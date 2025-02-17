@@ -12,7 +12,7 @@
 - **Nombre**: Jesús  
 - **Apellidos**: Ortiz Lopo  
 - **Correo oficial de la universidad**: j.ortizl.2019@alumnos.urjc.es  
-- **Cuenta en GitHub**:
+- **Cuenta en GitHub**: [JesusOrtiz10](https://github.com/JesusOrtiz10)
 
 ---
 ---
