@@ -1,0 +1,71 @@
+# Compiled class files
+*.class
+
+# IntelliJ IDEA-specific files
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Maven
+.m2/
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+
+# Log files
+*.log
+logs/
+log/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Spring Boot
+*.jar
+*.war
+
+# Build directories
+out/
+bin/
+build/
+
+# Mustache template compilation (if using frontend assets)
+*.mustache~
+
+# Node.js dependencies (if using npm/yarn for Bootstrap or frontend assets)
+node_modules/
+dist/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# MySQL (if using local database dumps)
+*.sql
+*.sqlite
+*.db
+
+# Environment variables (prevent exposing secrets)
+.env
+*.env
+application-*.yml
+application-*.properties
+
+# Docker-related files (if using Docker for MySQL)
+docker-compose.override.yml
+mysql_data/
+
+# Lombok generated files
+lombok.config
+
+# JetBrains workspace files
+.vscode/
+.classpath
+.project
+
+# Other dependency caches
+.gradle/
