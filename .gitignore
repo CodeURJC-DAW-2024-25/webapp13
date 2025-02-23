@@ -25,8 +25,15 @@ log/
 .DS_Store
 Thumbs.db
 
+# Package Files #
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
 # Spring Boot
 *.jar
+*.jar.original
 *.war
 
 # Build directories
@@ -63,9 +70,20 @@ mysql_data/
 lombok.config
 
 # JetBrains workspace files
-.vscode/
+.vscode
 .classpath
 .project
+.settings
+target
 
 # Other dependency caches
 .gradle/
+.ivy/
+# BlueJ files
+*.ctxt
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
