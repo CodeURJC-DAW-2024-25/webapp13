@@ -45,9 +45,9 @@ yarn-debug.log
 yarn-error.log
 
 # MySQL (if using local database dumps)
-*.sql
-*.sqlite
-*.db
+#*.sql
+#*.sqlite
+#*.db
 
 # Environment variables (prevent exposing secrets)
 .env
