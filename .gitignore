@@ -33,6 +33,7 @@ Thumbs.db
 *.rar
 # Spring Boot
 *.jar
+*.jar.original
 *.war
 
 # Build directories
