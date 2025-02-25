@@ -26,14 +26,7 @@
     </properties>
 
     <dependencies>
-        <!-- Spring Boot Starter Parent -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-parent</artifactId>
-            <version>3.4.2</version>
-            <scope>import</scope>
-            <type>pom</type>
-        </dependency>
+        <!-- Spring Boot Starter -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
