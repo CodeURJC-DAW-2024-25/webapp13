@@ -2,13 +2,8 @@ package es.codeurjc13.librored.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class IndexController {
@@ -29,9 +24,9 @@ public class IndexController {
         model.addAttribute("name", name);
     }
 
-    private void addNameAttribute(Model model, String bauthor, String btitle) {
-        model.addAttribute("bauthor", bauthor);
-        model.addAttribute("btitle", btitle);
+    private void addNameAttribute(Model model, String author, String title) {
+        model.addAttribute("author", author);
+        model.addAttribute("title", title);
     }
 
 
