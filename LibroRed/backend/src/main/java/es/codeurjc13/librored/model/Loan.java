@@ -1,7 +1,7 @@
 package es.codeurjc13.librored.model;
 
 import jakarta.persistence.*;
-import java.util.Date;
+import java.time.LocalDate;
 
 @Entity
 public class Loan {
@@ -18,8 +18,8 @@ public class Loan {
     @ManyToOne
     private User borrower;
 
-    private Date startDate;
-    private Date endDate;
+    private LocalDate startDate;
+    private LocalDate endDate;
 
     @Enumerated(EnumType.STRING)
     private Status status;
@@ -31,7 +31,7 @@ public class Loan {
     public Loan() {
     }
 
-    public Loan(Book book, User lender, User borrower, Date startDate, Date endDate, Status status) {
+    public Loan(Book book, User lender, User borrower, LocalDate startDate, LocalDate endDate, Status status) {
         this.book = book;
         this.lender = lender;
         this.borrower = borrower;
@@ -73,19 +73,19 @@ public class Loan {
         this.borrower = borrower;
     }
 
-    public Date getStartDate() {
+    public LocalDate getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(Date startDate) {
+    public void setStartDate(LocalDate startDate) {
         this.startDate = startDate;
     }
 
-    public Date getEndDate() {
+    public LocalDate getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(Date endDate) {
+    public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
     }
 
