@@ -53,9 +53,11 @@ yarn-debug.log
 yarn-error.log
 
 # MySQL (if using local database dumps)
-#*.sql
-#*.sqlite
-#*.db
+mysql_data/
+database.backup/*
+*.sql
+*.sqlite
+*.db
 
 # Environment variables (prevent exposing secrets)
 .env
@@ -65,8 +67,6 @@ application-*.properties
 
 # Docker-related files (if using Docker for MySQL)
 docker-compose.override.yml
-mysql_data/
-database/
 
 # Lombok generated files
 lombok.config
