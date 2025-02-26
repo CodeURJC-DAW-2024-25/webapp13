@@ -2,16 +2,16 @@
 
 -- This data is used to populate the User table.
 -- The User table contains sample users with different roles.
-INSERT INTO User (name, email, password, profile_pic, role)
+INSERT INTO User (name, email, password, role)
 VALUES
-    ('Alice Johnson', 'alice@example.com', 'password123', 'alice.png', 'Registered'),
-    ('Bob Smith', 'bob@example.com', 'password123', 'bob.png', 'Registered'),
-    ('Charlie Brown', 'charlie@example.com', 'password123', 'charlie.png', 'Registered'),
-    ('Diana Prince', 'diana@example.com', 'password123', 'diana.png', 'Registered'),
-    ('Ethan Hunt', 'ethan@example.com', 'password123', 'ethan.png', 'Registered'),
-    ('Fiona Gallagher', 'fiona@example.com', 'password123', 'fiona.png', 'Registered'),
-    ('George Miller', 'george@example.com', 'password123', 'george.png', 'Registered'),
-    ('Admin User', 'admin@example.com', 'adminpassword', 'admin.png', 'Admin');
+    ('Alice Johnson', 'alice@example.com', 'password123','Registered'),
+    ('Bob Smith', 'bob@example.com', 'password123','Registered'),
+    ('Charlie Brown', 'charlie@example.com', 'password123','Registered'),
+    ('Diana Prince', 'diana@example.com', 'password123','Registered'),
+    ('Ethan Hunt', 'ethan@example.com', 'password123', 'Registered'),
+    ('Fiona Gallagher', 'fiona@example.com', 'password123', 'Registered'),
+    ('George Miller', 'george@example.com', 'password123', 'Registered'),
+    ('Admin User', 'admin@example.com', 'adminpassword', 'Admin');
 
 
 
@@ -78,13 +78,13 @@ INSERT INTO Loan (book_id, lender_id, borrower_id, start_date, end_date, status)
 -- This data is used to populate the Review table.
 -- Insert data into the Review table (for the 9 completed loans):
 -- Here, the review is done by the borrower of each completed loan.
-INSERT INTO Review (book_id, user_id, rating, comment) VALUES
-                                                           (1, 2, '4', 'Enjoyed the adventure.'),
-                                                           (5, 3, '5', 'Very informative!'),
-                                                           (9, 4, '3', 'Good read, but a bit slow.'),
-                                                           (13, 5, '4', 'Exciting insights into technology.'),
-                                                           (17, 6, '5', 'Captivating and emotional.'),
-                                                           (21, 7, '4', 'A fascinating journey.'),
-                                                           (23, 1, '5', 'Thrilling and spooky.'),
-                                                           (2, 3, '4', 'Great space opera.'),
-                                                           (6, 4, '3', 'Not as scary as expected.');
+INSERT INTO Review (book_id, user_id, rating, comment, review_date) VALUES
+                                                                       (1, 2, '4', 'Enjoyed the adventure.', DATE_ADD('2025-01-15', INTERVAL 1 DAY)),
+                                                                       (5, 3, '5', 'Very informative!', DATE_ADD('2025-01-20', INTERVAL 6 DAY)),
+                                                                       (9, 4, '3', 'Good read, but a bit slow.', DATE_ADD('2025-01-25', INTERVAL 3 DAY)),
+                                                                       (13, 5, '4', 'Exciting insights into technology.', DATE_ADD('2025-01-30', INTERVAL 5 DAY)),
+                                                                       (17, 6, '5', 'Captivating and emotional.', DATE_ADD('2025-02-04', INTERVAL 10 DAY)),
+                                                                       (21, 7, '4', 'A fascinating journey.', DATE_ADD('2025-02-09', INTERVAL 6 DAY)),
+                                                                       (23, 1, '5', 'Thrilling and spooky.', DATE_ADD('2025-02-14', INTERVAL 2 DAY)),
+                                                                       (2, 3, '4', 'Great space opera.', DATE_ADD('2025-02-16', INTERVAL 3 DAY)),
+                                                                       (6, 4, '3', 'Not as scary as expected.', DATE_ADD('2025-02-20', INTERVAL 1 DAY));
