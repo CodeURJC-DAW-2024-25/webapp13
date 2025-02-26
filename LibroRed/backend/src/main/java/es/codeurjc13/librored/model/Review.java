@@ -1,7 +1,8 @@
 package es.codeurjc13.librored.model;
 
 import jakarta.persistence.*;
-import java.util.Date;
+
+import java.time.LocalDate;
 
 @Entity
 public class Review {
@@ -21,8 +22,7 @@ public class Review {
     @Column(columnDefinition = "TEXT")
     private String comment;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date review_date = new Date();
+    private LocalDate review_date = LocalDate.now();
 
     public enum Rating {
         ONE, TWO, THREE, FOUR, FIVE
@@ -35,7 +35,7 @@ public class Review {
         this.user = user;
         this.rating = rating;
         this.comment = comment;
-        this.review_date = new Date();
+        this.review_date = LocalDate.now();
     }
 
     // Getters and setters
@@ -79,11 +79,11 @@ public class Review {
         this.comment = comment;
     }
 
-    public Date getReview_date() {
+    public LocalDate getReview_date() {
         return review_date;
     }
 
-    public void setReview_date(Date review_date) {
+    public void setReview_date(LocalDate review_date) {
         this.review_date = review_date;
     }
 
