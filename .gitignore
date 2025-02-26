@@ -1,13 +1,14 @@
-/.idea/
-/.mvn/
-/database.backup/
-/out/
-/bin/
-/build/
-/target/
-/librored/backend/target/
-/librored/backend/src/test/
-/librored/backend/build/
+.idea/
+.mvn/
+database.backup/
+out/
+bin/
+build/
+target/
+librored/backend/target/
+librored/backend/src/test/
+librored/backend/build/
+
 /log/
 /logs/
 
