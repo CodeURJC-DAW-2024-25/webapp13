@@ -1,2 +1,11 @@
 /Users/ana/IdeaProjects/webapp13/librored/backend/src/main/java/es/codeurjc13/librored/LibroRedApplication.java
 /Users/ana/IdeaProjects/webapp13/librored/backend/src/main/java/es/codeurjc13/librored/controller/IndexController.java
+/Users/ana/IdeaProjects/webapp13/librored/backend/src/main/java/es/codeurjc13/librored/model/Book.java
+/Users/ana/IdeaProjects/webapp13/librored/backend/src/main/java/es/codeurjc13/librored/model/Loan.java
+/Users/ana/IdeaProjects/webapp13/librored/backend/src/main/java/es/codeurjc13/librored/model/Review.java
+/Users/ana/IdeaProjects/webapp13/librored/backend/src/main/java/es/codeurjc13/librored/model/User.java
+/Users/ana/IdeaProjects/webapp13/librored/backend/src/main/java/es/codeurjc13/librored/repository/BookRepository.java
+/Users/ana/IdeaProjects/webapp13/librored/backend/src/main/java/es/codeurjc13/librored/repository/LoanRepository.java
+/Users/ana/IdeaProjects/webapp13/librored/backend/src/main/java/es/codeurjc13/librored/repository/ReviewRepository.java
+/Users/ana/IdeaProjects/webapp13/librored/backend/src/main/java/es/codeurjc13/librored/repository/UserRepository.java
+/Users/ana/IdeaProjects/webapp13/librored/backend/src/main/java/es/codeurjc13/librored/service/DatabaseInitializer.java
