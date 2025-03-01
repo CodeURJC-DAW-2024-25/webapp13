@@ -481,49 +481,52 @@
 <!-- main js -->
 <script src="/js/scripts.js"></script>
 
-
+<!-- Pagination Script Using AJAX-->
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        let books = document.querySelectorAll(".book-item"); // Get all books
-        let loadMoreBtn = document.getElementById("load-more"); // Get Load More button
-        let itemsPerPage = 8; // Number of books to show per click
-        let currentIndex = 0; // Track visible books
+        let bookList = document.getElementById("book-list");
+        let loadMoreBtn = document.getElementById("load-more");
+        let spinner = document.getElementById("loading-spinner");
+        let itemsPerPage = 10;
+        let currentPage = 1;
 
-        function showNextBooks() {
-            let endIndex = currentIndex + itemsPerPage;
+        function fetchNextBooks() {
+            // Show spinner while loading
+            spinner.style.display = "block";
+            loadMoreBtn.style.display = "none";
 
-            // Display the next batch of books
-            for (let i = currentIndex; i < endIndex && i < books.length; i++) {
-                books[i].style.display = "block";
-            }
+            // Fetch new books via AJAX
+            fetch(`/api/books?page=${currentPage}&size=${itemsPerPage}`)
+                .then(response => response.text()) // Expect HTML response from server
+                .then(data => {
+                    // Insert new books into the existing book list
+                    bookList.insertAdjacentHTML("beforeend", data);
 
-            // Update index AFTER displaying books
-            currentIndex = endIndex;
+                    // Hide spinner after loading
+                    spinner.style.display = "none";
+                    loadMoreBtn.style.display = "block";
 
-            // **Fix: Ensure button only hides when ALL books are visible**
-            if (currentIndex < books.length) {
-                loadMoreBtn.style.display = "block"; // Button stays visible if more books remain
-            } else {
-                loadMoreBtn.style.display = "none"; // Hide ONLY when all books are displayed
-            }
+                    // Update page counter
+                    currentPage++;
+
+                    // Hide button if no more books are available
+                    if (data.trim() === "") {
+                        loadMoreBtn.style.display = "none";
+                    }
+                })
+                .catch(error => {
+                    console.error("Error loading more books:", error);
+                    spinner.style.display = "none"; // Ensure spinner hides on error
+                    loadMoreBtn.style.display = "block"; // Keep button visible for retry
+                });
         }
 
-        // Hide all books initially
-        books.forEach(book => book.style.display = "none");
-
-        // Show the first batch of books
-        showNextBooks();
-
-        // **Fix: Ensure button is visible from the start if needed**
-        if (books.length > itemsPerPage) {
-            loadMoreBtn.style.display = "block";
-        } else {
-            loadMoreBtn.style.display = "none"; // Hide button if all books fit on one page
-        }
+        // Load first batch automatically
+        fetchNextBooks();
 
         // Click event for "Load More"
         loadMoreBtn.addEventListener("click", function () {
-            showNextBooks();
+            fetchNextBooks();
         });
     });
 </script>
