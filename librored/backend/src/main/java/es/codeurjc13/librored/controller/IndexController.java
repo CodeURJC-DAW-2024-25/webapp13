@@ -1,23 +1,47 @@
 package es.codeurjc13.librored.controller;
 
+import es.codeurjc13.librored.model.Book;
+import es.codeurjc13.librored.repository.BookRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import java.security.Principal;
+import java.util.List;
 
 @Controller
 public class IndexController {
 
-    private static final String DEFAULT_NAME = "Librored";
-    private static final String AUTHOR_NAME = "Pepita Flores";
-    private static final String TITLE_NAME = "Una Rosa";
+    private final BookRepository bookRepository;
+
+    public IndexController(BookRepository bookRepository) {
+        this.bookRepository = bookRepository;
+    }
 
     @GetMapping("/")
-    public String index(Model viewModel) {
-        addNameAttribute(viewModel, DEFAULT_NAME);
-        addNameAttribute(viewModel, AUTHOR_NAME, TITLE_NAME);
+    public String index(Model model, HttpServletRequest request) {
 
-        return "index";
+        Principal principal = request.getUserPrincipal();
+
+        if (principal != null) {
+            model.addAttribute("logged", true);
+            model.addAttribute("userName", principal.getName());
+            model.addAttribute("admin", request.isUserInRole("ADMIN"));
+        } else {
+            model.addAttribute("logged", false);
+        }
+
+        // Fetch books from the database
+        List<Book> books = bookRepository.findAll();
+        // Debugging output
+        System.out.println("Books retrieved from database: " + books);
+
+        model.addAttribute("books", books); // Ensure books list is passed
+
+        String viewName = "index";
+        System.out.println("Rendering view: " + viewName);
+        return viewName;
     }
 
     private void addNameAttribute(Model model, String name) {
