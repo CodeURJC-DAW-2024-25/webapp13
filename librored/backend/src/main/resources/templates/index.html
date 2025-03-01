@@ -121,22 +121,7 @@
                 </div>
             </div>
         </div>
-        <ul class="row" id="book-list">
-            {{#books}}
-            <li class="col-xl-3 col-lg-4 col-sm-6 col-12 book-item">
-                <div class="product-wrap">
-                    <div class="product-img">
-                        <img alt="{{title}}" src="{{cover_pic}}">
-                    </div>
-                    <div class="product-content">
-                        <h3><a href="single-product.html">{{title}}</a></h3>
-                        <p class="pull-left">{{author}}</p>
-                        <p class='pull-right'>{{genre}}</p>
-                    </div>
-                </div>
-            </li>
-            {{/books}}
-        </ul>
+        <ul class="row" id="book-list"></ul> <!-- Book list will be inserted here with AJAX-->
         <div class="text-center mt-4">
             <div id="loading-spinner" style="display: none;">
                 <img src="/images/spinner.gif" alt="Loading..." width="80">
@@ -235,30 +220,29 @@
             fetch(`/api/books?page=${currentPage}&size=${itemsPerPage}`)
                 .then(response => response.text()) // Expect HTML response from server
                 .then(data => {
-                    // Insert new books into the existing book list
-                    bookList.insertAdjacentHTML("beforeend", data);
+                    if (data.trim() !== "") {
+                        // Append books to the existing list
+                        bookList.insertAdjacentHTML("beforeend", data);
 
-                    // Hide spinner after loading
-                    spinner.style.display = "none";
+                        // Hide spinner after loading
+                        spinner.style.display = "none";
+                        loadMoreBtn.style.display = "block";
 
-                    // Increase the page count for the next request
-                    currentPage++;
-
-                    // Hide "LOAD MORE" button only if no more books are available
-                    if (data.trim() === "") {
-                        loadMoreBtn.style.display = "none";
+                        // Increase page count for next request
+                        currentPage++;
                     } else {
-                        loadMoreBtn.style.display = "block"; // Keep button visible
+                        // No more books left to load
+                        loadMoreBtn.style.display = "none";
                     }
                 })
                 .catch(error => {
-                    console.error("Error loading more books:", error);
-                    spinner.style.display = "none"; // Ensure spinner hides on error
+                    console.error("Error loading books:", error);
+                    spinner.style.display = "none"; // Hide spinner on error
                     loadMoreBtn.style.display = "block"; // Keep button visible for retry
                 });
         }
 
-        // Load first batch automatically
+        // Load first 8 books automatically
         fetchNextBooks();
 
         // Click event for "Load More"
@@ -267,6 +251,7 @@
         });
     });
 </script>
+
 
 </body>
 

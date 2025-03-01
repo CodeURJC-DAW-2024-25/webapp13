@@ -37,18 +37,17 @@ public class BookController {
         StringBuilder htmlResponse = new StringBuilder();
         for (Book book : books) {
             htmlResponse.append(
-                    "<li class='col-xl-3 col-lg-4 col-sm-6 col-12 book-item'>" +
-                            "    <div class='product-wrap'>" +
-                            "        <div class='product-img'>" +
-                            "            <img src='" + book.getCover_pic() + "' alt='" + book.getTitle() + "'>" +
-                            "        </div>" +
-                            "        <div class='product-content'>" +
-                            "            <h3><a href='single-product.html'>" + book.getTitle() + "</a></h3>" +
-                            "            <p class='pull-left'>" + book.getAuthor() + "</p>" +
-                            "            <p class='pull-right'>" + book.getGenre() + "</p>" +
-                            "        </div>" +
-                            "    </div>" +
-                            "</li>"
+                    "<li class='col-xl-3 col-lg-4 col-sm-6 col-12 book-item' style='display: block;'>"
+                            + "    <div class='product-wrap'>"
+                            + "        <div class='product-img'>"
+                            + "            <img src='" + book.getCover_pic() + "' alt='" + book.getTitle() + "'>"
+                            + "        </div>"
+                            + "        <div class='product-content'>"
+                            + "            <h3><a href='single-product.html'>" + book.getTitle() + "</a></h3>"
+                            + "            <p class='pull-left'>" + book.getAuthor() + "</p>"
+                            + "        </div>"
+                            + "    </div>"
+                            + "</li>"
             );
         }
 
