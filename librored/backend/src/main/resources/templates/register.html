@@ -1,0 +1,183 @@
+<!doctype html>
+<html class="no-js" lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="ie=edge" http-equiv="x-ua-compatible">
+    <title>LibroRed</title>
+    <meta content="Share your books" name="description">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <link href="/images/favicon.png" rel="shortcut icon" type="image/png">
+    <!-- Place favicon.ico in the root directory -->
+    <!-- all css here -->
+    <!-- bootstrap v3.3.7 css -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <!-- owl.carousel.2.0.0-beta.2.4 css -->
+    <link href="/css/owl.carousel.min.css" rel="stylesheet">
+    <!-- font-awesome v4.6.3 css -->
+    <link href="/css/font-awesome.min.css" rel="stylesheet">
+    <!-- flaticon.css -->
+    <link href="/css/flaticon.css" rel="stylesheet">
+    <!-- jquery-ui.css -->
+    <link href="/css/jquery-ui.css" rel="stylesheet">
+    <!-- metisMenu.min.css -->
+    <link href="/css/metisMenu.min.css" rel="stylesheet">
+    <!-- swiper.min.css -->
+    <link href="/css/swiper.min.css" rel="stylesheet">
+    <!-- style css -->
+    <link href="/css/styles.css" rel="stylesheet">
+    <!-- responsive css -->
+    <link href="/css/responsive.css" rel="stylesheet">
+    <!-- modernizr css -->
+    <script src="/js/vendor/modernizr-2.8.3.min.js"></script>
+</head>
+
+<body>
+
+<!--Start Preloader-->
+<div class="preloader-wrap">
+    <div class="spinner"></div>
+</div>
+
+<!-- header-area start -->
+<header class="header-area">
+    <div class="header-top bg-2">
+        <div class="fluid-container">
+            <div class="row">
+                <div class="col-md-6 col-12">
+                    <ul class="d-flex header-contact">
+                        {{^logged}}
+                        <div class="logo">
+                            <a href="index.html">
+                                <img alt="LibroRed" src="/images/logo.png">
+                            </a>
+                        </div>
+                        <li><i>Share your books caca</i></li>
+                        {{/logged}}
+                        {{#logged}}
+                        <div class="logo">
+                            <a href="index.html">
+                                <img alt="" src="/images/logo.png">
+                            </a>
+                        </div>
+                        <li><i>Hello {{name}}</i></li>
+                        {{/logged}}
+                    </ul>
+                </div>
+                <div class="col-md-6 col-12">
+                    <ul class="d-flex account_login-area">
+                        {{^logged}}
+                        <li>
+                            <a href="login.html"> Login </a>
+                        </li>
+                        <li>
+                            <a href="register.html"> Register </a>
+                        </li>
+                        {{/logged}}
+                        {{#logged}}
+                        <li>
+                            <a href="javascript:void(0);"><i class="fa fa-user"></i> My Account <i
+                                    class="fa fa-angle-down"></i></a>
+                            <ul class="dropdown_style">
+                                <li><a href="book.html">My Books</a></li>
+                                <li><a href="loan.html">My Loans</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item">
+                            <form action="/logout" method="post" class="d-inline">
+                                <button class="btn btn-primary btn-nowrap" type="submit">Log Out</button>
+                                <input type="hidden" name="_csrf" value="{{token}}" />
+                            </form>
+                        </li>
+                        {{#admin}}
+                        <li>
+                            <a href="admin.html"> Admin Panel </a>
+                        </li>
+                        {{/admin}}
+                        {{/logged}}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+<!-- header-area end -->
+
+
+<!-- THE FORM CONTENT SHOULD BE PLACED HERE-->
+
+
+<!-- .footer-area start -->
+<div class="footer-area">
+    <div class="footer-top">
+        <div class="container">
+            <div class="footer-top-item">
+                <div class="row">
+                    <div class="col-lg-12 col-12">
+                        <div class="footer-top-text text-center">
+                            <ul>
+                                <li><a href="home.html">home</a></li>
+                                <li>LIBRORED</li>
+                                <li>SHARE YOUR BOOKS</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-2 col-md-3 col-sm-12">
+                </div>
+                <div class="col-lg-4 col-md-8 col-sm-12">
+                    <div class="footer-content">
+                        <p>LibroRed is a student project</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-4 col-sm-12">
+                    <div class="footer-reserved">
+                        <ul>
+                            <li>2025 URJC - DAW - EQUIPO 13</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- .footer-area end -->
+
+<!-- all js here -->
+<!-- jquery latest version -->
+<script src="/js/vendor/jquery-2.2.4.min.js"></script>
+<!-- bootstrap js -->
+<script src="/js/bootstrap.min.js"></script>
+<!-- owl.carousel.2.0.0-beta.2.4 css -->
+<script src="/js/owl.carousel.min.js"></script>
+<!-- scrollup.js -->
+<script src="/js/scrollup.js"></script>
+<!-- isotope.pkgd.min.js -->
+<script src="/js/isotope.pkgd.min.js"></script>
+<!-- imagesloaded.pkgd.min.js -->
+<script src="/js/imagesloaded.pkgd.min.js"></script>
+<!-- jquery.zoom.min.js -->
+<script src="/js/jquery.zoom.min.js"></script>
+<!-- countdown.js -->
+<script src="/js/countdown.js"></script>
+<!-- swiper.min.js -->
+<script src="/js/swiper.min.js"></script>
+<!-- metisMenu.min.js -->
+<script src="/js/metisMenu.min.js"></script>
+<!-- mailchimp.js -->
+<script src="/js/mailchimp.js"></script>
+<!-- jquery-ui.min.js -->
+<script src="/js/jquery-ui.min.js"></script>
+<!-- main js -->
+<script src="/js/scripts.js"></script>
+<!-- End js -->
+
+</body>
+
+</html>
