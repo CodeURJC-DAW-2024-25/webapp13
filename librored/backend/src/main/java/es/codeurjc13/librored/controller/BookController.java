@@ -25,7 +25,7 @@ public class BookController {
     private BookService bookService;
 
     @GetMapping
-    public ResponseEntity<String> getBooks(@RequestParam(defaultValue = "1") int page,
+    public ResponseEntity<String> getBooks(@RequestParam(defaultValue = "0") int page,
                                            @RequestParam(defaultValue = "8") int size) {
         List<Book> books = bookService.getBooks(page, size);
 
