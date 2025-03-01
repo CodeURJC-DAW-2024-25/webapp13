@@ -223,8 +223,8 @@
         let bookList = document.getElementById("book-list");
         let loadMoreBtn = document.getElementById("load-more");
         let spinner = document.getElementById("loading-spinner");
-        let itemsPerPage = 10;
-        let currentPage = 1;
+        let itemsPerPage = 8;
+        let currentPage = 0; // Start from page 0
 
         function fetchNextBooks() {
             // Show spinner while loading
@@ -240,14 +240,15 @@
 
                     // Hide spinner after loading
                     spinner.style.display = "none";
-                    loadMoreBtn.style.display = "block";
 
-                    // Update page counter
+                    // Increase the page count for the next request
                     currentPage++;
 
-                    // Hide button if no more books are available
+                    // Hide "LOAD MORE" button only if no more books are available
                     if (data.trim() === "") {
                         loadMoreBtn.style.display = "none";
+                    } else {
+                        loadMoreBtn.style.display = "block"; // Keep button visible
                     }
                 })
                 .catch(error => {
