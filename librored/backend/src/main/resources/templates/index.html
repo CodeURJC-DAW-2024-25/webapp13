@@ -480,6 +480,55 @@
 <script src="/js/jquery-ui.min.js"></script>
 <!-- main js -->
 <script src="/js/scripts.js"></script>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let books = document.querySelectorAll(".book-item"); // Get all books
+        let loadMoreBtn = document.getElementById("load-more"); // Get Load More button
+        let itemsPerPage = 8; // Number of books to show per click
+        let currentIndex = 0; // Track visible books
+
+        function showNextBooks() {
+            let endIndex = currentIndex + itemsPerPage;
+
+            // Display the next batch of books
+            for (let i = currentIndex; i < endIndex && i < books.length; i++) {
+                books[i].style.display = "block";
+            }
+
+            // Update index AFTER displaying books
+            currentIndex = endIndex;
+
+            // **Fix: Ensure button only hides when ALL books are visible**
+            if (currentIndex < books.length) {
+                loadMoreBtn.style.display = "block"; // Button stays visible if more books remain
+            } else {
+                loadMoreBtn.style.display = "none"; // Hide ONLY when all books are displayed
+            }
+        }
+
+        // Hide all books initially
+        books.forEach(book => book.style.display = "none");
+
+        // Show the first batch of books
+        showNextBooks();
+
+        // **Fix: Ensure button is visible from the start if needed**
+        if (books.length > itemsPerPage) {
+            loadMoreBtn.style.display = "block";
+        } else {
+            loadMoreBtn.style.display = "none"; // Hide button if all books fit on one page
+        }
+
+        // Click event for "Load More"
+        loadMoreBtn.addEventListener("click", function () {
+            showNextBooks();
+        });
+    });
+</script>
+
+
 </body>
 
 </html>
