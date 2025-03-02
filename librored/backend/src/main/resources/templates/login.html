@@ -30,6 +30,9 @@
     <link href="/css/responsive.css" rel="stylesheet">
     <!-- modernizr css -->
     <script src="/js/vendor/modernizr-2.8.3.min.js"></script>
+    <meta name="_csrf" content="{{csrf_token}}">
+    <meta name="_csrf_parameter" content="{{csrf_parameter}}">
+
 </head>
 
 <body>
@@ -52,7 +55,7 @@
                                 <img alt="LibroRed" src="/images/logo.png">
                             </a>
                         </div>
-                        <li><i>Share your books caca</i></li>
+                        <li><i>Share your books</i></li>
                         {{/logged}}
                         {{#logged}}
                         <div class="logo">
@@ -111,23 +114,19 @@
         <div class="row">
             <div class="col-lg-6 offset-lg-3 col-md-8 offset-md-2 col-12">
                 <div class="account-form form-style">
-                    <p>User Name or Email Address *</p>
-                    <input type="email">
-                    <p>Password *</p>
-                    <input type="Password">
-                    <div class="row">
-                        <div class="col-lg-6">
-                            <input id="password" type="checkbox">
-                            <label for="password">Save Password</label>
-                        </div>
-                        <div class="col-lg-6 text-right">
-                            <a href="#">Forget Your Password?</a>
-                        </div>
-                    </div>
-                    <button>SIGN IN</button>
-                    <div class="text-center">
-                        <a href="register.html">Or Creat an Account</a>
-                    </div>
+                    <form action="/perform_login" method="post">
+
+                        <input type="email" name="username" placeholder="Email" required>
+                        <input type="password" name="password" placeholder="Password" required>
+
+                        <!-- ✅ Mustache syntax for CSRF -->
+                        <input type="hidden" name="{{csrf_parameter}}" value="{{csrf_token}}">
+
+                        <button type="submit">SIGN IN</button>
+                    </form>
+                <div class="text-center">
+                    <a href="register.html">Or Creat an Account</a>
+                </div>
                 </div>
             </div>
         </div>
@@ -207,6 +206,33 @@
     <!-- main js -->
     <script src="/js/scripts.js"></script>
 <!-- End js -->
+
+    <script>
+        // Fetch CSRF token from meta tag and add it to every form
+        document.addEventListener("DOMContentLoaded", function() {
+            fetch("/", {
+                method: "GET",
+                credentials: "same-origin"
+            }).then(response => {
+                return response.text();
+            }).then(html => {
+                let parser = new DOMParser();
+                let doc = parser.parseFromString(html, "text/html");
+                let csrfToken = doc.querySelector('meta[name="_csrf"]').content;
+                let csrfParameter = doc.querySelector('meta[name="_csrf_parameter"]').content;
+
+                // Inject CSRF token into all forms
+                document.querySelectorAll("form").forEach(form => {
+                    let input = document.createElement("input");
+                    input.type = "hidden";
+                    input.name = csrfParameter;
+                    input.value = csrfToken;
+                    form.appendChild(input);
+                });
+            }).catch(error => console.error("CSRF Fetch Error:", error));
+        });
+    </script>
+
 
 </body>
 

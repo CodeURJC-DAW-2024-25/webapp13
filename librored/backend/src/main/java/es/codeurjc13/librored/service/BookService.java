@@ -17,6 +17,8 @@ public class BookService {
 
     public List<Book> getBooks(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
+        System.out.println("Books fetched: " + bookRepository.findAll());
         return bookRepository.findAll(pageable).getContent();
     }
+
 }

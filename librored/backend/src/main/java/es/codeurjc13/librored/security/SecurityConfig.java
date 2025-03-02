@@ -1,24 +1,23 @@
 package es.codeurjc13.librored.security;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private final UserDetailsService userDetailsService;
-
-    public SecurityConfig(UserDetailsService userDetailsService) {
-        this.userDetailsService = userDetailsService;
-    }
+    @Autowired
+    RepositoryUserDetailsService userDetailsService;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -34,18 +33,33 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
+        http.authenticationProvider(authenticationProvider());
+
         http
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/css/**", "/js/**", "/images/**").permitAll()  // Allow static resources
-                        .requestMatchers("/api/books").permitAll()  // Allow public access to books API
-                        .anyRequest().authenticated()  // Require login for everything else
-                )
-                .formLogin(login -> login
-                        .loginPage("/login")  // Specify custom login page
-                        .permitAll()
-                )
-                .logout(logout -> logout.permitAll());
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/", "/login", "/loginerror", "/css/**", "/js/**", "/images/**").permitAll()
+                        .requestMatchers("/api/books/**").permitAll()
+                        .requestMatchers("/books/**").permitAll()
+                        .anyRequest().authenticated())
+
+                    /*   // PRIVATE PAGES
+                        .requestMatchers("/newbook").hasAnyRole("USER")
+                        .requestMatchers("/editbook").hasAnyRole("USER")
+                        .requestMatchers("/editbook/*").hasAnyRole("USER")
+                        .requestMatchers("/removebook/*").hasAnyRole("ADMIN"))
+                    */
+
+                .formLogin(formLogin -> formLogin
+                        .loginPage("/login")
+                        .failureUrl("/loginerror")
+                        .defaultSuccessUrl("/")
+                        .permitAll())
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/")
+                        .permitAll());
 
         return http.build();
     }

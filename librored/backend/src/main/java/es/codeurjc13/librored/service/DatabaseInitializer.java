@@ -10,6 +10,7 @@ import es.codeurjc13.librored.repository.ReviewRepository;
 import es.codeurjc13.librored.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -41,6 +42,9 @@ public class DatabaseInitializer {
     @Autowired
     private ReviewRepository reviewRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
 
     @PostConstruct
     public void init() throws IOException, URISyntaxException {
@@ -48,21 +52,18 @@ public class DatabaseInitializer {
         logger.info("⚡ Running DatabaseInitializer...");
 
         if (userRepository.findByEmail("admin@example.com").isEmpty()) {
-            User admin = new User("Admin", "admin@example.com", "pass", User.Role.Admin);
+            User admin = new User("Admin", "admin@example.com", passwordEncoder.encode("pass"), User.Role.Admin);
             userRepository.save(admin);
         }
 
-        logger.info("✅ DatabaseInitializer execution completed.");
-
-
         // Sample users
-        User alice = new User("Alice", "alice@example.com", "password123", User.Role.Registered);
-        User bob = new User("Bob", "bob@example.com", "password123", User.Role.Registered);
-        User charlie = new User("Charlie", "charlie@example.com", "password123", User.Role.Registered);
-        User diana = new User("Diana", "diana@example.com", "password123", User.Role.Registered);
-        User ethan = new User("Ethan", "ethan@example.com", "password123", User.Role.Registered);
-        User fiona = new User("Fiona", "fiona@example.com", "password123", User.Role.Registered);
-        User george = new User("George", "george@example.com", "password123", User.Role.Registered);
+        User alice = new User("Alice Green", "alice@example.com", passwordEncoder.encode("pass"), User.Role.Registered);
+        User bob = new User("Bob Staples", "bob@example.com", passwordEncoder.encode("pass"), User.Role.Registered);
+        User charlie = new User("Charlie Dock", "charlie@example.com", passwordEncoder.encode("pass"), User.Role.Registered);
+        User diana = new User("Diana Brown", "diana@example.com", passwordEncoder.encode("pass"), User.Role.Registered);
+        User ethan = new User("Ethan Hawk", "ethan@example.com", passwordEncoder.encode("pass"), User.Role.Registered);
+        User fiona = new User("Fiona Shrek", "fiona@example.com", passwordEncoder.encode("pass"), User.Role.Registered);
+        User george = new User("George Orwell", "george@example.com", passwordEncoder.encode("pass"), User.Role.Registered);
 
         userRepository.saveAll(Arrays.asList(alice, bob, charlie, diana, ethan, fiona, george));
 
@@ -159,7 +160,8 @@ public class DatabaseInitializer {
         // Save all reviews
         reviewRepository.saveAll(Arrays.asList(review1, review2, review3, review4, review5, review6, review7, review8, review9));
 
+        // Log completion
+        logger.info("DatabaseInitializer execution completed.");
+
     }
-
-
 }
