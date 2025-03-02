@@ -46,22 +46,12 @@
             <div class="row">
                 <div class="col-md-6 col-12">
                     <ul class="d-flex header-contact">
-                        {{^logged}}
                         <div class="logo">
                             <a href="index.html">
                                 <img alt="LibroRed" src="/images/logo.png">
                             </a>
                         </div>
-                        <li><i>Share your books caca</i></li>
-                        {{/logged}}
-                        {{#logged}}
-                        <div class="logo">
-                            <a href="index.html">
-                                <img alt="" src="/images/logo.png">
-                            </a>
-                        </div>
-                        <li><i>Hello {{name}}</i></li>
-                        {{/logged}}
+                        <li><i>Share your books</i></li>
                     </ul>
                 </div>
                 <div class="col-md-6 col-12">
@@ -86,7 +76,6 @@
                         <li class="nav-item">
                             <form action="/logout" method="post" class="d-inline">
                                 <button class="btn btn-primary btn-nowrap" type="submit">Log Out</button>
-                                <input type="hidden" name="_csrf" value="{{token}}" />
                             </form>
                         </li>
                         {{#admin}}
@@ -111,23 +100,16 @@
         <div class="row">
             <div class="col-lg-6 offset-lg-3 col-md-8 offset-md-2 col-12">
                 <div class="account-form form-style">
-                    <p>User Name or Email Address *</p>
-                    <input type="email">
-                    <p>Password *</p>
-                    <input type="Password">
-                    <div class="row">
-                        <div class="col-lg-6">
-                            <input id="password" type="checkbox">
-                            <label for="password">Save Password</label>
-                        </div>
-                        <div class="col-lg-6 text-right">
-                            <a href="#">Forget Your Password?</a>
-                        </div>
-                    </div>
-                    <button>SIGN IN</button>
-                    <div class="text-center">
-                        <a href="register.html">Or Creat an Account</a>
-                    </div>
+
+                    <form action="/perform_login" method="post">
+                        <input type="email" name="username" placeholder="Email" required>
+                        <input type="password" name="password" placeholder="Password" required>
+                        <button type="submit">SIGN IN</button>
+                    </form>
+
+                <div class="text-center">
+                    <a href="register.html">Or Creat an Account</a>
+                </div>
                 </div>
             </div>
         </div>

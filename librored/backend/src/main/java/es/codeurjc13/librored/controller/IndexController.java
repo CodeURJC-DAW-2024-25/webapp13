@@ -34,14 +34,9 @@ public class IndexController {
 
         // Fetch books from the database
         List<Book> books = bookRepository.findAll();
-        // Debugging output
-        System.out.println("Books retrieved from database: " + books);
-
         model.addAttribute("books", books); // Ensure books list is passed
 
-        String viewName = "index";
-        System.out.println("Rendering view: " + viewName);
-        return viewName;
+        return "index";
     }
 
     private void addNameAttribute(Model model, String name) {

@@ -1,12 +1,15 @@
 package es.codeurjc13.librored.controller;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
+@RequestMapping("/login")  // ✅ Fix: Ensure login is mapped correctly
 public class LoginWebController {
 
-    @RequestMapping("/login")
+
+    @GetMapping
     public String login() {
         return "login";
     }
