@@ -1,0 +1,41 @@
+{{> header}}
+
+<div class="container mt-5">
+    <h2 class="text-center">Manage Loans</h2>
+    <table class="table table-striped mt-3">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Book</th>
+            <th>Lender</th>
+            <th>Borrower</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{#loans}}
+        <tr>
+            <td>{{id}}</td>
+            <td>{{book.title}}</td>
+            <td>{{lender.username}}</td>
+            <td>{{borrower.username}}</td>
+            <td>{{startDate}}</td>
+            <td>{{endDate}}</td>
+            <td>{{status}}</td>
+            <td>
+                <a href="/admin/loans/edit/{{id}}" class="btn btn-warning btn-sm">Edit</a>
+                <form action="/admin/loans/delete/{{id}}" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {{/loans}}
+        </tbody>
+    </table>
+    <a href="/admin" class="btn btn-secondary mt-3">Back</a>
+</div>
+
+{{> footer}}
