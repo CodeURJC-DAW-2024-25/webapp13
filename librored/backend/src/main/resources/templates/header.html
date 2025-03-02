@@ -1,0 +1,52 @@
+<!-- header-area start -->
+<header class="header-area">
+    <div class="header-top bg-2">
+        <div class="fluid-container">
+            <div class="row">
+                <div class="col-md-6 col-12">
+                    <ul class="d-flex header-contact">
+                        <div class="logo">
+                            <a href="index.html">
+                                <img alt="LibroRed" src="/images/logo.png">
+                            </a>
+                        </div>
+                        <li><i>     -  Share your books</i></li>
+                    </ul>
+                </div>
+                <div class="col-md-6 col-12">
+                    <ul class="d-flex account_login-area">
+                        {{^logged}}
+                            <li>
+                                <a href="login.html"> Login </a>
+                            </li>
+                            <li>
+                                <a href="register.html"> Register </a>
+                            </li>
+                        {{/logged}}
+                        {{#logged}}
+                            <li>
+                                <a href="javascript:void(0);"><i class="fa fa-user"></i> My Account <i
+                                        class="fa fa-angle-down"></i></a>
+                                <ul class="dropdown_style">
+                                    <li><a href="book.html">My Books</a></li>
+                                    <li><a href="loan.html">My Loans</a></li>
+                                </ul>
+                            </li>
+                            <li class="nav-item">
+                                <form action="/logout" method="post" class="d-inline">
+                                    <button class="btn btn-primary btn-nowrap" type="submit">Log Out</button>
+                                </form>
+                            </li>
+                            {{#admin}}
+                            <li>
+                                <a href="admin.html"> Admin Panel </a>
+                            </li>
+                            {{/admin}}
+                        {{/logged}}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+<!-- header-area end -->
