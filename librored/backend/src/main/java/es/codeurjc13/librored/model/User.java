@@ -20,7 +20,7 @@ public class User {
     private Role role;
 
     public enum Role {
-        user, admin
+        USER, ADMIN
     }
 
     public User() {
@@ -56,6 +56,14 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public void setPassword(String password) {
+        this.encodedPassword = password;
+    }
+
+    public CharSequence getPassword() {
+        return this.encodedPassword;
     }
 
     public String getEncodedPassword() {

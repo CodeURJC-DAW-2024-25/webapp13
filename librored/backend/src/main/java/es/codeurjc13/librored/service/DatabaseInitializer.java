@@ -9,6 +9,8 @@ import es.codeurjc13.librored.repository.LoanRepository;
 import es.codeurjc13.librored.repository.ReviewRepository;
 import es.codeurjc13.librored.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -17,10 +19,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.util.Arrays;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 
 
 @Service
@@ -52,18 +50,18 @@ public class DatabaseInitializer {
         logger.info("⚡ Running DatabaseInitializer...");
 
         if (userRepository.findByEmail("admin@example.com").isEmpty()) {
-            User admin = new User("Admin", "admin@example.com", passwordEncoder.encode("pass"), User.Role.admin);
+            User admin = new User("Admin", "admin@example.com", passwordEncoder.encode("pass"), User.Role.ADMIN);
             userRepository.save(admin);
         }
 
         // Sample users
-        User alice = new User("Alice Green", "alice@example.com", passwordEncoder.encode("pass"), User.Role.user);
-        User bob = new User("Bob Staples", "bob@example.com", passwordEncoder.encode("pass"), User.Role.user);
-        User charlie = new User("Charlie Dock", "charlie@example.com", passwordEncoder.encode("pass"), User.Role.user);
-        User diana = new User("Diana Brown", "diana@example.com", passwordEncoder.encode("pass"), User.Role.user);
-        User ethan = new User("Ethan Hawk", "ethan@example.com", passwordEncoder.encode("pass"), User.Role.user);
-        User fiona = new User("Fiona Shrek", "fiona@example.com", passwordEncoder.encode("pass"), User.Role.user);
-        User george = new User("George Orwell", "george@example.com", passwordEncoder.encode("pass"), User.Role.user);
+        User alice = new User("Alice Green", "alice@example.com", passwordEncoder.encode("pass"), User.Role.USER);
+        User bob = new User("Bob Staples", "bob@example.com", passwordEncoder.encode("pass"), User.Role.USER);
+        User charlie = new User("Charlie Dock", "charlie@example.com", passwordEncoder.encode("pass"), User.Role.USER);
+        User diana = new User("Diana Brown", "diana@example.com", passwordEncoder.encode("pass"), User.Role.USER);
+        User ethan = new User("Ethan Hawk", "ethan@example.com", passwordEncoder.encode("pass"), User.Role.USER);
+        User fiona = new User("Fiona Shrek", "fiona@example.com", passwordEncoder.encode("pass"), User.Role.USER);
+        User george = new User("George Orwell", "george@example.com", passwordEncoder.encode("pass"), User.Role.USER);
 
         userRepository.saveAll(Arrays.asList(alice, bob, charlie, diana, ethan, fiona, george));
 
