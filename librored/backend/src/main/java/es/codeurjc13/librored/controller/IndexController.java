@@ -19,22 +19,11 @@ public class IndexController {
     }
 
     @GetMapping("/")
-    public String index(Model model, HttpServletRequest request) {
-
-        Principal principal = request.getUserPrincipal();
-
-        if (principal != null) {
-            model.addAttribute("logged", true);
-            model.addAttribute("userName", principal.getName());
-            model.addAttribute("admin", request.isUserInRole("ADMIN"));
-        } else {
-            model.addAttribute("logged", false);
-        }
+    public String index(Model model) {
 
         // Fetch books from the database
         List<Book> books = bookRepository.findAll();
-        model.addAttribute("books", books); // Ensure books list is passed
-
+        model.addAttribute("books", books); // Ensure books list is passed to the view
         return "index";
     }
 
