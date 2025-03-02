@@ -1,7 +1,5 @@
 package es.codeurjc13.librored.security;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,16 +32,17 @@ public class SecurityConfig {
         return authProvider;
     }
 
-    private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
                 .csrf(AbstractHttpConfigurer::disable)  // Disable CSRF
+                // Desactivamos CSRF para evitar problemas con el token
+                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/css/**", "/js/**", "/images/**").permitAll()
-                        .requestMatchers("/", "/api/books").permitAll()
+                        .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
+                        .requestMatchers("/", "/login", "/register", "/api/books").permitAll()
+                        .requestMatchers("/api/books").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(login -> login

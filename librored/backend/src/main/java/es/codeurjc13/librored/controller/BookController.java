@@ -19,7 +19,6 @@ public class BookController {
     @GetMapping
     public ResponseEntity<List<Book>> getBooks(@RequestParam(defaultValue = "0") int page,
                                                @RequestParam(defaultValue = "8") int size) {
-        System.out.println("Fetching books - Page: " + page + " Size: " + size);
         List<Book> books = bookService.getBooks(page, size);
 
         return ResponseEntity.ok(books);
