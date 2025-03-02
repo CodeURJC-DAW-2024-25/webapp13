@@ -8,6 +8,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.web.csrf.CsrfToken;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import jakarta.servlet.http.HttpServletRequest;
 
 @Controller
 @RequestMapping("/login")  // ✅ Fix: Ensure login is mapped correctly
@@ -23,14 +31,13 @@ public class LoginWebController {
             model.addAttribute("csrf_token", csrfToken.getToken());
             model.addAttribute("csrf_parameter", csrfToken.getParameterName());
 
-            // ✅ Fix: Log CSRF token every time login page is accessed
-            logger.info("CSRF Token Retrieved for Login Page: {}", csrfToken.getToken());
+            // 🔴 Log CSRF token every time login page is loaded
+            logger.info("Login Page Loaded - CSRF Token: {}", csrfToken.getToken());
         } else {
             model.addAttribute("csrf_token", "MISSING");
             model.addAttribute("csrf_parameter", "_csrf");
 
-            // ✅ Fix: Use warn() instead of warning()
-            logger.warn("CSRF Token is MISSING when loading login page!");
+            logger.warn("Login Page Loaded - CSRF Token is MISSING!");
         }
 
         return "login";

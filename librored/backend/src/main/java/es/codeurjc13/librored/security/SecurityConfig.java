@@ -10,6 +10,13 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Bean;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.context.annotation.Configuration;
 
 
 @Configuration
@@ -32,36 +39,39 @@ public class SecurityConfig {
         return authProvider;
     }
 
+    private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
+
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.authenticationProvider(authenticationProvider());
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        HttpSessionCsrfTokenRepository csrfTokenRepository = new HttpSessionCsrfTokenRepository();
 
         http
-                .csrf(csrf -> csrf.ignoringRequestMatchers("/loginerror"))  // Ensure CSRF is correctly enforced
-                .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/", "/login", "/loginerror", "/css/**", "/js/**", "/images/**").permitAll()
+                .csrf(csrf -> csrf
+                        .csrfTokenRepository(csrfTokenRepository) // 🔴 Store CSRF in session instead of cookie
+                )
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/login", "/css/**", "/js/**", "/images/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                .formLogin(formLogin -> formLogin
+                .formLogin(login -> login
                         .loginPage("/login")
+                        .loginProcessingUrl("/perform_login")
+                        .defaultSuccessUrl("/post-login", true) // 🔴 Redirect to /post-login after successful login
                         .failureUrl("/loginerror")
-                        .defaultSuccessUrl("/")
                         .permitAll()
                 )
+
                 .logout(logout -> logout
                         .logoutUrl("/logout")
-                        .logoutSuccessUrl("/")
-                        .invalidateHttpSession(false)  // 🔴 Prevent session reset
-                        .deleteCookies("JSESSIONID")  // 🔴 Preserve session cookies
+                        .logoutSuccessUrl("/login?logout")
+                        .invalidateHttpSession(false) // 🔴 Prevents session reset
+                        .deleteCookies("JSESSIONID") // 🔴 Keeps JSESSIONID cookie intact
                         .permitAll()
-                )
-                .sessionManagement(session -> session
-                        .sessionFixation().none()  // 🔴 Prevents session fixation attacks
-                        .maximumSessions(1).maxSessionsPreventsLogin(false)  // 🔴 Ensures session persistence
                 );
+
+        // 🔴 Log CSRF token every time it's retrieved
+        csrfTokenRepository.setSessionAttributeName("SESSION_CSRF");
 
         return http.build();
     }
-
-
 }
