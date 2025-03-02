@@ -40,8 +40,9 @@ public class SecurityConfig {
                 // Desactivamos CSRF para evitar problemas con el token
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/css/**", "/js/**", "/images/**").permitAll()
-                        .requestMatchers("/", "/api/books").permitAll()
+                        .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
+                        .requestMatchers("/", "/login", "/register", "/api/books").permitAll()
+                        .requestMatchers("/api/books").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(login -> login
