@@ -8,11 +8,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.csrf.CsrfTokenRepository;
-import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
+
 
 @Configuration
 @EnableWebSecurity
@@ -38,14 +38,12 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        HttpSessionCsrfTokenRepository csrfTokenRepository = new HttpSessionCsrfTokenRepository();
 
         http
-                .csrf(csrf -> csrf
-                        .csrfTokenRepository(sessionCsrfTokenRepository()) // 🔴 Use session-based CSRF storage
-                )
+                .csrf(AbstractHttpConfigurer::disable)  // Disable CSRF
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/login", "/css/**", "/js/**", "/images/**").permitAll()
+                        .requestMatchers("/", "/api/books").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(login -> login
@@ -64,16 +62,8 @@ public class SecurityConfig {
                         .permitAll()
                 );
 
-        // 🔴 Log CSRF token every time it's retrieved
-        csrfTokenRepository.setSessionAttributeName("SESSION_CSRF");
 
         return http.build();
     }
 
-    @Bean
-    public CsrfTokenRepository sessionCsrfTokenRepository() {
-        HttpSessionCsrfTokenRepository repository = new HttpSessionCsrfTokenRepository();
-        repository.setSessionAttributeName("SESSION_CSRF_TOKEN"); // 🔴 Store CSRF token in session
-        return repository;
-    }
 }

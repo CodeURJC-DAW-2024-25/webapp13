@@ -2,7 +2,6 @@ package es.codeurjc13.librored.controller;
 
 import es.codeurjc13.librored.model.Book;
 import es.codeurjc13.librored.repository.BookRepository;
-import org.springframework.security.web.csrf.CsrfToken;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -36,16 +35,6 @@ public class IndexController {
         // Fetch books from the database
         List<Book> books = bookRepository.findAll();
         model.addAttribute("books", books); // Ensure books list is passed
-
-        // ✅ Ensure CSRF token is always available
-        CsrfToken csrfToken = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
-        if (csrfToken != null) {
-            model.addAttribute("csrf_token", csrfToken.getToken());
-            model.addAttribute("csrf_parameter", csrfToken.getParameterName());
-        } else {
-            model.addAttribute("csrf_token", ""); // Prevent Mustache errors
-            model.addAttribute("csrf_parameter", "_csrf");
-        }
 
         return "index";
     }
