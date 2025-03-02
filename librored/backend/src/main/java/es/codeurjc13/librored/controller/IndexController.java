@@ -2,12 +2,10 @@ package es.codeurjc13.librored.controller;
 
 import es.codeurjc13.librored.model.Book;
 import es.codeurjc13.librored.repository.BookRepository;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import java.security.Principal;
 import java.util.List;
 
 @Controller
@@ -16,6 +14,7 @@ public class IndexController {
     private final BookRepository bookRepository;
 
     public IndexController(BookRepository bookRepository) {
+
         this.bookRepository = bookRepository;
     }
 
