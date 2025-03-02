@@ -34,33 +34,33 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-
         http.authenticationProvider(authenticationProvider());
 
         http
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/loginerror"))  // Ensure CSRF is enforced correctly
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/", "/login", "/loginerror", "/css/**", "/js/**", "/images/**").permitAll()
-                        .requestMatchers("/api/books/**").permitAll()
-                        .requestMatchers("/books/**").permitAll()
-                        .anyRequest().authenticated())
-
-                    /*   // PRIVATE PAGES
-                        .requestMatchers("/newbook").hasAnyRole("USER")
-                        .requestMatchers("/editbook").hasAnyRole("USER")
-                        .requestMatchers("/editbook/*").hasAnyRole("USER")
-                        .requestMatchers("/removebook/*").hasAnyRole("ADMIN"))
-                    */
-
+                        .anyRequest().authenticated()
+                )
                 .formLogin(formLogin -> formLogin
                         .loginPage("/login")
                         .failureUrl("/loginerror")
                         .defaultSuccessUrl("/")
-                        .permitAll())
+                        .permitAll()
+                )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/")
-                        .permitAll());
+                        .invalidateHttpSession(false)  // 🔴 Prevent session invalidation
+                        .deleteCookies("JSESSIONID")  // 🔴 Ensure session cookies remain
+                        .permitAll()
+                )
+                .sessionManagement(session -> session
+                        .sessionFixation().none()  // 🔴 Prevents session fixation attacks
+                        .maximumSessions(1).maxSessionsPreventsLogin(false)  // 🔴 Ensures session continuity
+                );
 
         return http.build();
     }
+
 }
