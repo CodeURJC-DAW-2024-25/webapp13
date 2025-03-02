@@ -5,25 +5,31 @@ import jakarta.persistence.*;
 @Entity
 public class User {
 
-    public enum Role {
-        Registered, Admin
-    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+
     private String name;
+
     private String email;
-    private String password;
+
+    private String encodedPassword;
+
+    @Enumerated(EnumType.STRING)
     private Role role;
+
+    public enum Role {
+        user, admin
+    }
 
     public User() {
     }
 
-    public User(String name, String email, String password, Role role) {
+    public User(String name, String email, String encodedPassword, Role role) {
         this.name = name;
         this.email = email;
-        this.password = password;
+        this.encodedPassword = encodedPassword;
         this.role = role;
     }
 
@@ -52,16 +58,12 @@ public class User {
         this.email = email;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
     public String getEncodedPassword() {
-        return "{noop}" + password;
+        return encodedPassword;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setEncodedPassword(String encodedPassword) {
+        this.encodedPassword = encodedPassword;
     }
 
     public Role getRole() {
@@ -71,5 +73,4 @@ public class User {
     public void setRole(Role role) {
         this.role = role;
     }
-
 }
