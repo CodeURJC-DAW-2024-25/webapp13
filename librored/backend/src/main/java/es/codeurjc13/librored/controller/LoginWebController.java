@@ -23,11 +23,9 @@ public class LoginWebController {
             model.addAttribute("csrf_parameter", "_csrf");
         }
 
-        // ✅ Ensures CSRF token is always available.
-        // ✅ If the token is missing, it will display "MISSING" instead of failing silently.
-
         return "login";
     }
+
 
 
     @RequestMapping("/loginerror")

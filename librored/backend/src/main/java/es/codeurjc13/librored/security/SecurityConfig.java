@@ -37,7 +37,7 @@ public class SecurityConfig {
         http.authenticationProvider(authenticationProvider());
 
         http
-                .csrf(csrf -> csrf.ignoringRequestMatchers("/loginerror"))  // Ensure CSRF is enforced correctly
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/loginerror"))  // Ensure CSRF is correctly enforced
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/", "/login", "/loginerror", "/css/**", "/js/**", "/images/**").permitAll()
                         .anyRequest().authenticated()
@@ -51,16 +51,17 @@ public class SecurityConfig {
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/")
-                        .invalidateHttpSession(false)  // 🔴 Prevent session invalidation
-                        .deleteCookies("JSESSIONID")  // 🔴 Ensure session cookies remain
+                        .invalidateHttpSession(false)  // 🔴 Prevent session reset
+                        .deleteCookies("JSESSIONID")  // 🔴 Preserve session cookies
                         .permitAll()
                 )
                 .sessionManagement(session -> session
                         .sessionFixation().none()  // 🔴 Prevents session fixation attacks
-                        .maximumSessions(1).maxSessionsPreventsLogin(false)  // 🔴 Ensures session continuity
+                        .maximumSessions(1).maxSessionsPreventsLogin(false)  // 🔴 Ensures session persistence
                 );
 
         return http.build();
     }
+
 
 }

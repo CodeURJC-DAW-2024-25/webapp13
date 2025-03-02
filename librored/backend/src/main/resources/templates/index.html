@@ -269,20 +269,21 @@
     });
 </script>
 
+<!-- CSRF Token -->
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         let csrfToken = document.querySelector('meta[name="_csrf"]').content;
         let csrfParameter = document.querySelector('meta[name="_csrf_parameter"]').content;
 
-        // Inject CSRF token into all forms if it's missing
         document.querySelectorAll("form").forEach(form => {
-            if (!form.querySelector(`input[name='${csrfParameter}']`)) {
-                let input = document.createElement("input");
+            let input = form.querySelector(`input[name='${csrfParameter}']`);
+            if (!input) {
+                input = document.createElement("input");
                 input.type = "hidden";
                 input.name = csrfParameter;
-                input.value = csrfToken;
                 form.appendChild(input);
             }
+            input.value = csrfToken;
         });
     });
 </script>
