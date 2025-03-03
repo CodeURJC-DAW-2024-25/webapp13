@@ -2,6 +2,7 @@
 
 <div class="container mt-5">
     <h2 class="text-center">Manage Books</h2>
+    <a href="/admin/books/create" class="btn btn-primary">Create Book</a>
     <table class="table table-striped mt-3">
         <thead>
         <tr>
@@ -9,6 +10,7 @@
             <th>Title</th>
             <th>Author</th>
             <th>Cover</th>
+            <th>Description</th>
             <th>Actions</th>
         </tr>
         </thead>
@@ -25,11 +27,14 @@
                     <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                 </form>
             </td>
+            <td>{{description}}</td>
         </tr>
         {{/books}}
         </tbody>
     </table>
-    <a href="/admin" class="btn btn-secondary mt-3">Back</a>
+    <div class="d-flex justify-content-end mt-3">
+        <a href="/admin" class="btn btn-secondary mt-3">Back</a>
+    </div>
 </div>
 
 {{> footer}}

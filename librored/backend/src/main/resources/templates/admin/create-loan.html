@@ -1,0 +1,82 @@
+{{>header}}
+
+<div class="container mt-5">
+    <h2 class="text-center">Create Loan</h2>
+    <form action="/admin/loans/create" method="post">
+        <div class="form-group">
+            <label>Lender</label>
+            <select name="lenderId" id="lenderSelect" class="form-control">
+                <option value="">-- Select Lender --</option>
+                {{#users}}
+                <option value="{{id}}">{{username}}</option>
+                {{/users}}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Book</label>
+            <select name="bookId" id="bookSelect" class="form-control" disabled>
+                <option value="">-- Select a Lender First --</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Borrower</label>
+            <select name="borrowerId" class="form-control">
+                {{#users}}
+                <option value="{{id}}">{{username}}</option>
+                {{/users}}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Start Date</label>
+            <input type="date" name="startDate" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+            <label>End Date</label>
+            <input type="date" name="endDate" class="form-control">
+        </div>
+
+        <div class="form-group">
+            <label>Status</label>
+            <select name="status" class="form-control">
+                <option value="Active">Active</option>
+                <option value="Completed">Completed</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-success">Create Loan</button>
+    </form>
+</div>
+
+<script>
+    document.getElementById("lenderSelect").addEventListener("change", function() {
+        var lenderId = this.value;
+        var bookSelect = document.getElementById("bookSelect");
+
+        if (lenderId) {
+            fetch("/admin/loans/books/" + lenderId)
+                .then(response => response.json())
+                .then(data => {
+                    bookSelect.innerHTML = "<option value=''>-- Select Available Book --</option>";
+                    if (data.length === 0) {
+                        bookSelect.innerHTML += "<option value='' disabled>No available books</option>";
+                        bookSelect.disabled = true;
+                    } else {
+                        data.forEach(book => {
+                            bookSelect.innerHTML += `<option value="${book.id}">${book.title}</option>`;
+                        });
+                        bookSelect.disabled = false;
+                    }
+                });
+        } else {
+            bookSelect.innerHTML = "<option value=''>-- Select a Lender First --</option>";
+            bookSelect.disabled = true;
+        }
+    });
+</script>
+
+
+{{>footer}}

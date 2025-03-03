@@ -1,10 +1,13 @@
 package es.codeurjc13.librored.service;
 
+import es.codeurjc13.librored.model.Book;
 import es.codeurjc13.librored.model.Loan;
+import es.codeurjc13.librored.model.User;
 import es.codeurjc13.librored.repository.LoanRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -53,6 +56,11 @@ public class LoanService {
 
             loanRepository.save(loan);
         }
+    }
+
+    public void createLoan(Book book, User lender, User borrower, LocalDate startDate, LocalDate endDate, Loan.Status status) {
+        Loan loan = new Loan(book, lender, borrower, startDate, endDate, status);
+        loanRepository.save(loan);
     }
 
 

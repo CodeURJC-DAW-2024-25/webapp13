@@ -1,7 +1,11 @@
 {{>header}}
 
 <div class="container mt-5">
-    <h2 class="text-center">Manage Loans</h2>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="text-center">Manage Loans</h2>
+        <a href="/admin/loans/create" class="btn btn-primary">Create Loan</a>
+    </div>
+
     <table class="table table-striped mt-3">
         <thead>
         <tr>
@@ -35,7 +39,10 @@
         {{/loans}}
         </tbody>
     </table>
-    <a href="/admin" class="btn btn-secondary mt-3">Back</a>
+
+    <div class="d-flex justify-content-end mt-3">
+        <a href="/admin" class="btn btn-secondary">Back</a>
+    </div>
 </div>
 
 {{>footer}}
