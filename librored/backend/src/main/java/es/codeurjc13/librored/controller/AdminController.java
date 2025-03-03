@@ -12,6 +12,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -102,6 +103,13 @@ public class AdminController {
     @GetMapping("/loans")
     public String listLoans(Model model) {
         List<Loan> loans = loanService.getAllLoans();
+
+        for (Loan loan : loans) {
+            if (loan.getEndDate() == null) {
+                loan.setEndDate(LocalDate.now());  // Avoid null pointer issue
+            }
+        }
+
         model.addAttribute("loans", loans);
         return "admin/loans";
     }
