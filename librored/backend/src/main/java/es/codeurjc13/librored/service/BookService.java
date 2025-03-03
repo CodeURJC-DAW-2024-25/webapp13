@@ -7,7 +7,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -49,6 +51,22 @@ public class BookService {
             bookRepository.save(existingBook);
         }
     }
+
+    public Map<String, Long> getBooksPerGenre() {
+        List<Object[]> results = bookRepository.countBooksByGenre();
+        Map<String, Long> booksPerGenre = new HashMap<>();
+
+        for (Object[] result : results) {
+            Book.Genre genreEnum = (Book.Genre) result[0]; // Cast Enum correctly
+            String genre = genreEnum.name(); // Convert Enum to String
+
+            Long count = (Long) result[1];
+            booksPerGenre.put(genre, count);
+        }
+
+        return booksPerGenre;
+    }
+
 
 
     public void deleteBook(Long id) {
