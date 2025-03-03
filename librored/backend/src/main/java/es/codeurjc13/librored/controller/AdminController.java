@@ -51,7 +51,7 @@ public class AdminController {
         Optional<User> user = userService.getUserById(id);
         if (user.isPresent()) {
             model.addAttribute("user", user.get());
-            return "admin/edit-user";
+            return "admin/user";
         }
         return "redirect:/admin/users";
     }
@@ -59,7 +59,7 @@ public class AdminController {
     @PostMapping("/users/edit/{id}")
     public String updateUser(@PathVariable Long id, @ModelAttribute User user) {
         userService.updateUser(id, user);
-        return "redirect:/admin/users";
+        return "redirect:/admin/user";
     }
 
     @PostMapping("/users/delete/{id}")
@@ -128,6 +128,3 @@ public class AdminController {
         return "redirect:/admin/loans";
     }
 }
-
-
-
