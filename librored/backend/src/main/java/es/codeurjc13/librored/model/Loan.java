@@ -1,6 +1,9 @@
 package es.codeurjc13.librored.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import java.time.LocalDate;
 
 @Entity
@@ -13,6 +16,8 @@ public class Loan {
     private Book book;
 
     @ManyToOne
+    @JoinColumn(name = "lender_id", nullable = false, foreignKey = @ForeignKey(name = "FK1epll7mdosrbax5th2tlnym38"))
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private User lender;
 
     @ManyToOne

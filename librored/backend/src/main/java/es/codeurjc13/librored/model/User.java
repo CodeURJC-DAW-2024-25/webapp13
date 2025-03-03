@@ -2,6 +2,8 @@ package es.codeurjc13.librored.model;
 
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
 public class User {
 
@@ -22,6 +24,13 @@ public class User {
     public enum Role {
         USER, ADMIN
     }
+
+    @OneToMany(mappedBy = "lender", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Loan> loans;
+
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Book> books;
+
 
     public User() {
     }
@@ -81,4 +90,5 @@ public class User {
     public void setRole(Role role) {
         this.role = role;
     }
+
 }
