@@ -1,5 +1,89 @@
 {{>header}}
 
+<!-- books per genre graph-->
+<div class="fluid-container">
+    <div class="row">
+        <div class="col-12">
+            <div class="section-title">
+                <h2>Our Genres</h2>
+                <img alt="" src="/images/section-title.png">
+            </div>
+        </div>
+    </div>
+<div class="graph">
+    <div class="fluid-container">
+        <div class="row">
+            <div class="col-12">
+                <canvas id="booksChart"></canvas>
+
+                <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                <script>
+                    async function loadChartData() {
+                        try {
+                            const response = await fetch('/api/books/books-per-genre');
+                            if (!response.ok) throw new Error('Network response was not ok');
+
+                            const data = await response.json();
+
+                            if (Object.keys(data).length === 0) {
+                                console.warn("No data received for books per genre.");
+                                return;
+                            }
+
+                            console.log("Chart Data:", data); // Debugging output
+
+                            const genres = Object.keys(data);
+                            const counts = Object.values(data);
+
+                            const ctx = document.getElementById('booksChart');
+                            if (!ctx) {
+                                console.error("Canvas element not found!");
+                                return;
+                            }
+
+                            new Chart(ctx, {
+                                type: 'bar',
+                                data: {
+                                    labels: genres,
+                                    datasets: [{
+                                        label: 'Books per Genre',
+                                        data: counts,
+                                        backgroundColor: 'rgba(54, 162, 235, 0.6)', // Better color
+                                        borderColor: 'rgba(54, 162, 235, 1)',
+                                        borderWidth: 1,
+                                        barPercentage: 0.7 // Adjust bar width
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    scales: {
+                                        x: {
+                                            ticks: {
+                                                maxRotation: 45, // Rotate labels for better visibility
+                                                minRotation: 30
+                                            }
+                                        },
+                                        y: {
+                                            beginAtZero: true
+                                        }
+                                    }
+                                }
+                            });
+                        } catch (error) {
+                            console.error("Error loading chart data:", error);
+                        }
+                    }
+
+                    document.addEventListener("DOMContentLoaded", loadChartData);
+                </script>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <!-- product-area start -->
 <div class="product-area">
     <div class="fluid-container">
