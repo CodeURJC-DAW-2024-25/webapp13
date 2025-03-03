@@ -18,22 +18,23 @@ public class CustomErrorController implements ErrorController {
 
             switch (statusCode) {
                 case 404:
-                    return "error-404";
+                    return "error/404";
                 case 500:
-                    return "error-500";
+                    return "error/500";
                 case 403:
-                    return "error-403";
+                    return "error/403";
                 case 401:
-                    return "error-401";
+                    return "error/401";
                 default:
-                    return "error-404"; // Default fallback page
+                    return "error/default"; // Ensure this file exists
             }
+
         }
-        return "error-404";
+        return "error/404";
     }
 
     @GetMapping("/loginerror")
     public String loginError() {
-        return "error-login";
+        return "loginerror";
     }
 }
