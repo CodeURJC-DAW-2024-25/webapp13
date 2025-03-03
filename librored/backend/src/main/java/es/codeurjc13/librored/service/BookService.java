@@ -7,8 +7,15 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+
+import org.hibernate.engine.jdbc.BlobProxy;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.sql.Blob;
+import java.sql.SQLException;
 
 @Service
 public class BookService {
@@ -33,7 +40,8 @@ public class BookService {
         bookRepository.save(book);
     }
 
-    public void updateBook(Long id, Book updatedBook) {
+
+    public void updateBook(Long id, Book updatedBook, MultipartFile coverImage) throws SQLException, IOException {
         Optional<Book> existingBookOpt = bookRepository.findById(id);
 
         if (existingBookOpt.isPresent()) {
@@ -41,14 +49,20 @@ public class BookService {
 
             existingBook.setTitle(updatedBook.getTitle());
             existingBook.setAuthor(updatedBook.getAuthor());
-            existingBook.setCover_pic(updatedBook.getCover_pic());
             existingBook.setDescription(updatedBook.getDescription());
             existingBook.setGenre(updatedBook.getGenre());
             existingBook.setOwner(updatedBook.getOwner());
 
+            // ✅ Convert MultipartFile to Blob before saving
+            if (coverImage != null && !coverImage.isEmpty()) {
+                existingBook.setCover_picFile(BlobProxy.generateProxy(coverImage.getInputStream(), coverImage.getSize()));
+                existingBook.setCover(true);
+            }
+
             bookRepository.save(existingBook);
         }
     }
+
 
 
     public void deleteBook(Long id) {

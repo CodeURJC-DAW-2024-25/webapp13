@@ -9,14 +9,18 @@ import es.codeurjc13.librored.repository.LoanRepository;
 import es.codeurjc13.librored.repository.ReviewRepository;
 import es.codeurjc13.librored.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
+import org.hibernate.engine.jdbc.BlobProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.sql.Blob;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.nio.file.Files;
@@ -70,6 +74,7 @@ public class DatabaseInitializer {
         // Sample books
 
         // Load book cover images as byte[]
+/*
         byte[] book1Cover = Files.readAllBytes(Paths.get("src/main/resources/static/images/covers/great_adventure.png"));
         byte[] book2Cover = Files.readAllBytes(Paths.get("src/main/resources/static/images/covers/galactic_wars.png"));
         byte[] book3Cover = Files.readAllBytes(Paths.get("src/main/resources/static/images/covers/silent_killer.png"));
@@ -95,10 +100,20 @@ public class DatabaseInitializer {
         byte[] book23Cover = Files.readAllBytes(Paths.get("src/main/resources/static/images/covers/haunted_manor.png"));
         byte[] book24Cover = Files.readAllBytes(Paths.get("src/main/resources/static/images/covers/great_adventure.png"));
         byte[] book25Cover = Files.readAllBytes(Paths.get("src/main/resources/static/images/covers/love_in_the_rain.png"));
+*/
+
+        // Load book cover image from resources
+        Resource image = new ClassPathResource("/static/images/covers/great_adventure.png");
+        Blob bookCover1 = BlobProxy.generateProxy(image.getInputStream(), image.contentLength());
 
 
         // Owner 1 (Mix of Fiction, SciFi & Fantasy, Mystery & Thriller)
-        Book book1 = new Book("The Great Adventure", "John Doe", Book.Genre.Fiction, "An epic tale of discovery and courage.", book1Cover, alice);
+        Book book1 = new Book("The Great Adventure", "John Doe", Book.Genre.Fiction, "An epic tale of discovery and courage.", alice);
+        book1.setCover_picFile(bookCover1);
+        book1.setCover(true);
+        bookRepository.save(book1);
+
+/*
         Book book2 = new Book("Galactic Wars", "Emily Carter", Book.Genre.SciFi_Fantasy, "An interstellar battle for survival in a distant galaxy.", book2Cover, alice);
         Book book3 = new Book("The Silent Killer", "Mark Johnson", Book.Genre.Mystery_Thriller, "A detective investigates a series of cryptic murders.", book3Cover, alice);
         Book book4 = new Book("The Last Pharaoh", "Wilbur Smith", Book.Genre.Historical_Fiction, "The final days of an Egyptian dynasty.", book4Cover, alice);
@@ -137,11 +152,12 @@ public class DatabaseInitializer {
         Book book25 = new Book("Love in the Rain", "Sophia Lee", Book.Genre.Romance, "Two souls find each other in the midst of a storm.", book25Cover, george);
         // Save all books
         bookRepository.saveAll(Arrays.asList(book1, book2, book3, book4, book5, book6, book7, book8, book9, book10, book11, book12, book13, book14, book15, book16, book17, book18, book19, book20, book21, book22, book23, book24, book25));
+*/
 
 
         // Sample loans
         Loan loan1 = new Loan(book1, alice, bob, LocalDate.of(2025, 1, 1), LocalDate.of(2025, 1, 15), Loan.Status.Completed);
-        Loan loan2 = new Loan(book5, bob, charlie, LocalDate.of(2025, 1, 5), LocalDate.of(2025, 1, 20), Loan.Status.Completed);
+/*        Loan loan2 = new Loan(book5, bob, charlie, LocalDate.of(2025, 1, 5), LocalDate.of(2025, 1, 20), Loan.Status.Completed);
         Loan loan3 = new Loan(book9, charlie, diana, LocalDate.of(2025, 1, 10), LocalDate.of(2025, 1, 25), Loan.Status.Completed);
         Loan loan4 = new Loan(book13, diana, ethan, LocalDate.of(2025, 1, 15), LocalDate.of(2025, 1, 30), Loan.Status.Completed);
         Loan loan5 = new Loan(book17, ethan, fiona, LocalDate.of(2025, 1, 20), LocalDate.of(2025, 2, 4), Loan.Status.Completed);
@@ -190,6 +206,13 @@ public class DatabaseInitializer {
 
         // Log completion
         logger.info("DatabaseInitializer execution completed.");
+ */
 
+    }
+
+    public void setBookImage(Book book, String classpathResource) throws IOException {
+        book.setCover(true);
+        Resource image = new ClassPathResource(classpathResource);
+        book.setCover_picFile(BlobProxy.generateProxy(image.getInputStream(), image.contentLength()));
     }
 }

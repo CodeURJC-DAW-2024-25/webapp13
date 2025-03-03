@@ -1,6 +1,12 @@
 package es.codeurjc13.librored.model;
+import java.sql.Blob;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.Base64;
 
 @Entity
 public class Book {
@@ -14,12 +20,13 @@ public class Book {
     private Genre genre;
 
     @Lob  // ✅ Store image as BLOB (Binary Large Object)
-    @Column(columnDefinition = "LONGBLOB")
-    private byte[] cover_pic;
+    @JsonIgnore // ✅ Ignore this field when serializing to JSON
+    private Blob cover_pic;
+
+    private boolean image;
 
     @Column(columnDefinition = "TEXT")
     private String description;
-
 
     @ManyToOne
     private User owner;
@@ -30,12 +37,12 @@ public class Book {
 
     public Book() {}
 
-    public Book(String title, String author, Genre genre, String description, byte[] cover_pic, User owner) {
+    public Book(String title, String author, Genre genre, String description, User owner) {
+        super();
         this.title = title;
         this.author = author;
         this.genre = genre;
         this.description = description;
-        this.cover_pic = cover_pic;
         this.owner = owner;
     }
 
@@ -79,12 +86,20 @@ public class Book {
         this.description = description;
     }
 
-    public byte[] getCover_pic() {
+    public Blob getCover_picFile() {
         return cover_pic;
     }
 
-    public void setCover_pic(byte[] cover_pic) {
+    public void setCover_picFile(Blob cover_pic) {
         this.cover_pic = cover_pic;
+    }
+
+    public boolean getCover(){
+        return this.image;
+    }
+
+    public void setCover(boolean image){
+        this.image = image;
     }
 
     public User getOwner() {
@@ -94,4 +109,31 @@ public class Book {
     public void setOwner(User owner) {
         this.owner = owner;
     }
+
+
+    public String getCoverPicBase64() {
+        if (cover_pic == null) {
+            return null;
+        }
+        try {
+            byte[] bytes = cover_pic.getBytes(1, (int) cover_pic.length());
+            return Base64.getEncoder().encodeToString(bytes);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public void setCoverPicBase64(String base64) {
+        // ✅ Convert Base64 to Blob
+        if (base64 != null) {
+            byte[] bytes = Base64.getDecoder().decode(base64);
+            try {
+                this.cover_pic = new javax.sql.rowset.serial.SerialBlob(bytes);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 }

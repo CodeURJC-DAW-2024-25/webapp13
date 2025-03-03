@@ -6,18 +6,28 @@ import es.codeurjc13.librored.model.User;
 import es.codeurjc13.librored.service.BookService;
 import es.codeurjc13.librored.service.LoanService;
 import es.codeurjc13.librored.service.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
+
+
 
 @Controller
 @RequestMapping("/admin")
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
+
+    private static final Logger logger = LoggerFactory.getLogger(AdminController.class);
+
 
     private final UserService userService;
     private final BookService bookService;
@@ -61,7 +71,13 @@ public class AdminController {
     // ✅ Books CRUD
     @GetMapping("/books")
     public String listBooks(Model model) {
-        model.addAttribute("books", bookService.getAllBooks());
+        List<Book> books = bookService.getAllBooks();
+
+        // Convert Blob to Base64 for JSON response
+        for (Book book : books) {
+            book.setCoverPicBase64(book.getCoverPicBase64());
+        }
+
         return "admin/books";
     }
 
@@ -78,8 +94,13 @@ public class AdminController {
 
 
     @PostMapping("/books/edit/{id}")
-    public String updateBook(@PathVariable Long id, @ModelAttribute Book book) {
-        bookService.updateBook(id, book);
+    public String updateBook(@PathVariable Long id, @ModelAttribute Book book,
+                             @RequestParam(value = "coverImage", required = false) MultipartFile coverImage) {
+        try {
+            bookService.updateBook(id, book, coverImage);
+        } catch (IOException | SQLException e) {
+            logger.error("Error processing cover image upload", e);
+        }
         return "redirect:/admin/books";
     }
 
