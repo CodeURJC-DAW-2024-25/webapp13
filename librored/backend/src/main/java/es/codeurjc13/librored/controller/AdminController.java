@@ -70,10 +70,12 @@ public class AdminController {
         Optional<Book> book = bookService.getBookById(id);
         if (book.isPresent()) {
             model.addAttribute("book", book.get());
+            model.addAttribute("users", userService.getAllUsers()); // ✅ Pass users for owner selection
             return "admin/edit-book";
         }
         return "redirect:/admin/books";
     }
+
 
     @PostMapping("/books/edit/{id}")
     public String updateBook(@PathVariable Long id, @ModelAttribute Book book) {

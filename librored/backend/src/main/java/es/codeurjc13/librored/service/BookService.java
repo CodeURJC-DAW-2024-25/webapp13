@@ -34,16 +34,22 @@ public class BookService {
     }
 
     public void updateBook(Long id, Book updatedBook) {
-        Optional<Book> existingBook = bookRepository.findById(id);
-        if (existingBook.isPresent()) {
-            Book book = existingBook.get();
-            book.setTitle(updatedBook.getTitle());
-            book.setAuthor(updatedBook.getAuthor());
-            book.setDescription(updatedBook.getDescription());
-            book.setCover_pic(updatedBook.getCover_pic());
-            bookRepository.save(book);
+        Optional<Book> existingBookOpt = bookRepository.findById(id);
+
+        if (existingBookOpt.isPresent()) {
+            Book existingBook = existingBookOpt.get();
+
+            existingBook.setTitle(updatedBook.getTitle());
+            existingBook.setAuthor(updatedBook.getAuthor());
+            existingBook.setCover_pic(updatedBook.getCover_pic());
+            existingBook.setDescription(updatedBook.getDescription());
+            existingBook.setGenre(updatedBook.getGenre());
+            existingBook.setOwner(updatedBook.getOwner());
+
+            bookRepository.save(existingBook);
         }
     }
+
 
     public void deleteBook(Long id) {
         bookRepository.deleteById(id);
