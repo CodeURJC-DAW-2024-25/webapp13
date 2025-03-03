@@ -2,11 +2,9 @@ package es.codeurjc13.librored.service;
 
 import es.codeurjc13.librored.model.Book;
 import es.codeurjc13.librored.model.Loan;
-import es.codeurjc13.librored.model.Review;
 import es.codeurjc13.librored.model.User;
 import es.codeurjc13.librored.repository.BookRepository;
 import es.codeurjc13.librored.repository.LoanRepository;
-import es.codeurjc13.librored.repository.ReviewRepository;
 import es.codeurjc13.librored.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
@@ -36,9 +34,6 @@ public class DatabaseInitializer {
 
     @Autowired
     private LoanRepository loanRepository;
-
-    @Autowired
-    private ReviewRepository reviewRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -126,37 +121,6 @@ public class DatabaseInitializer {
         // Save all loans
         loanRepository.saveAll(Arrays.asList(loan1, loan2, loan3, loan4, loan5, loan6, loan7, loan8, loan9, loan10, loan11, loan12));
 
-
-        // Sample reviews
-        Review review1 = new Review(book1, bob, Review.Rating.FOUR, "Enjoyed the adventure.");
-        review1.setReview_date(baseDate.plusDays(1)); // DATE_ADD('2025-01-15', INTERVAL 1 DAY)
-
-        Review review2 = new Review(book5, charlie, Review.Rating.FIVE, "Very informative!");
-        review2.setReview_date(baseDate.plusDays(6)); // DATE_ADD('2025-01-20', INTERVAL 6 DAY)
-
-        Review review3 = new Review(book9, diana, Review.Rating.THREE, "Good read, but a bit slow.");
-        review3.setReview_date(baseDate.plusDays(3)); // DATE_ADD('2025-01-25', INTERVAL 3 DAY)
-
-        Review review4 = new Review(book13, ethan, Review.Rating.FOUR, "Exciting insights into technology.");
-        review4.setReview_date(baseDate.plusDays(5)); // DATE_ADD('2025-01-30', INTERVAL 5 DAY)
-
-        Review review5 = new Review(book17, fiona, Review.Rating.FIVE, "Captivating and emotional.");
-        review5.setReview_date(baseDate.plusDays(10)); // DATE_ADD('2025-02-04', INTERVAL 10 DAY)
-
-        Review review6 = new Review(book21, george, Review.Rating.FOUR, "A fascinating journey.");
-        review6.setReview_date(baseDate.plusDays(6)); // DATE_ADD('2025-02-09', INTERVAL 6 DAY)
-
-        Review review7 = new Review(book23, alice, Review.Rating.FIVE, "Thrilling and spooky.");
-        review7.setReview_date(baseDate.plusDays(2)); // DATE_ADD('2025-02-14', INTERVAL 2 DAY)
-
-        Review review8 = new Review(book2, charlie, Review.Rating.FOUR, "Great space opera.");
-        review8.setReview_date(baseDate.plusDays(3)); // DATE_ADD('2025-02-16', INTERVAL 3 DAY)
-
-        Review review9 = new Review(book6, diana, Review.Rating.THREE, "Not as scary as expected.");
-        review9.setReview_date(baseDate.plusDays(1)); // DATE_ADD('2025-02-20', INTERVAL 1 DAY)
-
-        // Save all reviews
-        reviewRepository.saveAll(Arrays.asList(review1, review2, review3, review4, review5, review6, review7, review8, review9));
 
         // Log completion
         logger.info("DatabaseInitializer execution completed.");
