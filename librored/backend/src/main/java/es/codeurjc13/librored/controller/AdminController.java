@@ -57,6 +57,13 @@ public class AdminController {
         return "redirect:/admin/users";
     }
 
+    @PostMapping("/users/delete/{id}")
+    public String deleteUser(@PathVariable Long id) {
+        userService.deleteUser(id);
+        return "redirect:/admin/users";
+    }
+
+
 
     // ✅ Books CRUD
     @GetMapping("/books")

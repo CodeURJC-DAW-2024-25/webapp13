@@ -1,6 +1,8 @@
 package es.codeurjc13.librored.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 public class Book {
@@ -18,6 +20,8 @@ public class Book {
     private String cover_pic;
 
     @ManyToOne
+    @JoinColumn(name = "owner_id", nullable = false, foreignKey = @ForeignKey(name = "FK_book_owner"))
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private User owner;
 
     public enum Genre {
@@ -90,4 +94,5 @@ public class Book {
     public void setOwner(User owner) {
         this.owner = owner;
     }
+
 }
