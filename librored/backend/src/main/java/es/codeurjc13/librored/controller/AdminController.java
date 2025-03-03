@@ -31,6 +31,12 @@ public class AdminController {
         this.loanService = loanService;
     }
 
+    // ✅ FIX: Ensure /admin loads admin.html
+    @GetMapping
+    public String adminDashboard(Model model) {
+        return "admin";
+    }
+
 
     // CRUD operations for Users
     @GetMapping("/users")
