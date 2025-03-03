@@ -42,8 +42,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
                         .requestMatchers("/", "/login", "/register", "/api/books").permitAll()
-                        .requestMatchers("/api/books").permitAll()
-                        .anyRequest().authenticated()
+                        .requestMatchers("/api/books/books-per-genre").permitAll() // Allow public access to this endpoint
+                        .requestMatchers("/api/**").authenticated() // Secure other API endpoints
+                        .anyRequest().permitAll()
                 )
                 .formLogin(login -> login
                         .loginPage("/login")
