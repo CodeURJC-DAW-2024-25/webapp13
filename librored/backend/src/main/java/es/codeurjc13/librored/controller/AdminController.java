@@ -10,12 +10,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.ModelAttribute;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-
 
 @Controller
 @RequestMapping("/admin")
@@ -32,18 +29,15 @@ public class AdminController {
         this.loanService = loanService;
     }
 
-    // ✅ FIX: Ensure /admin loads admin.html
     @GetMapping
-    public String adminDashboard(Model model) {
+    public String adminDashboard() {
         return "admin";
     }
 
-
-    // CRUD operations for Users
+    // ✅ Users CRUD
     @GetMapping("/users")
     public String listUsers(Model model) {
-        List<User> users = userService.getAllUsers();
-        model.addAttribute("users", users);
+        model.addAttribute("users", userService.getAllUsers());
         return "admin/users";
     }
 
@@ -52,28 +46,22 @@ public class AdminController {
         Optional<User> user = userService.getUserById(id);
         if (user.isPresent()) {
             model.addAttribute("user", user.get());
-            return "admin/user";
+            return "admin/edit-user";
         }
         return "redirect:/admin/users";
     }
 
     @PostMapping("/users/edit/{id}")
-    public String updateUser(@PathVariable Long id, @ModelAttribute User user) {
-        userService.updateUser(id, user);
-        return "redirect:/admin/user";
-    }
-
-    @PostMapping("/users/delete/{id}")
-    public String deleteUser(@PathVariable Long id) {
-        userService.deleteUser(id);
+    public String updateUser(@PathVariable Long id, @ModelAttribute User updatedUser) {
+        userService.updateUser(id, updatedUser);
         return "redirect:/admin/users";
     }
 
-    // CRUD operations for Books
+
+    // ✅ Books CRUD
     @GetMapping("/books")
     public String listBooks(Model model) {
-        List<Book> books = bookService.getAllBooks();
-        model.addAttribute("books", books);
+        model.addAttribute("books", bookService.getAllBooks());
         return "admin/books";
     }
 
@@ -99,17 +87,10 @@ public class AdminController {
         return "redirect:/admin/books";
     }
 
-    // CRUD operations for Loans
+    // ✅ Loans CRUD
     @GetMapping("/loans")
     public String listLoans(Model model) {
         List<Loan> loans = loanService.getAllLoans();
-
-        for (Loan loan : loans) {
-            if (loan.getEndDate() == null) {
-                loan.setEndDate(LocalDate.now());  // Avoid null pointer issue
-            }
-        }
-
         model.addAttribute("loans", loans);
         return "admin/loans";
     }
@@ -119,6 +100,8 @@ public class AdminController {
         Optional<Loan> loan = loanService.getLoanById(id);
         if (loan.isPresent()) {
             model.addAttribute("loan", loan.get());
+            model.addAttribute("books", bookService.getAllBooks());
+            model.addAttribute("users", userService.getAllUsers());
             return "admin/edit-loan";
         }
         return "redirect:/admin/loans";
