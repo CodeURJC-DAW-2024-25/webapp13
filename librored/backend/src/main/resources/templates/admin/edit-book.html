@@ -1,0 +1,52 @@
+{{> header}}
+
+<div class="container mt-5">
+    <h2 class="text-center">Edit Book</h2>
+    <form action="/admin/books/edit/{{book.id}}" method="post">
+
+        <div class="form-group">
+            <label>Title</label>
+            <p>Current: <strong>{{book.title}}</strong></p>
+            <input type="text" name="title" class="form-control" value="{{book.title}}">
+        </div>
+
+        <div class="form-group">
+            <label>Author</label>
+            <p>Current: <strong>{{book.author}}</strong></p>
+            <input type="text" name="author" class="form-control" value="{{book.author}}">
+        </div>
+
+        <div class="form-group">
+            <label>Cover Picture (URL)</label>
+            <p>Current: <strong>{{book.cover_pic}}</strong></p>
+            <input type="text" name="cover_pic" class="form-control" value="{{book.cover_pic}}">
+        </div>
+
+        <div class="form-group">
+            <label>Description</label>
+            <p>Current: <strong>{{book.description}}</strong></p>
+            <textarea name="description" class="form-control">{{book.description}}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Genre</label>
+            <p>Current: <strong>{{book.genre}}</strong></p>
+            <input type="text" name="genre" class="form-control" value="{{book.genre}}">
+        </div>
+
+        <div class="form-group">
+            <label>Owner</label>
+            <p>Current: <strong>{{book.owner.id}}</strong></p>
+            <select name="owner.id" class="form-control">
+                {{#users}}
+                <option value="{{id}}" {{#book.owner.id}}{{#id}}selected{{/id}}{{/book.owner.id}}>{{username}}</option>
+                {{/users}}
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-success mt-3">Update Book</button>
+        <a href="/admin/books" class="btn btn-secondary mt-3">Cancel</a>
+    </form>
+</div>
+
+{{> footer}}
