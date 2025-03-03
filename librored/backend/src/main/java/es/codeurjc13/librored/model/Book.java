@@ -13,9 +13,13 @@ public class Book {
     @Enumerated(EnumType.STRING)
     private Genre genre;
 
+    @Lob  // ✅ Store image as BLOB (Binary Large Object)
+    @Column(columnDefinition = "LONGBLOB")
+    private byte[] cover_pic;
+
     @Column(columnDefinition = "TEXT")
     private String description;
-    private String cover_pic;
+
 
     @ManyToOne
     private User owner;
@@ -26,7 +30,7 @@ public class Book {
 
     public Book() {}
 
-    public Book(String title, String author, Genre genre, String description, String cover_pic, User owner) {
+    public Book(String title, String author, Genre genre, String description, byte[] cover_pic, User owner) {
         this.title = title;
         this.author = author;
         this.genre = genre;
@@ -75,11 +79,11 @@ public class Book {
         this.description = description;
     }
 
-    public String getCover_pic() {
+    public byte[] getCover_pic() {
         return cover_pic;
     }
 
-    public void setCover_pic(String cover_pic) {
+    public void setCover_pic(byte[] cover_pic) {
         this.cover_pic = cover_pic;
     }
 

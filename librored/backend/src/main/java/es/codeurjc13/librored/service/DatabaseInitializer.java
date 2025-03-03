@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 
 @Service
@@ -66,45 +68,73 @@ public class DatabaseInitializer {
         userRepository.saveAll(Arrays.asList(alice, bob, charlie, diana, ethan, fiona, george));
 
         // Sample books
+
+        // Load book cover images as byte[]
+        byte[] book1Cover = Files.readAllBytes(Paths.get("src/main/resources/static/images/covers/great_adventure.png"));
+        byte[] book2Cover = Files.readAllBytes(Paths.get("src/main/resources/static/images/covers/galactic_wars.png"));
+        byte[] book3Cover = Files.readAllBytes(Paths.get("src/main/resources/static/images/covers/silent_killer.png"));
+        byte[] book4Cover = Files.readAllBytes(Paths.get("src/main/resources/static/images/covers/last_pharaoh.png"));
+        byte[] book5Cover = Files.readAllBytes(Paths.get("src/main/resources/static/images/covers/science_everything.png"));
+        byte[] book6Cover = Files.readAllBytes(Paths.get("src/main/resources/static/images/covers/cursed_woods.png"));
+        byte[] book7Cover = Files.readAllBytes(Paths.get("src/main/resources/static/images/covers/unwritten_letters.png"));
+        byte[] book8Cover = Files.readAllBytes(Paths.get("src/main/resources/static/images/covers/chronicles_eldoria.png"));
+        byte[] book9Cover = Files.readAllBytes(Paths.get("src/main/resources/static/images/covers/whispers_dark.png"));
+        byte[] book10Cover = Files.readAllBytes(Paths.get("src/main/resources/static/images/covers/echoes_tomorrow.png"));
+        byte[] book11Cover = Files.readAllBytes(Paths.get("src/main/resources/static/images/covers/emperors_shadow.png"));
+        byte[] book12Cover = Files.readAllBytes(Paths.get("src/main/resources/static/images/covers/night_visitor.png"));
+        byte[] book13Cover = Files.readAllBytes(Paths.get("src/main/resources/static/images/covers/cyber_revolution.png"));
+        byte[] book14Cover = Files.readAllBytes(Paths.get("src/main/resources/static/images/covers/universe_guide.png"));
+        byte[] book15Cover = Files.readAllBytes(Paths.get("src/main/resources/static/images/covers/shadows_beneath.png"));
+        byte[] book16Cover = Files.readAllBytes(Paths.get("src/main/resources/static/images/covers/parisian_affair.png"));
+        byte[] book17Cover = Files.readAllBytes(Paths.get("src/main/resources/static/images/covers/midnight_serenade.png"));
+        byte[] book18Cover = Files.readAllBytes(Paths.get("src/main/resources/static/images/covers/vanishing_shadows.png"));
+        byte[] book19Cover = Files.readAllBytes(Paths.get("src/main/resources/static/images/covers/warriors_legacy.png"));
+        byte[] book20Cover = Files.readAllBytes(Paths.get("src/main/resources/static/images/covers/last_horizon.png"));
+        byte[] book21Cover = Files.readAllBytes(Paths.get("src/main/resources/static/images/covers/forgotten_kingdom.png"));
+        byte[] book22Cover = Files.readAllBytes(Paths.get("src/main/resources/static/images/covers/history_inventions.png"));
+        byte[] book23Cover = Files.readAllBytes(Paths.get("src/main/resources/static/images/covers/haunted_manor.png"));
+        byte[] book24Cover = Files.readAllBytes(Paths.get("src/main/resources/static/images/covers/great_adventure.png"));
+        byte[] book25Cover = Files.readAllBytes(Paths.get("src/main/resources/static/images/covers/love_in_the_rain.png"));
+
+
         // Owner 1 (Mix of Fiction, SciFi & Fantasy, Mystery & Thriller)
-        Book book1 = new Book("The Great Adventure", "John Doe", Book.Genre.Fiction, "An epic tale of discovery and courage.", "images/covers/great_adventure.png", alice);
-        Book book2 = new Book("Galactic Wars", "Emily Carter", Book.Genre.SciFi_Fantasy, "An interstellar battle for survival in a distant galaxy.", "images/covers/galactic_wars.png", alice);
-        Book book3 = new Book("The Silent Killer", "Mark Johnson", Book.Genre.Mystery_Thriller, "A detective investigates a series of cryptic murders.", "images/covers/silent_killer.png", alice);
-        Book book4 = new Book("The Last Pharaoh", "Wilbur Smith", Book.Genre.Historical_Fiction, "The final days of an Egyptian dynasty.", "images/covers/last_pharaoh.png", alice);
+        Book book1 = new Book("The Great Adventure", "John Doe", Book.Genre.Fiction, "An epic tale of discovery and courage.", book1Cover, alice);
+        Book book2 = new Book("Galactic Wars", "Emily Carter", Book.Genre.SciFi_Fantasy, "An interstellar battle for survival in a distant galaxy.", book2Cover, alice);
+        Book book3 = new Book("The Silent Killer", "Mark Johnson", Book.Genre.Mystery_Thriller, "A detective investigates a series of cryptic murders.", book3Cover, alice);
+        Book book4 = new Book("The Last Pharaoh", "Wilbur Smith", Book.Genre.Historical_Fiction, "The final days of an Egyptian dynasty.", book4Cover, alice);
 
         // Owner 2 (Mix of Non-Fiction, Horror, Romance, SciFi & Fantasy)
-        Book book5 = new Book("The Science of Everything", "Jane Smith", Book.Genre.Non_Fiction, "A deep dive into the wonders of modern science.", "images/covers/science_everything.png", bob);
-        Book book6 = new Book("The Cursed Woods", "Stephen King", Book.Genre.Horror, "A mysterious forest where people disappear.", "images/covers/cursed_woods.png", bob);
-        Book book7 = new Book("Unwritten Letters", "Nicholas Sparks", Book.Genre.Romance, "A series of letters change a woman’s fate.", "images/covers/unwritten_letters.png", bob);
-        Book book8 = new Book("Chronicles of Eldoria", "Brandon Sanderson", Book.Genre.SciFi_Fantasy, "A young mage embarks on a heroic quest.", "images/covers/chronicles_eldoria.png", bob);
+        Book book5 = new Book("The Science of Everything", "Jane Smith", Book.Genre.Non_Fiction, "A deep dive into the wonders of modern science.", book5Cover, bob);
+        Book book6 = new Book("The Cursed Woods", "Stephen King", Book.Genre.Horror, "A mysterious forest where people disappear.", book6Cover, bob);
+        Book book7 = new Book("Unwritten Letters", "Nicholas Sparks", Book.Genre.Romance, "A series of letters change a woman’s fate.", book7Cover, bob);
+        Book book8 = new Book("Chronicles of Eldoria", "Brandon Sanderson", Book.Genre.SciFi_Fantasy, "A young mage embarks on a heroic quest.", book8Cover, bob);
 
         // Owner 3 (Mix of Mystery & Thriller, Fiction, Historical Fiction, Horror)
-        Book book9 = new Book("Whispers in the Dark", "Angela Carter", Book.Genre.Mystery_Thriller, "A journalist uncovers a hidden conspiracy.", "images/covers/whispers_dark.png", charlie);
-        Book book10 = new Book("Echoes of Tomorrow", "Robert Martin", Book.Genre.Fiction, "A mysterious journey through time.", "images/covers/echoes_tomorrow.png", charlie);
-        Book book11 = new Book("The Emperor’s Shadow", "Ken Follett", Book.Genre.Historical_Fiction, "A Roman general’s fight for justice.", "images/covers/emperors_shadow.png", charlie);
-        Book book12 = new Book("The Night Visitor", "Dean Koontz", Book.Genre.Horror, "A chilling presence haunts a woman’s dreams.", "images/covers/night_visitor.png", charlie);
+        Book book9 = new Book("Whispers in the Dark", "Angela Carter", Book.Genre.Mystery_Thriller, "A journalist uncovers a hidden conspiracy.", book9Cover, charlie);
+        Book book10 = new Book("Echoes of Tomorrow", "Robert Martin", Book.Genre.Fiction, "A mysterious journey through time.", book10Cover, charlie);
+        Book book11 = new Book("The Emperor’s Shadow", "Ken Follett", Book.Genre.Historical_Fiction, "A Roman general’s fight for justice.", book11Cover, charlie);
+        Book book12 = new Book("The Night Visitor", "Dean Koontz", Book.Genre.Horror, "A chilling presence haunts a woman’s dreams.", book12Cover, charlie);
 
         // Owner 4 (Mix of SciFi & Fantasy, Non-Fiction, Horror, Romance)
-        Book book13 = new Book("The Cyber Revolution", "Isaac Asimov", Book.Genre.SciFi_Fantasy, "The rise of AI and its impact on humanity.", "images/covers/cyber_revolution.png", diana);
-        Book book14 = new Book("Understanding the Universe", "Neil Tyson", Book.Genre.Non_Fiction, "A simplified guide to the cosmos.", "images/covers/universe_guide.png", diana);
-        Book book15 = new Book("Shadows Beneath", "Clive Barker", Book.Genre.Horror, "Something lurks in the depths of an abandoned hospital.", "images/covers/shadows_beneath.png", diana);
-        Book book16 = new Book("A Parisian Affair", "Megan Hart", Book.Genre.Romance, "A love story set in the heart of Paris.", "images/covers/parisian_affair.png", diana);
+        Book book13 = new Book("The Cyber Revolution", "Isaac Asimov", Book.Genre.SciFi_Fantasy, "The rise of AI and its impact on humanity.", book13Cover, diana);
+        Book book14 = new Book("Understanding the Universe", "Neil Tyson", Book.Genre.Non_Fiction, "A simplified guide to the cosmos.", book14Cover, diana);
+        Book book15 = new Book("Shadows Beneath", "Clive Barker", Book.Genre.Horror, "Something lurks in the depths of an abandoned hospital.", book15Cover, diana);
+        Book book16 = new Book("A Parisian Affair", "Megan Hart", Book.Genre.Romance, "A love story set in the heart of Paris.", book16Cover, diana);
 
         // Owner 5 (Mix of Romance, Mystery & Thriller, Historical Fiction, Fiction)
-        Book book17 = new Book("Midnight Serenade", "Emily Bronte", Book.Genre.Romance, "A musician falls for a mysterious stranger.", "images/covers/midnight_serenade.png", ethan);
-        Book book18 = new Book("Vanishing Shadows", "Lisa Scott", Book.Genre.Mystery_Thriller, "A small town hides dark secrets.", "images/covers/vanishing_shadows.png", ethan);
-        Book book19 = new Book("Warrior’s Legacy", "Conn Iggulden", Book.Genre.Historical_Fiction, "A samurai’s tale of honor and revenge.", "images/covers/warriors_legacy.png", ethan);
-        Book book20 = new Book("The Last Horizon", "Alice Walker", Book.Genre.Fiction, "A gripping story of survival in an uncharted land.", "images/covers/last_horizon.png", ethan);
+        Book book17 = new Book("Midnight Serenade", "Emily Bronte", Book.Genre.Romance, "A musician falls for a mysterious stranger.", book17Cover, ethan);
+        Book book18 = new Book("Vanishing Shadows", "Lisa Scott", Book.Genre.Mystery_Thriller, "A small town hides dark secrets.", book18Cover, ethan);
+        Book book19 = new Book("Warrior’s Legacy", "Conn Iggulden", Book.Genre.Historical_Fiction, "A samurai’s tale of honor and revenge.", book19Cover, ethan);
+        Book book20 = new Book("The Last Horizon", "Alice Walker", Book.Genre.Fiction, "A gripping story of survival in an uncharted land.", book20Cover, ethan);
 
         // Owner 6 (Mix of Historical Fiction, Non-Fiction, SciFi & Fantasy, Mystery & Thriller)
-        Book book21 = new Book("The Forgotten Kingdom", "Henry Williams", Book.Genre.Historical_Fiction, "A lost kingdom and the quest to uncover its past.", "images/covers/forgotten_kingdom.png", fiona);
-        Book book22 = new Book("History’s Greatest Inventions", "David Attenborough", Book.Genre.Non_Fiction, "The key inventions that shaped the modern world.", "images/covers/history_inventions.png", fiona);
+        Book book21 = new Book("The Forgotten Kingdom", "Henry Williams", Book.Genre.Historical_Fiction, "A lost kingdom and the quest to uncover its past.", book21Cover, fiona);
+        Book book22 = new Book("History’s Greatest Inventions", "David Attenborough", Book.Genre.Non_Fiction, "The key inventions that shaped the modern world.", book22Cover, fiona);
 
         // Owner 7 (Mix of Horror, Fiction, Romance, Non-Fiction)
-        Book book23 = new Book("The Haunted Manor", "Laura Brown", Book.Genre.Horror, "A family moves into a house with a terrifying past.", "images/covers/haunted_manor.png", george);
-        Book book24 = new Book("The Great Adventure", "John Doe", Book.Genre.Fiction, "An epic tale of discovery and courage.", "images/covers/great_adventure.png", george);
-        Book book25 = new Book("Love in the Rain", "Sophia Lee", Book.Genre.Romance, "Two souls find each other in the midst of a storm.", "images/covers/love_in_the_rain.png", george);
-
+        Book book23 = new Book("The Haunted Manor", "Laura Brown", Book.Genre.Horror, "A family moves into a house with a terrifying past.", book23Cover, george);
+        Book book24 = new Book("The Great Adventure", "John Doe", Book.Genre.Fiction, "An epic tale of discovery and courage.", book24Cover, george);
+        Book book25 = new Book("Love in the Rain", "Sophia Lee", Book.Genre.Romance, "Two souls find each other in the midst of a storm.", book25Cover, george);
         // Save all books
         bookRepository.saveAll(Arrays.asList(book1, book2, book3, book4, book5, book6, book7, book8, book9, book10, book11, book12, book13, book14, book15, book16, book17, book18, book19, book20, book21, book22, book23, book24, book25));
 
