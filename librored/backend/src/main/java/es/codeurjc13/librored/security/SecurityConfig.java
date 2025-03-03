@@ -36,32 +36,43 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
-                .csrf(AbstractHttpConfigurer::disable)  // Disable CSRF
-                // Desactivamos CSRF para evitar problemas con el token
-                .csrf(csrf -> csrf.disable())
+                .csrf(AbstractHttpConfigurer::disable)  // Disable CSRF protection
                 .authorizeHttpRequests(auth -> auth
+                        // Public resources (CSS, JS, Images)
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
-                        .requestMatchers("/", "/login", "/register", "/api/books").permitAll()
-                        .requestMatchers("/api/books/books-per-genre").permitAll() // Allow public access to this endpoint
-                        .requestMatchers("/api/**").authenticated() // Secure other API endpoints
-                        .anyRequest().permitAll()
+
+                        // Public pages
+                        .requestMatchers("/", "/login", "/register", "/error/**").permitAll()
+
+                        // API access: Public endpoints
+                        .requestMatchers("/api/books", "/api/books/books-per-genre").permitAll()
+
+                        // API access: Only logged-in users
+                        .requestMatchers("/api/**").authenticated()
+
+                        // User dashboard and protected actions (only for authenticated users)
+                        .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
+
+                        // Admin-only pages
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+
+                        // Any other request requires authentication
+                        .anyRequest().authenticated()
                 )
                 .formLogin(login -> login
                         .loginPage("/login")
                         .loginProcessingUrl("/perform_login")
-                        .defaultSuccessUrl("/post-login", true) // 🔴 Redirect to /post-login after successful login
+                        .defaultSuccessUrl("/post-login", true) // Redirect after successful login
                         .failureUrl("/loginerror")
                         .permitAll()
                 )
-
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/login?logout")
-                        .invalidateHttpSession(false) // 🔴 Prevents session reset
-                        .deleteCookies("JSESSIONID") // 🔴 Keeps JSESSIONID cookie intact
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
                         .permitAll()
                 );
-
 
         return http.build();
     }

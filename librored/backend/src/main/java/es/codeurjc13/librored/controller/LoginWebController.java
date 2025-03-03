@@ -22,11 +22,6 @@ public class LoginWebController {
         return "login";
     }
 
-    @RequestMapping("/loginerror")
-    public String loginerror() {
-        return "loginerror";
-    }
-
     // Muestra el formulario de registro
     @GetMapping("/register")
     public String register(Model model) {
