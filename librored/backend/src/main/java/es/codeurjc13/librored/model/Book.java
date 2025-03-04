@@ -17,7 +17,7 @@ public class Book {
 
     @Column(columnDefinition = "TEXT")
     private String description;
-    private String cover_pic;
+    private String coverPic;
 
     @ManyToOne
     @JoinColumn(name = "owner_id", nullable = false, foreignKey = @ForeignKey(name = "FK_book_owner"))
@@ -30,12 +30,12 @@ public class Book {
 
     public Book() {}
 
-    public Book(String title, String author, Genre genre, String description, String cover_pic, User owner) {
+    public Book(String title, String author, Genre genre, String description, String coverPic, User owner) {
         this.title = title;
         this.author = author;
         this.genre = genre;
         this.description = description;
-        this.cover_pic = cover_pic;
+        this.coverPic = coverPic;
         this.owner = owner;
     }
 
@@ -79,12 +79,12 @@ public class Book {
         this.description = description;
     }
 
-    public String getCover_pic() {
-        return cover_pic;
+    public String getCoverPic() {
+        return coverPic;
     }
 
-    public void setCover_pic(String cover_pic) {
-        this.cover_pic = cover_pic;
+    public void setCoverPic(String coverPic) {
+        this.coverPic = coverPic;
     }
 
     public User getOwner() {

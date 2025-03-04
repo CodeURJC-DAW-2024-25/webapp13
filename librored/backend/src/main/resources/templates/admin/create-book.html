@@ -1,0 +1,73 @@
+{{>header}}
+
+<div class="container mt-5">
+    <h2 class="text-center">Create Book</h2>
+    <form action="/admin/books/create" method="post" enctype="multipart/form-data">
+        <div class="form-group">
+            <label>Title</label>
+            <input type="text" name="title" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+            <label>Author</label>
+            <input type="text" name="author" class="form-control" required>
+        </div>
+
+        <!-- ✅ Genre Dropdown -->
+        <div class="form-group">
+            <label>Genre</label>
+            <select name="genre" class="form-control">
+                <option value="" disabled selected>-- Select a Genre --</option>
+                {{#genres}}
+                <option value="{{.}}">{{.}}</option>
+                {{/genres}}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Description</label>
+            <textarea name="description" class="form-control" rows="3" required></textarea>
+        </div>
+
+        <!-- ✅ Cover Picture Upload -->
+        <div class="form-group">
+            <label>Cover Picture</label>
+            <input type="file" name="coverImage" id="coverImageInput" class="d-none" accept=".jpg, .jpeg, .png" required>
+            <button type="button" class="btn btn-info" onclick="document.getElementById('coverImageInput').click();">
+                Upload From Local
+            </button>
+            <br>
+            <img id="imagePreview" src="" style="max-height: 150px; display: none; margin-top: 10px;">
+        </div>
+
+        <!-- ✅ Owner Dropdown -->
+        <div class="form-group">
+            <label>Owner</label>
+            <select name="ownerId" class="form-control">
+                <option value="" disabled selected>-- Select an Owner --</option>
+                {{#users}}
+                <option value="{{id}}">{{username}}</option>
+                {{/users}}
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-success">Create Book</button>
+    </form>
+</div>
+
+<script>
+    document.getElementById("coverImageInput").addEventListener("change", function(event) {
+        var file = event.target.files[0];
+        if (file) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var imagePreview = document.getElementById("imagePreview");
+                imagePreview.src = e.target.result;
+                imagePreview.style.display = "block";
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+
+{{>footer}}

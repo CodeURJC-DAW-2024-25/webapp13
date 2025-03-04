@@ -1,6 +1,7 @@
 package es.codeurjc13.librored.service;
 
 import es.codeurjc13.librored.model.Book;
+import es.codeurjc13.librored.model.User;
 import es.codeurjc13.librored.repository.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -43,7 +44,7 @@ public class BookService {
 
             existingBook.setTitle(updatedBook.getTitle());
             existingBook.setAuthor(updatedBook.getAuthor());
-            existingBook.setCover_pic(updatedBook.getCover_pic());
+            existingBook.setCoverPic(updatedBook.getCoverPic());
             existingBook.setDescription(updatedBook.getDescription());
             existingBook.setGenre(updatedBook.getGenre());
             existingBook.setOwner(updatedBook.getOwner());
@@ -67,6 +68,19 @@ public class BookService {
         return booksPerGenre;
     }
 
+    public void createBook(String title, String author, String description, String coverPic, Book.Genre genre, User owner) {
+        Book book = new Book(title, author, genre, description, coverPic, owner);
+        bookRepository.save(book);
+    }
+
+
+    public List<Book> getBooksByOwnerId(Long ownerId) {
+        return bookRepository.findByOwnerId(ownerId);
+    }
+
+    public List<Book> getAvailableBooksByOwnerId(Long ownerId) {
+        return bookRepository.findAvailableBooksByOwnerId(ownerId);
+    }
 
 
     public void deleteBook(Long id) {

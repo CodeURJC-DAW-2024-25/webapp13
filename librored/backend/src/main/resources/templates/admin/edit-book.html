@@ -17,10 +17,12 @@
         </div>
 
         <div class="form-group">
-            <label>Cover Picture (URL)</label>
-            <p>Current: <strong>{{book.cover_pic}}</strong></p>
-            <input type="text" name="cover_pic" class="form-control" value="{{book.cover_pic}}">
+            <label>Cover Picture</label>
+            <p>Current: <strong>{{book.coverPic}}</strong></p>
+            <input type="file" id="coverUpload" name="coverPic" class="form-control">
+            <button type="button" id="uploadBtn" class="btn btn-secondary mt-2">Upload from Local</button>
         </div>
+
 
         <div class="form-group">
             <label>Description</label>
@@ -31,8 +33,13 @@
         <div class="form-group">
             <label>Genre</label>
             <p>Current: <strong>{{book.genre}}</strong></p>
-            <input type="text" name="genre" class="form-control" value="{{book.genre}}">
+            <select name="genre" class="form-control">
+                {{#genres}}
+                <option value="{{.}}" {{#selected}}selected{{/selected}}>{{.}}</option>
+                {{/genres}}
+            </select>
         </div>
+
 
         <div class="form-group">
             <label>Owner</label>
@@ -48,5 +55,20 @@
         <a href="/admin/books" class="btn btn-secondary mt-3">Cancel</a>
     </form>
 </div>
+
+<script>
+    document.getElementById('uploadBtn').addEventListener('click', function() {
+        document.getElementById('coverUpload').click();
+    });
+
+    document.getElementById('coverUpload').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            alert("Selected file: " + file.name);
+        }
+    });
+</script>
+
+
 
 {{> footer}}
