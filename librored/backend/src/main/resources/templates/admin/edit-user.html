@@ -19,8 +19,10 @@
             <label>Role</label>
             <p>Current: <strong>{{user.role}}</strong></p>
             <select name="role" class="form-control">
-                <option value="USER" {{#user.role}} {{#USER}}selected{{/USER}} {{/user.role}}>User</option>
-                <option value="ADMIN" {{#user.role}} {{#ADMIN}}selected{{/ADMIN}} {{/user.role}}>Admin</option>
+                <option value="USER" {{#user.role}} {{#USER}}selected{{
+                /USER}} {{/user.role}}>User</option>
+                <option value="ADMIN" {{#user.role}} {{#ADMIN}}selected{{
+                /ADMIN}} {{/user.role}}>Admin</option>
             </select>
         </div>
 

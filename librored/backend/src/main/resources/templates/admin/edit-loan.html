@@ -8,7 +8,8 @@
             <p>Current: <strong>{{loan.book.title}}</strong></p>
             <select name="book.id" class="form-control">
                 {{#books}}
-                <option value="{{id}}" {{#loan.book.id}}{{^loan.book.id}}{{/loan.book.id}}{{#id}}{{^id}}{{/id}}selected{{/id}}{{/loan.book.id}}>{{title}}</option>
+                <option value="{{id}}" {{#loan.book.id}}{{^loan.book.id}}{{
+                /loan.book.id}}{{#id}}{{^id}}{{/id}}selected{{/id}}{{/loan.book.id}}>{{title}}</option>
                 {{/books}}
             </select>
         </div>
@@ -18,7 +19,8 @@
             <p>Current: <strong>{{loan.lender.username}}</strong></p>
             <select name="lender.id" class="form-control">
                 {{#users}}
-                <option value="{{id}}" {{#loan.lender}}{{#id}}{{^id}}{{/id}}selected{{/id}}{{/loan.lender}}>{{username}}</option>
+                <option value="{{id}}" {{#loan.lender}}{{#id}}{{^id}}{{
+                /id}}selected{{/id}}{{/loan.lender}}>{{username}}</option>
                 {{/users}}
             </select>
         </div>
@@ -28,7 +30,8 @@
             <p>Current: <strong>{{loan.borrower.username}}</strong></p>
             <select name="borrower.id" class="form-control">
                 {{#users}}
-                <option value="{{id}}" {{#loan.borrower}}{{#id}}{{^id}}{{/id}}selected{{/id}}{{/loan.borrower}}>{{username}}</option>
+                <option value="{{id}}" {{#loan.borrower}}{{#id}}{{^id}}{{
+                /id}}selected{{/id}}{{/loan.borrower}}>{{username}}</option>
                 {{/users}}
             </select>
         </div>
@@ -49,8 +52,10 @@
             <label>Status</label>
             <p>Current: <strong>{{loan.status}}</strong></p>
             <select name="status" class="form-control">
-                <option value="Active" {{#loan.status}} {{#Active}}selected{{/Active}} {{/loan.status}}>Active</option>
-                <option value="Completed" {{#loan.status}} {{#Completed}}selected{{/Completed}} {{/loan.status}}>Completed</option>
+                <option value="Active" {{#loan.status}} {{#Active}}selected{{
+                /Active}} {{/loan.status}}>Active</option>
+                <option value="Completed" {{#loan.status}} {{#Completed}}selected{{
+                /Completed}} {{/loan.status}}>Completed</option>
             </select>
         </div>
 

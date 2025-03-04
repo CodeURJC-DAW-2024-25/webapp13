@@ -6,6 +6,12 @@ import es.codeurjc13.librored.model.User;
 import es.codeurjc13.librored.service.BookService;
 import es.codeurjc13.librored.service.LoanService;
 import es.codeurjc13.librored.service.UserService;
+import jakarta.servlet.http.HttpServletResponse;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -13,30 +19,13 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.List;
-
-
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import java.nio.file.Path;
-
-import org.apache.pdfbox.pdmodel.*;
-import org.apache.pdfbox.pdmodel.font.PDType1Font;
-import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.List;
-
-import org.apache.pdfbox.pdmodel.*;
-import org.apache.pdfbox.pdmodel.font.PDType1Font;
-import org.apache.pdfbox.pdmodel.common.PDRectangle;
-import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.List;
 
 
 @Controller
@@ -137,15 +126,9 @@ public class AdminController {
 
 
     @PostMapping("/books/create")
-    public String createBook(@RequestParam String title,
-                             @RequestParam String author,
-                             @RequestParam Book.Genre genre,
-                             @RequestParam String description,
-                             @RequestParam("coverImage") MultipartFile coverImage,
-                             @RequestParam Long ownerId) {
+    public String createBook(@RequestParam String title, @RequestParam String author, @RequestParam Book.Genre genre, @RequestParam String description, @RequestParam("coverImage") MultipartFile coverImage, @RequestParam Long ownerId) {
 
-        User owner = userService.getUserById(ownerId)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
+        User owner = userService.getUserById(ownerId).orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
 
         String coverPicPath = saveImage(coverImage);  // ✅ Save image to server
 
@@ -219,12 +202,7 @@ public class AdminController {
 
 
     @PostMapping("/loans/create")
-    public String createLoan(@RequestParam Long bookId,
-                             @RequestParam Long lenderId,
-                             @RequestParam Long borrowerId,
-                             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-                             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-                             @RequestParam Loan.Status status) {
+    public String createLoan(@RequestParam Long bookId, @RequestParam Long lenderId, @RequestParam Long borrowerId, @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate, @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate, @RequestParam Loan.Status status) {
 
         Book book = bookService.getBookById(bookId).orElseThrow(() -> new IllegalArgumentException("Invalid book ID"));
         User lender = userService.getUserById(lenderId).orElseThrow(() -> new IllegalArgumentException("Invalid lender ID"));
