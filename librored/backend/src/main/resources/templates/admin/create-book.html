@@ -32,7 +32,8 @@
         <!-- ✅ Cover Picture Upload -->
         <div class="form-group">
             <label>Cover Picture</label>
-            <input type="file" name="coverImage" id="coverImageInput" class="d-none" accept=".jpg, .jpeg, .png" required>
+            <input type="file" name="coverImage" id="coverImageInput" class="d-none" accept=".jpg, .jpeg, .png"
+                   required>
             <button type="button" class="btn btn-info" onclick="document.getElementById('coverImageInput').click();">
                 Upload From Local
             </button>
@@ -56,11 +57,11 @@
 </div>
 
 <script>
-    document.getElementById("coverImageInput").addEventListener("change", function(event) {
+    document.getElementById("coverImageInput").addEventListener("change", function (event) {
         var file = event.target.files[0];
         if (file) {
             var reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = function (e) {
                 var imagePreview = document.getElementById("imagePreview");
                 imagePreview.src = e.target.result;
                 imagePreview.style.display = "block";

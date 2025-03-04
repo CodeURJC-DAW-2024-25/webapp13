@@ -35,7 +35,8 @@
             <p>Current: <strong>{{book.genre}}</strong></p>
             <select name="genre" class="form-control">
                 {{#genres}}
-                <option value="{{.}}" {{#selected}}selected{{/selected}}>{{.}}</option>
+                <option value="{{.}}" {{#selected}}selected{{
+                /selected}}>{{.}}</option>
                 {{/genres}}
             </select>
         </div>
@@ -46,7 +47,8 @@
             <p>Current: <strong>{{book.owner.id}}</strong></p>
             <select name="owner.id" class="form-control">
                 {{#users}}
-                <option value="{{id}}" {{#book.owner.id}}{{#id}}selected{{/id}}{{/book.owner.id}}>{{username}}</option>
+                <option value="{{id}}" {{#book.owner.id}}{{#id}}selected{{
+                /id}}{{/book.owner.id}}>{{username}}</option>
                 {{/users}}
             </select>
         </div>
@@ -57,18 +59,17 @@
 </div>
 
 <script>
-    document.getElementById('uploadBtn').addEventListener('click', function() {
+    document.getElementById('uploadBtn').addEventListener('click', function () {
         document.getElementById('coverUpload').click();
     });
 
-    document.getElementById('coverUpload').addEventListener('change', function(event) {
+    document.getElementById('coverUpload').addEventListener('change', function (event) {
         const file = event.target.files[0];
         if (file) {
             alert("Selected file: " + file.name);
         }
     });
 </script>
-
 
 
 {{> footer}}

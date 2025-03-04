@@ -28,7 +28,8 @@ public class Book {
         Fiction, Non_Fiction, Mystery_Thriller, SciFi_Fantasy, Romance, Historical_Fiction, Horror
     }
 
-    public Book() {}
+    public Book() {
+    }
 
     public Book(String title, String author, Genre genre, String description, String coverPic, User owner) {
         this.title = title;
