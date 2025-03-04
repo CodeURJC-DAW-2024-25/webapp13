@@ -20,7 +20,10 @@
             <td>{{id}}</td>
             <td>{{title}}</td>
             <td>{{author}}</td>
-            <td>{{cover_pic}}</td>
+            <td>
+                <img src="/{{coverPic}}" alt="Book Cover" style="max-height: 80px;">
+            </td>
+
             <td>
                 <a href="/admin/books/edit/{{id}}" class="btn btn-warning btn-sm">Edit</a>
                 <form action="/admin/books/delete/{{id}}" method="post" class="d-inline">

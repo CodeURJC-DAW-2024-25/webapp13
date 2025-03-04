@@ -208,12 +208,12 @@
 
         function appendBooksToPage(books) {
             books.forEach(book => {
-                let coverImage = book.cover_pic && book.cover_pic.trim() !== "" ? book.cover_pic : "images/default_cover.png";
+                let coverImage = book.coverPic && book.coverPic.trim() !== "" ? book.coverPic : "images/default_cover.jpg";
 
                 $("#book-list").append(`
                     <li class="col-md-3 book-item">
                         <div class="book-card">
-                            <img src="${coverImage}" alt="${book.title}" class="book-cover" onerror="this.onerror=null;this.src='images/default_cover.png';">
+                            <img src="${coverImage}" alt="${book.title}" class="book-cover" onerror="this.onerror=null;this.src='images/default_cover.jpg';">
                             <h4 class="book-title">${book.title}</h4>
                             <p><strong>Author:</strong> ${book.author}</p>
                             <p><strong>Genre:</strong> ${book.genre.replace("_", " ")}</p>
