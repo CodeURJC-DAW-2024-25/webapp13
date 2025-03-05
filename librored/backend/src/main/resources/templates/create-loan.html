@@ -2,10 +2,10 @@
 
 <div class="container mt-5">
     <h2 class="text-center">Create Loan</h2>
-    <form action="/admin/loans/create" method="post">
+    <form action="/loans/create" method="post">
         <div class="form-group">
             <label>Lender</label>
-            <select name="lenderId" id="lenderSelect" class="form-control">
+            <select name="lenderId" id="lenderSelect" class="form-control" required>
                 <option value="">-- Select Lender --</option>
                 {{#users}}
                 <option value="{{id}}">{{username}}</option>
@@ -22,7 +22,7 @@
 
         <div class="form-group">
             <label>Borrower</label>
-            <select name="borrowerId" class="form-control">
+            <select name="borrowerId" class="form-control" required>
                 {{#users}}
                 <option value="{{id}}">{{username}}</option>
                 {{/users}}
@@ -57,7 +57,7 @@
         var bookSelect = document.getElementById("bookSelect");
 
         if (lenderId) {
-            fetch("/admin/loans/books/" + lenderId)
+            fetch("/loans/books/" + lenderId)
                 .then(response => response.json())
                 .then(data => {
                     bookSelect.innerHTML = "<option value=''>-- Select Available Book --</option>";
@@ -77,6 +77,7 @@
         }
     });
 </script>
+
 
 
 {{>footer}}
