@@ -4,6 +4,7 @@ import es.codeurjc13.librored.model.Book;
 import es.codeurjc13.librored.model.User;
 import es.codeurjc13.librored.service.BookService;
 import es.codeurjc13.librored.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
@@ -13,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.Principal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -26,6 +28,33 @@ public class BookController {
 
     @Autowired
     private UserService userService;
+
+    @ModelAttribute
+    public void addAttributes(Model model, HttpServletRequest request) {
+
+        Principal principal = request.getUserPrincipal();
+
+        if (principal != null) {
+
+            model.addAttribute("logged", true);
+            model.addAttribute("userName", principal.getName());
+            model.addAttribute("admin", request.isUserInRole("ADMIN"));
+
+        } else {
+            model.addAttribute("logged", false);
+        }
+    }
+
+
+    @GetMapping("/")
+    public String index(Model model) {
+
+        // Fetch books from the database
+        List<Book> books = bookService.findAll();
+        model.addAttribute("books", books); // Ensure books list is passed to the view
+        return "index";
+    }
+
 
     @GetMapping
     public ResponseEntity<List<Book>> getBooks(@RequestParam(defaultValue = "0") int page,

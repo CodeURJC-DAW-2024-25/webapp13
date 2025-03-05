@@ -19,6 +19,10 @@ public class BookService {
     @Autowired
     private BookRepository bookRepository;
 
+    public List<Book> findAll() {
+        return bookRepository.findAll();
+    }
+
     public List<Book> getBooks(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return bookRepository.findAll(pageable).getContent();
