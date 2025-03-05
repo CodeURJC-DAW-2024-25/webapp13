@@ -25,10 +25,6 @@ public class LoanService {
         return loanRepository.findById(id);
     }
 
-    public void saveLoan(Loan loan) {
-        loanRepository.save(loan);
-    }
-
     public void updateLoan(Long id, Loan updatedLoan) {
         Optional<Loan> existingLoan = loanRepository.findById(id);
         if (existingLoan.isPresent()) {
