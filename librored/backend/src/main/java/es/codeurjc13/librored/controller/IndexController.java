@@ -27,14 +27,4 @@ public class IndexController {
         return "index";
     }
 
-    private void addUsernameAttribute(Model model, String username) {
-        model.addAttribute("username", username);
-    }
-
-    private void addNameAttribute(Model model, String author, String title) {
-        model.addAttribute("author", author);
-        model.addAttribute("title", title);
-    }
-
-
 }
