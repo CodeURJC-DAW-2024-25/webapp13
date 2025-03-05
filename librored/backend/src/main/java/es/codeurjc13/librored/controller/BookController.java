@@ -20,6 +20,7 @@ import java.util.*;
 
 
 @Controller
+@RequestMapping("/api/books")
 public class BookController {
 
     @Autowired
