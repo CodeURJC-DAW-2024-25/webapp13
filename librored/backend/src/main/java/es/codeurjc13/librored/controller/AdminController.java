@@ -30,7 +30,6 @@ import java.util.Optional;
 
 @Controller
 @RequestMapping("/admin")
-@PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
 
     private final UserService userService;
@@ -47,6 +46,7 @@ public class AdminController {
     public String adminDashboard() {
         return "admin";
     }
+
 
     // ✅ Users CRUD
 
@@ -91,73 +91,6 @@ public class AdminController {
     }
 
 
-    // ✅ Books CRUD
-
-    @GetMapping("/books")
-    public String listBooks(Model model) {
-        model.addAttribute("books", bookService.getAllBooks());
-        return "admin/books";
-    }
-
-    @GetMapping("/books/edit/{id}")
-    public String editBookForm(@PathVariable Long id, Model model) {
-        Optional<Book> book = bookService.getBookById(id);
-        if (book.isPresent()) {
-            model.addAttribute("book", book.get());
-            model.addAttribute("users", userService.getAllUsers()); // ✅ Pass users for owner selection
-            return "admin/edit-book";
-        }
-        return "redirect:/admin/books";
-    }
-
-    @PostMapping("/books/edit/{id}")
-    public String updateBook(@PathVariable Long id, @ModelAttribute Book book) {
-        bookService.updateBook(id, book);
-        return "redirect:/admin/books";
-    }
-
-    @GetMapping("/books/create")
-    public String createBookForm(Model model) {
-        model.addAttribute("book", new Book());
-        model.addAttribute("users", userService.getAllUsers());
-        model.addAttribute("genres", Book.Genre.values());
-        return "admin/create-book";  // ✅ Must match the Mustache file name
-    }
-
-
-    @PostMapping("/books/create")
-    public String createBook(@RequestParam String title, @RequestParam String author, @RequestParam Book.Genre genre, @RequestParam String description, @RequestParam("coverImage") MultipartFile coverImage, @RequestParam Long ownerId) {
-
-        User owner = userService.getUserById(ownerId).orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
-
-        String coverPicPath = saveImage(coverImage);  // ✅ Save image to server
-
-        bookService.createBook(title, author, description, coverPicPath, genre, owner);
-
-        return "redirect:/admin/books";
-    }
-
-    // ✅ Save uploaded file to local directory
-    private String saveImage(MultipartFile file) {
-        try {
-            String uploadDir = "src/main/resources/static/uploads/";
-            Files.createDirectories(Paths.get(uploadDir));  // Ensure directory exists
-
-            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-            Path filePath = Paths.get(uploadDir, fileName);
-            Files.write(filePath, file.getBytes());
-
-            return "/uploads/" + fileName;  // ✅ Return relative path to be stored in DB
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to store file", e);
-        }
-    }
-
-    @PostMapping("/books/delete/{id}")
-    public String deleteBook(@PathVariable Long id) {
-        bookService.deleteBook(id);
-        return "redirect:/admin/books";
-    }
 
     // ✅ Loans CRUD
 
@@ -220,7 +153,7 @@ public class AdminController {
         return "redirect:/admin/loans";
     }
 
-
+    // PUEDE SER QUE ESTE SEA EL ÚNICO QUE SE SALVE
     @GetMapping("/download-report")
     public void downloadReport(HttpServletResponse response) throws IOException {
         response.setContentType("application/pdf");
