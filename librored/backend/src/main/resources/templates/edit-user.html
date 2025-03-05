@@ -2,7 +2,7 @@
 
 <div class="container mt-5">
     <h2 class="text-center">Edit User</h2>
-    <form action="/admin/users/edit/{{user.id}}" method="post">
+    <form action="/users/edit/{{user.id}}" method="post">
         <div class="form-group">
             <label>Username</label>
             <p>Current: <strong>{{user.username}}</strong></p>
@@ -33,7 +33,7 @@
         </div>
 
         <button type="submit" class="btn btn-success mt-3">Update User</button>
-        <a href="/admin/users" class="btn btn-secondary mt-3">Cancel</a>
+        <a href="/users" class="btn btn-secondary mt-3">Cancel</a>
     </form>
 </div>
 
