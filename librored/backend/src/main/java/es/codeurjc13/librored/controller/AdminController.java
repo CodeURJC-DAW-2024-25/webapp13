@@ -12,20 +12,12 @@ import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 
 @Controller
@@ -45,49 +37,6 @@ public class AdminController {
     @GetMapping
     public String adminDashboard() {
         return "admin";
-    }
-
-
-    // ✅ Users CRUD
-
-    @GetMapping("/users")
-    public String listUsers(Model model) {
-        model.addAttribute("users", userService.getAllUsers());
-        return "admin/users";
-    }
-
-    @GetMapping("/users/edit/{id}")
-    public String editUserForm(@PathVariable Long id, Model model) {
-        Optional<User> user = userService.getUserById(id);
-        if (user.isPresent()) {
-            model.addAttribute("user", user.get());
-            return "admin/edit-user";
-        }
-        return "redirect:/admin/users";
-    }
-
-    @PostMapping("/users/edit/{id}")
-    public String updateUser(@PathVariable Long id, @ModelAttribute User updatedUser) {
-        userService.updateUser(id, updatedUser);
-        return "redirect:/admin/users";
-    }
-
-    @PostMapping("/users/delete/{id}")
-    public String deleteUser(@PathVariable Long id) {
-        userService.deleteUser(id);
-        return "redirect:/admin/users";
-    }
-
-    @GetMapping("/users/create")
-    public String createUserForm(Model model) {
-        model.addAttribute("user", new User());
-        return "admin/create-user";  // New Mustache template for user creation
-    }
-
-    @PostMapping("/users/create")
-    public String createUser(@ModelAttribute User user) {
-        userService.registerUser(user);  // Ensure password encoding
-        return "redirect:/admin/users";
     }
 
 
