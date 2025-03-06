@@ -10,6 +10,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 
 @Configuration
@@ -37,7 +38,10 @@ public class SecurityConfig {
 
         http.authenticationProvider(authenticationProvider());
 
-        http.csrf(AbstractHttpConfigurer::disable)  // Disable CSRF protection
+        //http.csrf(AbstractHttpConfigurer::disable)  // Disable CSRF protection
+        http.   csrf(csrf -> csrf
+                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()) // CSRF enabled with token in cookies
+                )
                 .authorizeHttpRequests(auth -> auth
                         // Public resources (CSS, JS, Images)
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
