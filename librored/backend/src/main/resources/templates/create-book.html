@@ -3,6 +3,7 @@
 <div class="container mt-5">
     <h2 class="text-center">Create Book</h2>
     <form action="/books/create" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="_csrf" value="{{_csrf.token}}">
         <div class="form-group">
             <label>Title</label>
             <input type="text" name="title" class="form-control" required>

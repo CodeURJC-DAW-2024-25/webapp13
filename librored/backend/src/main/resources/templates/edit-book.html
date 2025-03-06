@@ -3,7 +3,7 @@
 <div class="container mt-5">
     <h2 class="text-center">Edit Book</h2>
     <form action="/books/edit/{{book.id}}" method="post" enctype="multipart/form-data">
-
+        <input type="hidden" name="_csrf" value="{{_csrf.token}}">
         <div class="form-group">
             <label>Title</label>
             <p>Current: <strong>{{book.title}}</strong></p>

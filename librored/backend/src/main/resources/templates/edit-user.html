@@ -3,6 +3,7 @@
 <div class="container mt-5">
     <h2 class="text-center">Edit User</h2>
     <form action="/users/edit/{{user.id}}" method="post">
+        <input type="hidden" name="_csrf" value="{{_csrf.token}}">
         <div class="form-group">
             <label>Username</label>
             <p>Current: <strong>{{user.username}}</strong></p>
