@@ -35,6 +35,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
+        http.authenticationProvider(authenticationProvider());
+
         http.csrf(AbstractHttpConfigurer::disable)  // Disable CSRF protection
                 .authorizeHttpRequests(auth -> auth
                         // Public resources (CSS, JS, Images)
@@ -55,9 +57,17 @@ public class SecurityConfig {
                         // Admin-only pages
                         .requestMatchers("/admin/**").hasRole("ADMIN")
 
-                        // Any other request requires authentication
-                        .anyRequest().authenticated()).formLogin(login -> login.loginPage("/login").loginProcessingUrl("/perform_login").defaultSuccessUrl("/post-login", true) // Redirect after successful login
-                        .failureUrl("/loginerror").permitAll()).logout(logout -> logout.logoutUrl("/logout").logoutSuccessUrl("/login?logout").invalidateHttpSession(true).deleteCookies("JSESSIONID").permitAll());
+                // Any other request requires authentication
+                .anyRequest().authenticated())
+                .formLogin(formLogin -> formLogin
+                        .loginPage("/login")
+                        .failureUrl("/loginerror")
+                        .defaultSuccessUrl("/")
+                        .permitAll())
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/")
+                        .permitAll());
 
         return http.build();
     }

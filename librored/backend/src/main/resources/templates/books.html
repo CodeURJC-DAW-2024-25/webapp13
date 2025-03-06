@@ -2,7 +2,7 @@
 
 <div class="container mt-5">
     <h2 class="text-center">Manage Books</h2>
-    <a href="/admin/books/create" class="btn btn-primary">Create Book</a>
+    <a href="/books/create" class="btn btn-primary">Create Book</a>
     <table class="table table-striped mt-3">
         <thead>
         <tr>
@@ -11,6 +11,7 @@
             <th>Author</th>
             <th>Cover</th>
             <th>Description</th>
+            <th>Genre</th>
             <th>Actions</th>
         </tr>
         </thead>
@@ -23,14 +24,14 @@
             <td>
                 <img src="/{{coverPic}}" alt="Book Cover" style="max-height: 80px;">
             </td>
-
+            <td>{{description}}</td>
+            <td>{{genre}}</td>
             <td>
-                <a href="/admin/books/edit/{{id}}" class="btn btn-warning btn-sm">Edit</a>
-                <form action="/admin/books/delete/{{id}}" method="post" class="d-inline">
+                <a href="/books/edit/{{id}}" class="btn btn-warning btn-sm">Edit</a>
+                <form action="/books/delete/{{id}}" method="post" class="d-inline">
                     <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                 </form>
             </td>
-            <td>{{description}}</td>
         </tr>
         {{/books}}
         </tbody>

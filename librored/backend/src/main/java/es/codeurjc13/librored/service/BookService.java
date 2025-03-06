@@ -19,6 +19,10 @@ public class BookService {
     @Autowired
     private BookRepository bookRepository;
 
+    public List<Book> findAll() {
+        return bookRepository.findAll();
+    }
+
     public List<Book> getBooks(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return bookRepository.findAll(pageable).getContent();
@@ -36,22 +40,6 @@ public class BookService {
         bookRepository.save(book);
     }
 
-    public void updateBook(Long id, Book updatedBook) {
-        Optional<Book> existingBookOpt = bookRepository.findById(id);
-
-        if (existingBookOpt.isPresent()) {
-            Book existingBook = existingBookOpt.get();
-
-            existingBook.setTitle(updatedBook.getTitle());
-            existingBook.setAuthor(updatedBook.getAuthor());
-            existingBook.setCoverPic(updatedBook.getCoverPic());
-            existingBook.setDescription(updatedBook.getDescription());
-            existingBook.setGenre(updatedBook.getGenre());
-            existingBook.setOwner(updatedBook.getOwner());
-
-            bookRepository.save(existingBook);
-        }
-    }
 
     public Map<String, Long> getBooksPerGenre() {
         List<Object[]> results = bookRepository.countBooksByGenre();
@@ -73,10 +61,6 @@ public class BookService {
         bookRepository.save(book);
     }
 
-
-    public List<Book> getBooksByOwnerId(Long ownerId) {
-        return bookRepository.findByOwnerId(ownerId);
-    }
 
     public List<Book> getAvailableBooksByOwnerId(Long ownerId) {
         return bookRepository.findAvailableBooksByOwnerId(ownerId);

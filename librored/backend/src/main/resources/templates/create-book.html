@@ -2,7 +2,7 @@
 
 <div class="container mt-5">
     <h2 class="text-center">Create Book</h2>
-    <form action="/admin/books/create" method="post" enctype="multipart/form-data">
+    <form action="/books/create" method="post" enctype="multipart/form-data">
         <div class="form-group">
             <label>Title</label>
             <input type="text" name="title" class="form-control" required>
@@ -16,7 +16,7 @@
         <!-- ✅ Genre Dropdown -->
         <div class="form-group">
             <label>Genre</label>
-            <select name="genre" class="form-control">
+            <select name="genre" class="form-control" required>
                 <option value="" disabled selected>-- Select a Genre --</option>
                 {{#genres}}
                 <option value="{{.}}">{{.}}</option>
@@ -32,8 +32,7 @@
         <!-- ✅ Cover Picture Upload -->
         <div class="form-group">
             <label>Cover Picture</label>
-            <input type="file" name="coverImage" id="coverImageInput" class="d-none" accept=".jpg, .jpeg, .png"
-                   required>
+            <input type="file" name="coverImage" id="coverImageInput" class="d-none" accept=".jpg, .jpeg, .png">
             <button type="button" class="btn btn-info" onclick="document.getElementById('coverImageInput').click();">
                 Upload From Local
             </button>
@@ -44,7 +43,7 @@
         <!-- ✅ Owner Dropdown -->
         <div class="form-group">
             <label>Owner</label>
-            <select name="ownerId" class="form-control">
+            <select name="ownerId" class="form-control" required>
                 <option value="" disabled selected>-- Select an Owner --</option>
                 {{#users}}
                 <option value="{{id}}">{{username}}</option>
@@ -69,6 +68,21 @@
             reader.readAsDataURL(file);
         }
     });
+
+    function validateForm() {
+        var title = document.getElementById("title").value.trim();
+        var author = document.getElementById("author").value.trim();
+        var genre = document.getElementById("genre").value;
+        var description = document.getElementById("description").value.trim();
+        var ownerId = document.getElementById("ownerId").value;
+
+        if (!title || !author || !genre || !description || !ownerId) {
+            alert("Please fill out all required fields.");
+            return false;
+        }
+        return true;
+    }
+
 </script>
 
 {{>footer}}
