@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import java.sql.Blob;
+
 @Entity
 public class Book {
     @Id
@@ -17,7 +19,9 @@ public class Book {
 
     @Column(columnDefinition = "TEXT")
     private String description;
-    private String coverPic;
+    //private String coverPic;
+    @Lob
+    private Blob coverPic;
 
     @ManyToOne
     @JoinColumn(name = "owner_id", nullable = false, foreignKey = @ForeignKey(name = "FK_book_owner"))
@@ -31,12 +35,12 @@ public class Book {
     public Book() {
     }
 
-    public Book(String title, String author, Genre genre, String description, String coverPic, User owner) {
+    public Book(String title, String author, Genre genre, String description, User owner) {
         this.title = title;
         this.author = author;
         this.genre = genre;
         this.description = description;
-        this.coverPic = coverPic;
+        this.coverPic = null;
         this.owner = owner;
     }
 
@@ -80,11 +84,11 @@ public class Book {
         this.description = description;
     }
 
-    public String getCoverPic() {
+    public Blob getCoverPic() {
         return coverPic;
     }
 
-    public void setCoverPic(String coverPic) {
+    public void setCoverPic(Blob coverPic) {
         this.coverPic = coverPic;
     }
 

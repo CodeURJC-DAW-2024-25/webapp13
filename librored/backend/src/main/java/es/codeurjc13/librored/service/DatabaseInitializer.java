@@ -7,9 +7,12 @@ import es.codeurjc13.librored.repository.BookRepository;
 import es.codeurjc13.librored.repository.LoanRepository;
 import es.codeurjc13.librored.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
+import org.hibernate.engine.jdbc.BlobProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -65,8 +68,10 @@ public class DatabaseInitializer {
 
             // Sample books
             // Owner 1 (Mix of Fiction, SciFi & Fantasy, Mystery & Thriller)
-            Book book1 = new Book("The Great Adventure", "John Doe", Book.Genre.Fiction, "An epic tale of discovery and courage.", "images/covers/great_adventure.png", alice);
-            Book book2 = new Book("Galactic Wars", "Emily Carter", Book.Genre.SciFi_Fantasy, "An interstellar battle for survival in a distant galaxy.", "images/covers/galactic_wars.png", alice);
+            Book book1 = new Book("The Great Adventure", "John Doe", Book.Genre.Fiction, "An epic tale of discovery and courage.", alice);
+            setBookImage(book1, "/static/images/covers/great_adventure.png");
+            bookRepository.save(book1);
+            /*Book book2 = new Book("Galactic Wars", "Emily Carter", Book.Genre.SciFi_Fantasy, "An interstellar battle for survival in a distant galaxy.", "images/covers/galactic_wars.png", alice);
             Book book3 = new Book("The Silent Killer", "Mark Johnson", Book.Genre.Mystery_Thriller, "A detective investigates a series of cryptic murders.", "images/covers/silent_killer.png", alice);
             Book book4 = new Book("The Last Pharaoh", "Wilbur Smith", Book.Genre.Historical_Fiction, "The final days of an Egyptian dynasty.", "images/covers/last_pharaoh.png", alice);
 
@@ -121,12 +126,21 @@ public class DatabaseInitializer {
             Loan loan12 = new Loan(book16, diana, george, LocalDate.of(2025, 2, 15), null, Loan.Status.Active);
 
             // Save all loans
-            loanRepository.saveAll(Arrays.asList(loan1, loan2, loan3, loan4, loan5, loan6, loan7, loan8, loan9, loan10, loan11, loan12));
+            loanRepository.saveAll(Arrays.asList(loan1, loan2, loan3, loan4, loan5, loan6, loan7, loan8, loan9, loan10, loan11, loan12));*/
+
+
 
         } // End of if
 
         // Log completion
         logger.info("DatabaseInitializer execution completed.");
 
+
+    }
+
+    public void setBookImage(Book book, String classpathResource) throws IOException {
+        //book.setImage(true);
+        Resource image = new ClassPathResource(classpathResource);
+        book.setCoverPic(BlobProxy.generateProxy(image.getInputStream(), image.contentLength()));
     }
 }

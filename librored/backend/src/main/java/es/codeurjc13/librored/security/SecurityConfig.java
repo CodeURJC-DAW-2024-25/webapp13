@@ -39,15 +39,13 @@ public class SecurityConfig {
         http.authenticationProvider(authenticationProvider());
 
         //http.csrf(AbstractHttpConfigurer::disable)  // Disable CSRF protection
-        http.   csrf(csrf -> csrf
-                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()) // CSRF enabled with token in cookies
-                )
+        http
                 .authorizeHttpRequests(auth -> auth
                         // Public resources (CSS, JS, Images)
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
 
                         // Public pages
-                        .requestMatchers("/", "/login", "/register", "/error/**").permitAll()
+                        .requestMatchers("/", "/login", "/register", "/error/**", "/perform_login").permitAll()
 
                         // API access: Public endpoints
                         .requestMatchers("/api/books", "/api/books/books-per-genre").permitAll()
@@ -64,7 +62,7 @@ public class SecurityConfig {
                 // Any other request requires authentication
                 .anyRequest().authenticated())
                 .formLogin(formLogin -> formLogin
-                        .loginPage("/login")
+                        .loginPage("/perform_login")
                         .failureUrl("/loginerror")
                         .defaultSuccessUrl("/")
                         .permitAll())

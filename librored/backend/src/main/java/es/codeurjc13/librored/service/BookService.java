@@ -56,8 +56,8 @@ public class BookService {
         return booksPerGenre;
     }
 
-    public void createBook(String title, String author, String description, String coverPic, Book.Genre genre, User owner) {
-        Book book = new Book(title, author, genre, description, coverPic, owner);
+    public void createBook(String title, String author, String description, Book.Genre genre, User owner) {
+        Book book = new Book(title, author, genre, description, owner);
         bookRepository.save(book);
     }
 
