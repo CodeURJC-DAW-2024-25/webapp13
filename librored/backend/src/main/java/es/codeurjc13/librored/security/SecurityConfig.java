@@ -28,7 +28,7 @@ public class SecurityConfig {
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService);  // ✅ Ensure it fetches users by `username`
+        authProvider.setUserDetailsService(userDetailsService);  // ✅ Now using email instead of username
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }

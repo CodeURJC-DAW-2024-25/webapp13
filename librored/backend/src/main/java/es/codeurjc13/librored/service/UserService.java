@@ -78,12 +78,18 @@ public class UserService {
         return userRepository.findByUsername(username);
     }
 
-    public User saveUser(User user) {
+    public Optional<User> getUserByEmail(String email) {
+        System.out.println("🔍 Searching for user in DB by email: " + email);
+        return userRepository.findByEmail(email);
+    }
+
+
+    public void saveUser(User user) {
         if (user == null) {
             throw new IllegalArgumentException("User cannot be null.");
         }
         System.out.println("💾 Saving user: " + user.getEmail());
-        return userRepository.save(user);  // ✅ Return the saved user
+        userRepository.save(user);  // Save without returning anything
     }
 
 }

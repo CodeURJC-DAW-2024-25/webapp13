@@ -21,18 +21,19 @@ public class RepositoryUserDetailsService implements UserDetailsService {
     private UserRepository userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        System.out.println("🔍 Loading user for authentication: " + username);
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        System.out.println("🔍 Loading user for authentication: " + email);
 
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+        User user = userRepository.findByEmail(email)  // ✅ Fetch by email instead of username
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
 
         return org.springframework.security.core.userdetails.User
-                .withUsername(user.getUsername()) // ✅ Use username, not email
+                .withUsername(user.getEmail()) // ✅ Store email in Spring Security session
                 .password(user.getEncodedPassword()) // ✅ Use encoded password
                 .roles(user.getRole().name()) // ✅ Assign correct role
                 .build();
     }
+
 
 
 }

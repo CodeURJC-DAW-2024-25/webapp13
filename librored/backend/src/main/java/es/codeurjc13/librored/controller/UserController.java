@@ -70,7 +70,7 @@ public class UserController {
 
         System.out.println("✅ Authenticated user: " + userDetails.getUsername());
 
-        Optional<User> user = userService.getUserByUsername(userDetails.getUsername());
+        Optional<User> user = userService.getUserByEmail(userDetails.getUsername());  // ✅ Fetch by email
 
         if (user.isEmpty()) {
             System.out.println("🔴 User not found in the database!");
@@ -81,5 +81,6 @@ public class UserController {
         model.addAttribute("logged", true);
         return "myaccount";
     }
+
 
 }
