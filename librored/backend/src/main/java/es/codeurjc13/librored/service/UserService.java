@@ -91,4 +91,7 @@ public class UserService {
         userRepository.save(user);  // Save without returning anything
     }
 
+    public List<User> getValidBorrowers(User lender) {
+        return userRepository.findAllValidBorrowers(lender);
+    }
 }

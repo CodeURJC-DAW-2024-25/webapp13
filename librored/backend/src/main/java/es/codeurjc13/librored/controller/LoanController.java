@@ -130,7 +130,6 @@ public class LoanController {
 
     @GetMapping("/loans/create")
     public String createLoanForm(@AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails, Model model) {
-
         if (userDetails == null) {
             return "redirect:/login";
         }
@@ -141,12 +140,12 @@ public class LoanController {
         boolean isAdmin = lender.getRoles().contains("ROLE_ADMIN");
 
         model.addAttribute("isAdmin", isAdmin);
-        model.addAttribute("userId", lender.getId()); // Pass logged-in user's ID for non-admins
-        model.addAttribute("loan", new Loan()); // Ensure loan attribute is always available
-        model.addAttribute("books", bookService.getAvailableBooksByOwnerId(lender.getId())); // Fetch only user's available books
+        model.addAttribute("userId", lender.getId()); // ✅ Pass the logged-in user's ID
+        model.addAttribute("loan", new Loan());
+        model.addAttribute("books", bookService.getAvailableBooksByOwnerId(lender.getId())); // ✅ Fetch only user's available books
 
         if (isAdmin) {
-            model.addAttribute("users", userService.getAllUsersExcept(lender)); // Load all users except the lender for admin selection
+            model.addAttribute("users", userService.getAllUsersExcept(lender)); // Load all users except lender for admin selection
         }
 
         return "create-loan";

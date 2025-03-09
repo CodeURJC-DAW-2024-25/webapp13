@@ -22,20 +22,21 @@
         <input type="hidden" name="lenderId" value="{{userId}}">
         {{/isAdmin}}
 
-
+        <!-- ✅ Book Selection -->
         <div class="form-group">
             <label>Book</label>
-            <select name="bookId" id="bookSelect" class="form-control" disabled>
-                <option value="">-- Select a Lender First --</option>
+            <select name="bookId" class="form-control" required>
+                <option value="" disabled selected>-- Select a Book --</option>
+                {{#books}}
+                <option value="{{id}}">{{title}}</option>
+                {{/books}}
             </select>
         </div>
 
         <div class="form-group">
             <label>Borrower</label>
-            <select name="borrowerId" class="form-control" required>
-                {{#users}}
-                <option value="{{id}}">{{username}}</option>
-                {{/users}}
+            <select name="borrowerId" id="borrowerSelect" class="form-control" required>
+                <option value="" disabled selected>-- Select a Borrower --</option>
             </select>
         </div>
 
@@ -91,6 +92,32 @@
     });
 </script>
 
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        fetch("/api/loans/valid-borrowers")  // Corrected API path
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                const borrowerSelect = document.getElementById("borrowerSelect");
+                borrowerSelect.innerHTML = "<option value='' disabled selected>-- Select a Borrower --</option>";
+
+                if (data.length === 0) {
+                    borrowerSelect.innerHTML += "<option value='' disabled>No available borrowers</option>";
+                    borrowerSelect.disabled = true;
+                } else {
+                    data.forEach(user => {
+                        borrowerSelect.innerHTML += `<option value="${user.id}">${user.username}</option>`;
+                    });
+                    borrowerSelect.disabled = false;
+                }
+            })
+            .catch(error => console.error("Error loading borrowers:", error));
+    });
+</script>
 
 
 {{>footer}}

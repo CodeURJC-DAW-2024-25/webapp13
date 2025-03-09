@@ -28,7 +28,10 @@
             <td>{{lender.username}}</td>
             <td>{{borrower.username}}</td>
             <td>{{startDate}}</td>
-            <td>{{endDate}}</td>
+            <td>
+                {{#endDate}}{{endDate}}{{/endDate}}
+                {{^endDate}}Not Set{{/endDate}}
+            </td>
             <td>{{status}}</td>
             <td>
                 <a href="/loans/edit/{{id}}" class="btn btn-warning btn-sm">Edit</a>

@@ -22,9 +22,10 @@ public class RepositoryUserDetailsService implements UserDetailsService {
         User user = userRepository.findByEmail(email)  // Fetch by email instead of username
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
 
-        return org.springframework.security.core.userdetails.User.withUsername(user.getEmail()) // Store email in Spring Security session
+        return org.springframework.security.core.userdetails.User
+                .withUsername(user.getEmail()) // Use email for authentication
                 .password(user.getEncodedPassword()) // Use encoded password
-                .roles(user.getRole().name()) // Assign correct role
+                .roles(user.getRole().name().replace("ROLE_", "")) // Remove "ROLE_" prefix
                 .build();
     }
 
