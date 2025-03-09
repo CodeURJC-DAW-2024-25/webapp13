@@ -22,18 +22,18 @@ public class RepositoryUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Optional<User> userOptional = userRepository.findByEmail(email);
-        if (userOptional.isEmpty()) {
-            throw new UsernameNotFoundException("User not found");
-        }
-        User user = userOptional.get();
+        System.out.println("🔍 Loading user for authentication: " + email);
 
-        List<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
+        User user = userRepository.findByEmail(email)  // ✅ Fetch by email instead of username
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
 
-        return new org.springframework.security.core.userdetails.User(
-                user.getEmail(),
-                user.getEncodedPassword(),
-                authorities
-        );
+        return org.springframework.security.core.userdetails.User
+                .withUsername(user.getEmail()) // ✅ Store email in Spring Security session
+                .password(user.getEncodedPassword()) // ✅ Use encoded password
+                .roles(user.getRole().name()) // ✅ Assign correct role
+                .build();
     }
+
+
+
 }

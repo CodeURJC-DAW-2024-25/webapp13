@@ -28,7 +28,7 @@ public class SecurityConfig {
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService);
+        authProvider.setUserDetailsService(userDetailsService);  // ✅ Now using email instead of username
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }
@@ -38,8 +38,13 @@ public class SecurityConfig {
 
         http.authenticationProvider(authenticationProvider());
 
-        //http.csrf(AbstractHttpConfigurer::disable)  // Disable CSRF protection
+        //http.csrf(AbstractHttpConfigurer::disable)  // Disable CSRF protection USE only when developing
+
         http
+
+                .csrf(csrf -> csrf
+                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()) // Ensure CSRF token is accessible
+                )
                 .authorizeHttpRequests(auth -> auth
                         // Public resources (CSS, JS, Images)
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
@@ -50,12 +55,16 @@ public class SecurityConfig {
                         // API access: Public endpoints
                         .requestMatchers("/api/books", "/api/books/books-per-genre","/api/books/**" ).permitAll()
 
-
                         // API access: Only logged-in users
-                        .requestMatchers("/api/**").authenticated()
+                        .requestMatchers("/api/users/**").hasRole("USER")  //  Only users with ROLE_USER can access
+                        .requestMatchers("/api/users/verify-password", "/api/users/update-username", "/api/users/update-password").authenticated()
+                        .requestMatchers("/api/**").authenticated()  // Require authentication for all APIs except the ones above
+
 
                         // User dashboard and protected actions (only for authenticated users)
-                        .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
+                        //.requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/myaccount").hasRole("USER")
+
 
                         // Admin-only pages
                         .requestMatchers("/admin/**").hasRole("ADMIN")
@@ -64,7 +73,7 @@ public class SecurityConfig {
                 .anyRequest().authenticated())
                 .formLogin(formLogin -> formLogin
                         .loginPage("/perform_login")
-                        .failureUrl("/loginerror")
+                        .failureUrl("/login?error=true")
                         .defaultSuccessUrl("/")
                         .permitAll())
                 .logout(logout -> logout
