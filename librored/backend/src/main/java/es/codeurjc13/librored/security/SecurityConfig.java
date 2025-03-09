@@ -45,10 +45,11 @@ public class SecurityConfig {
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
 
                         // Public pages
-                        .requestMatchers("/", "/login", "/register", "/error/**", "/perform_login").permitAll()
+                        .requestMatchers("/", "/login", "/register", "/error/**", "/perform_login", "/loginerror").permitAll()
 
                         // API access: Public endpoints
-                        .requestMatchers("/api/books", "/api/books/books-per-genre").permitAll()
+                        .requestMatchers("/api/books", "/api/books/books-per-genre","/api/books/**" ).permitAll()
+
 
                         // API access: Only logged-in users
                         .requestMatchers("/api/**").authenticated()

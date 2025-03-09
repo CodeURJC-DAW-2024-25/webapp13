@@ -1,5 +1,6 @@
 package es.codeurjc13.librored.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -20,7 +21,10 @@ public class Book {
     @Column(columnDefinition = "TEXT")
     private String description;
     //private String coverPic;
+
+
     @Lob
+    @JsonIgnore // 👈 This prevents serialization issues
     private Blob coverPic;
 
     @ManyToOne
@@ -90,6 +94,11 @@ public class Book {
 
     public void setCoverPic(Blob coverPic) {
         this.coverPic = coverPic;
+    }
+
+    // Add a method to return a URL for the image instead of the Blob
+    public String getCoverPicUrl() {
+        return "/api/books/" + this.id + "/cover";
     }
 
     public User getOwner() {

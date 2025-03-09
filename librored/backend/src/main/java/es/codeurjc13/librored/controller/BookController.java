@@ -9,6 +9,7 @@ import org.hibernate.engine.jdbc.BlobProxy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -26,7 +27,6 @@ import java.util.*;
 
 
 @Controller
-@RequestMapping("/api/books")
 public class BookController {
 
     @Autowired
@@ -61,17 +61,7 @@ public class BookController {
         return "index";
     }
 
-    // We use this for AJAX pagination
-    @GetMapping
-    public ResponseEntity<List<Book>> getBooks(@RequestParam(defaultValue = "0") int page,
-                                               @RequestParam(defaultValue = "8") int size) {
-        List<Book> books = bookService.getBooks(page, size);
-
-        return ResponseEntity.ok(books);
-    }
-
-
-    // when we need all the books
+    // Render the books.mustache template with all books
     @GetMapping("/books")
     public String listBooks(Model model) {
         List<Book> books = bookService.getAllBooks();
@@ -198,12 +188,6 @@ public class BookController {
     public String deleteBook(@PathVariable Long id) {
         bookService.deleteBook(id);
         return "redirect:/books";
-    }
-
-    // READ - graph needed endpoint
-    @GetMapping("/books-per-genre")
-    public ResponseEntity<Map<String, Long>> getBooksPerGenre() {
-        return ResponseEntity.ok(bookService.getBooksPerGenre());
     }
 
 
