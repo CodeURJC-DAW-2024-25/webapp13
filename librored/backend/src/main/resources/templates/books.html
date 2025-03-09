@@ -22,9 +22,9 @@
             <td>{{title}}</td>
             <td>{{author}}</td>
             <td>
-<!--                <img src="/{{coverPic}}" alt="Book Cover" style="max-height: 80px;">-->
-                <img src="/books/{{id}}/image" alt="Book Cover" style="max-height: 80px;">
-
+            <td>
+                <img src="{{#coverPicUrl}}{{coverPicUrl}}{{/coverPicUrl}}{{^coverPicUrl}}/images/default_cover.jpg{{/coverPicUrl}}"
+                     alt="Book Cover" style="max-height: 80px;">
             </td>
             <td>{{description}}</td>
             <td>{{genre}}</td>

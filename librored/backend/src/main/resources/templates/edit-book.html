@@ -18,7 +18,9 @@
 
         <div class="form-group">
             <label>Cover Picture</label>
-            <p>Current: <strong>{{book.coverPic}}</strong></p>
+            <p>Current:</p>
+            <img src="{{book.coverPicUrl}}" alt="Book Cover" style="max-height: 150px;">
+            <input type="hidden" name="currentCover" value="{{book.coverPic}}">
             <input type="file" id="coverUpload" name="coverPic" class="form-control">
             <button type="button" id="uploadBtn" class="btn btn-secondary mt-2">Upload from Local</button>
         </div>

@@ -6,6 +6,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import java.sql.Blob;
+import java.util.List;
 
 @Entity
 public class Book {
@@ -31,6 +32,11 @@ public class Book {
     @JoinColumn(name = "owner_id", nullable = false, foreignKey = @ForeignKey(name = "FK_book_owner"))
     @OnDelete(action = OnDeleteAction.CASCADE)
     private User owner;
+
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore // Prevent infinite recursion in JSON serialization
+    private List<Loan> loans;
+
 
     public enum Genre {
         Fiction, Non_Fiction, Mystery_Thriller, SciFi_Fantasy, Romance, Historical_Fiction, Horror
@@ -78,6 +84,7 @@ public class Book {
     }
 
     public void setGenre(Genre genre) {
+        this.genre = genre;
     }
 
     public String getDescription() {
@@ -96,9 +103,12 @@ public class Book {
         this.coverPic = coverPic;
     }
 
-    // Add a method to return a URL for the image instead of the Blob
     public String getCoverPicUrl() {
-        return "/api/books/" + this.id + "/cover";
+        if (this.coverPic != null) {
+            return "/books/" + this.id + "/image";
+        } else {
+            return "/images/default_cover.jpg"; // Return default image when cover is null
+        }
     }
 
     public User getOwner() {

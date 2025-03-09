@@ -38,7 +38,7 @@
                 Upload From Local
             </button>
             <br>
-            <img id="imagePreview" src="" style="max-height: 150px; display: none; margin-top: 10px;">
+            <img id="imagePreview" src="{{book.coverPicUrl}}" style="max-height: 150px; display: none; margin-top: 10px;">
         </div>
 
         <!-- ✅ Owner Dropdown -->
@@ -59,14 +59,16 @@
 <script>
     document.getElementById("coverImageInput").addEventListener("change", function (event) {
         var file = event.target.files[0];
+        var imagePreview = document.getElementById("imagePreview");
+
         if (file) {
             var reader = new FileReader();
             reader.onload = function (e) {
-                var imagePreview = document.getElementById("imagePreview");
                 imagePreview.src = e.target.result;
-                imagePreview.style.display = "block";
             };
             reader.readAsDataURL(file);
+        } else {
+            imagePreview.src = "/images/default_cover.jpg"; // Revert to default if no file is selected
         }
     });
 

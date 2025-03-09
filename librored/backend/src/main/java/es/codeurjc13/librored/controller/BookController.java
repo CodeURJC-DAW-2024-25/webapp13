@@ -9,19 +9,22 @@ import org.hibernate.engine.jdbc.BlobProxy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.sql.rowset.serial.SerialBlob;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.Principal;
+import java.sql.Blob;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -65,9 +68,16 @@ public class BookController {
     @GetMapping("/books")
     public String listBooks(Model model) {
         List<Book> books = bookService.getAllBooks();
-        model.addAttribute("books", bookService.getAllBooks());
+
+        // Ensure each book's `getCoverPicUrl()` is available for Mustache
+        for (Book book : books) {
+            book.getCoverPicUrl(); // This ensures it's computed
+        }
+
+        model.addAttribute("books", books);
         return "books";
     }
+
 
 
     // CREATE
@@ -81,22 +91,41 @@ public class BookController {
 
 
     @PostMapping("/books/create")
-    public String createBook(@RequestParam String title,
-                             @RequestParam String author,
-                             @RequestParam Book.Genre genre,
-                             @RequestParam String description,
-                             @RequestParam("coverImage") MultipartFile coverImage,
-                             @RequestParam Long ownerId) {
+    public String createBook(
+            @RequestParam("title") String title,
+            @RequestParam("author") String author,
+            @RequestParam("genre") String genre,
+            @RequestParam("description") String description,
+            @RequestParam("ownerId") Long ownerId,
+            @RequestParam(value = "coverImage", required = false) MultipartFile coverImage,
+            RedirectAttributes redirectAttributes) {
 
-        User owner = userService.getUserById(ownerId).orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
+        Book book = new Book();
+        book.setTitle(title);
+        book.setAuthor(author);
+        book.setGenre(Book.Genre.valueOf(genre));
+        book.setDescription(description);
+        book.setOwner(userService.getUserById(ownerId).orElseThrow(() -> new RuntimeException("Owner not found")));
 
-        //String coverPicPath = saveImage(coverImage);  // Save image to server
+        try {
+            if (coverImage != null && !coverImage.isEmpty()) {
+                // Convert uploaded image to Blob and store it
+                book.setCoverPic(new SerialBlob(coverImage.getBytes()));
+            } else {
+                // Use the default cover image from resources
+                byte[] defaultImageBytes = Files.readAllBytes(Paths.get("src/main/resources/static/images/default_cover.jpg"));
+                book.setCoverPic(new SerialBlob(defaultImageBytes));
+            }
+        } catch (IOException | SQLException e) {
+            throw new RuntimeException("Error processing cover image", e);
+        }
 
-        bookService.createBook(title, author, description, genre, owner);
-
+        bookService.saveBook(book);
+        redirectAttributes.addFlashAttribute("message", "Book created successfully!");
 
         return "redirect:/books";
     }
+
 
     // PAINT IMAGE FROM DB
     @GetMapping("/books/{id}/image")
@@ -115,29 +144,11 @@ public class BookController {
         }
     }
 
-
-    //private void setCoverPic(Book book, boolean removeImage, MultipartFile imageField) throws IOException, SQLException {
     private void setCoverPic(Book book, MultipartFile imageField) throws IOException, SQLException {
 
         if (!imageField.isEmpty()) {
             book.setCoverPic(BlobProxy.generateProxy(imageField.getInputStream(), imageField.getSize()));
-            //book.setImage(true);
         }
-//        else {
-//            if (removeImage) {
-//                book.setCoverPic(null);
-//                //book.setImage(false);
-//            }
-/*            else {
-                // Maintain the same image loading it before updating the book
-                Book dbBook = bookService.findById(book.getId()).orElseThrow();
-                if (dbBook.getCoverPic()) {
-                    book.setImageFile(BlobProxy.generateProxy(dbBook.getImageFile().getBinaryStream(),
-                            dbBook.getImageFile().length()));
-                    book.setImage(true);
-                }
-            }*/
-        //}
     }
 
 
@@ -161,6 +172,7 @@ public class BookController {
                              @RequestParam Book.Genre genre,
                              @RequestParam String description,
                              @RequestParam(required = false) MultipartFile coverPic,
+                             @RequestParam("currentCover") String currentCover, // Receive the old image URL
                              @RequestParam Long ownerId) throws SQLException, IOException {
 
         Book book = bookService.getBookById(id)
@@ -176,7 +188,6 @@ public class BookController {
         book.setOwner(owner);
 
         if (coverPic != null && !coverPic.isEmpty()) {
-            //String coverPicPath = setCoverPic(coverPic);
             setCoverPic(book, coverPic);
         }
 
@@ -189,24 +200,5 @@ public class BookController {
         bookService.deleteBook(id);
         return "redirect:/books";
     }
-
-
-    // Save the uploaded file to /static/uploads/
-    // Saves in local
-    private String saveImage(MultipartFile file) {
-        try {
-            String uploadDir = "src/main/resources/static/images/covers/";
-            Files.createDirectories(Paths.get(uploadDir));
-
-            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-            Path filePath = Paths.get(uploadDir, fileName);
-            Files.write(filePath, file.getBytes());
-
-            return "images/covers/" + fileName;
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to store file", e);
-        }
-    }
-
 
 }
