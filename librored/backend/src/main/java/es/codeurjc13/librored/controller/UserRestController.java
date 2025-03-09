@@ -37,15 +37,21 @@ public class UserRestController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("success", false, "error", "User not authenticated."));
         }
 
-        String email = userDetails.getUsername();  // ✅ Fetch user by email
-        User user = userService.getUserByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found in the database!"));
+        String email = userDetails.getUsername();  // ✅ Always fetch by email
+        Optional<User> user = userService.getUserByEmail(email);
 
-        user.setUsername(newUsername);
-        userService.saveUser(user);
+        if (user.isEmpty()) {
+            System.out.println("🔴 User not found in the database!");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("success", false, "error", "User not found."));
+        }
 
-        // Update authentication context
-        Authentication authentication = new UsernamePasswordAuthenticationToken(user, user.getEncodedPassword(), userDetails.getAuthorities());
+        System.out.println("🔍 Updating username for: " + user.get().getEmail());
+        user.get().setUsername(newUsername);
+        userService.saveUser(user.get());
+
+        // ✅ Refresh authentication to ensure future requests still work
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+                user.get(), user.get().getEncodedPassword(), userDetails.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         return ResponseEntity.ok(Map.of("success", true, "message", "Username updated successfully!"));
@@ -82,25 +88,24 @@ public class UserRestController {
         return ResponseEntity.ok(Map.of("success", true, "message", "Password updated successfully!"));
     }
 
-    
 
-    @PostMapping(value = "/verify-password", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+
+    @PostMapping("/verify-password")
     public ResponseEntity<Map<String, Object>> verifyPassword(
             @AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails,
             @RequestParam String currentPassword) {
 
         if (userDetails == null) {
             System.out.println("🔴 User is not authenticated!");
-            return ResponseEntity.ok(Map.of("success", false, "error", "User is not authenticated."));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("success", false, "error", "User is not authenticated."));
         }
 
-        System.out.println("✅ Authenticated user: " + userDetails.getUsername());
-
-        Optional<User> user = userService.getUserByUsername(userDetails.getUsername());
+        String email = userDetails.getUsername(); // ✅ Always fetch by email, NOT username
+        Optional<User> user = userService.getUserByEmail(email);
 
         if (user.isEmpty()) {
             System.out.println("🔴 User not found in the database!");
-            return ResponseEntity.ok(Map.of("success", false, "error", "User not found."));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("success", false, "error", "User not found."));
         }
 
         System.out.println("🔍 Verifying password for: " + user.get().getEmail());
@@ -108,8 +113,6 @@ public class UserRestController {
         if (!passwordEncoder.matches(currentPassword, user.get().getEncodedPassword())) {
             return ResponseEntity.ok(Map.of("success", false, "error", "Incorrect current password."));
         }
-
-        System.out.println("✅ Password verified successfully!");
 
         return ResponseEntity.ok(Map.of("success", true, "message", "Password verified! You can now enter a new password."));
     }
