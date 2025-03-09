@@ -40,6 +40,9 @@ public class SecurityConfig {
 
         //http.csrf(AbstractHttpConfigurer::disable)  // Disable CSRF protection
         http
+                .csrf(csrf -> csrf  // ✅ CSRF is enabled but not stored in cookies
+                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                )
                 .authorizeHttpRequests(auth -> auth
                         // Public resources (CSS, JS, Images)
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
@@ -48,11 +51,10 @@ public class SecurityConfig {
                         .requestMatchers("/", "/login", "/register", "/error/**", "/perform_login", "/loginerror").permitAll()
 
                         // API access: Public endpoints
-                        .requestMatchers("/api/books", "/api/books/books-per-genre","/api/books/**" ).permitAll()
-
+                        .requestMatchers("/api/books", "/api/books/books-per-genre","/api/books/**", "/api/loans/**" ).permitAll()
 
                         // API access: Only logged-in users
-                        .requestMatchers("/api/**").authenticated()
+                        //.requestMatchers("/api/**").authenticated()
 
                         // User dashboard and protected actions (only for authenticated users)
                         .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")

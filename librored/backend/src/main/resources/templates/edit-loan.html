@@ -6,13 +6,16 @@
     <!-- Loan Details (Read-Only) -->
     <div class="card p-3 mb-3">
         <h5>Loan Information</h5>
-        <p><strong>Book:</strong> {{loan.book.title}}</p>
-        <p><strong>Lender:</strong> {{loan.lender.username}}</p>
-        <p><strong>Borrower:</strong> {{loan.borrower.username}}</p>
-        <p><strong>Start Date:</strong> {{loan.startDate}}</p>
-        <p><strong>End Date:</strong> {{loan.endDate}}</p>
-        <p><strong>Status:</strong> {{loan.status}}</p>
+        <p><strong>Book:</strong> <span id="loan-book">{{loan.book.title}}</span></p>
+        <p><strong>Lender:</strong> <span id="loan-lender">{{loan.lender.username}}</span></p>
+        <p><strong>Borrower:</strong> <span id="loan-borrower">{{loan.borrower.username}}</span></p>
+        <p><strong>Start Date:</strong> <span id="loan-startDate">{{loan.startDate}}</span></p>
+        <p><strong>End Date:</strong> <span id="loan-endDate">{{loan.endDate}}</span></p>
+        <p><strong>Status:</strong> <span id="loan-status">{{loan.status}}</span></p>
     </div>
+
+    <!-- Alert Messages -->
+    <div id="message-box"></div>
 
     <!-- Step 1: Buttons to choose what to change -->
     <h5>Select Field to Edit:</h5>
@@ -24,54 +27,54 @@
     </div>
 
     <!-- Step 2: Form fields that appear dynamically -->
-    <form action="/loans/edit/{{loan.id}}" method="post">
-        <input type="hidden" name="_csrf" value="{{_csrf.token}}">
+    <form id="edit-loan-form">
+        <input type="hidden" name="loanId" value="{{loan.id}}">
+        <input type="hidden" id="csrf_token" name="_csrf" value="{{_csrf.token}}">
+        <input type="hidden" id="csrf_header" value="{{_csrf.headerName}}">
 
         <!-- Change Book -->
         <div id="bookField" class="form-group d-none">
             <label>New Book (Only Available Books from Lender)</label>
-            <select name="book.id" class="form-control">
+            <select name="bookId" class="form-control">
                 {{#books}}
                 <option value="{{id}}">{{title}}</option>
                 {{/books}}
             </select>
         </div>
 
-
         <!-- Change Borrower -->
         <div id="borrowerField" class="form-group d-none">
             <label>New Borrower</label>
-            <select name="borrower.id" class="form-control">
+            <select name="borrowerId" class="form-control">
                 {{#users}}
                 <option value="{{id}}">{{username}}</option>
                 {{/users}}
             </select>
         </div>
 
-
         <!-- Change Dates -->
         <div id="dateField" class="form-group d-none">
             <label>New Start Date</label>
-            <input type="date" name="startDate" class="form-control" value="{{loan.startDate}}">
-
+            <input type="date" name="startDate" class="form-control">
             <label>New End Date</label>
-            <input type="date" name="endDate" class="form-control" value="{{loan.endDate}}">
+            <input type="date" name="endDate" class="form-control">
         </div>
 
         <!-- Change Status -->
         <div id="statusField" class="form-group d-none">
             <label>New Status</label>
             <select name="status" class="form-control">
-                <option value="Active" {{#loan.status}} {{#Active}}selected{{/Active}} {{/loan.status}}>Active</option>
-                <option value="Completed" {{#loan.status}} {{#Completed}}selected{{/Completed}} {{/loan.status}}>Completed</option>
+                <option value="Active">Active</option>
+                <option value="Completed">Completed</option>
             </select>
         </div>
 
-        <button type="submit" class="btn btn-success mt-3">Update Loan</button>
+        <button type="button" class="btn btn-success mt-3" onclick="submitForm()">Update Loan</button>
         <a href="/loans" class="btn btn-secondary mt-3">Cancel</a>
     </form>
 </div>
 
+<!-- AJAX Script -->
 <script>
     function showField(fieldId) {
         document.querySelectorAll('.form-group').forEach(field => {
@@ -79,6 +82,57 @@
         });
         document.getElementById(fieldId).classList.remove('d-none'); // Show selected field
     }
+    function getCsrfToken() {
+        return document.querySelector('meta[name="_csrf"]').getAttribute("content");
+    }
+
+    function getCsrfHeaderName() {
+        return document.querySelector('meta[name="_csrf_header"]').getAttribute("content");
+    }
+
+    function submitForm() {
+        let formData = new URLSearchParams(new FormData(document.getElementById("edit-loan-form")));
+
+        fetch("/api/loans/" + document.getElementById("edit-loan-form").loanId.value + "/edit", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                [document.getElementById("csrf_header").value]: document.getElementById("csrf_token").value  // ✅ Include CSRF token
+            },
+            body: formData.toString()
+        })
+            .then(response => response.json())
+            .then(data => {
+                let messageBox = document.getElementById("message-box");
+
+                if (data.success) {
+                    messageBox.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
+
+                    // ✅ Update loan details dynamically
+                    if (data.updatedFields.book) {
+                        document.getElementById("loan-book").innerText = data.updatedFields.book;
+                    }
+                    if (data.updatedFields.borrower) {
+                        document.getElementById("loan-borrower").innerText = data.updatedFields.borrower;
+                    }
+                    if (data.updatedFields.startDate) {
+                        document.getElementById("loan-startDate").innerText = data.updatedFields.startDate;
+                    }
+                    if (data.updatedFields.endDate) {
+                        document.getElementById("loan-endDate").innerText = data.updatedFields.endDate;
+                    }
+                    if (data.updatedFields.status) {
+                        document.getElementById("loan-status").innerText = data.updatedFields.status;
+                    }
+                } else {
+                    messageBox.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                }
+            })
+            .catch(error => {
+                document.getElementById("message-box").innerHTML = `<div class="alert alert-danger">Error updating loan.</div>`;
+            });
+    }
+
 </script>
 
 {{> footer}}
