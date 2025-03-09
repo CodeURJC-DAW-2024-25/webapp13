@@ -1,15 +1,17 @@
-{{>header}}
+{{> header}}
 
 <div class="container mt-5">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="text-center">Manage Loans</h2>
-        <a href="/loans/create" class="btn btn-primary">Create Loan</a>
-    </div>
+    <h2 class="text-center">
+        {{#isAdmin}}Manage Loans{{/isAdmin}}
+        {{^isAdmin}}My Loans{{/isAdmin}}
+    </h2>
 
-    <table class="table table-striped mt-3">
+    <!-- Create Loan Button -->
+    <a href="/loans/create" class="btn btn-primary mb-3">Create Loan</a>
+
+    <table class="table">
         <thead>
         <tr>
-            <th>ID</th>
             <th>Book</th>
             <th>Lender</th>
             <th>Borrower</th>
@@ -22,12 +24,14 @@
         <tbody>
         {{#loans}}
         <tr>
-            <td>{{id}}</td>
             <td>{{book.title}}</td>
             <td>{{lender.username}}</td>
             <td>{{borrower.username}}</td>
             <td>{{startDate}}</td>
-            <td>{{#endDate}}{{endDate}}{{/endDate}}{{^endDate}}Not Set{{/endDate}}</td>
+            <td>
+                {{#endDate}}{{endDate}}{{/endDate}}
+                {{^endDate}}Not Set{{/endDate}}
+            </td>
             <td>{{status}}</td>
             <td>
                 <a href="/loans/edit/{{id}}" class="btn btn-warning btn-sm">Edit</a>
@@ -40,10 +44,6 @@
         {{/loans}}
         </tbody>
     </table>
-
-    <div class="d-flex justify-content-end mt-3">
-        <a href="/admin" class="btn btn-secondary">Back</a>
-    </div>
 </div>
 
-{{>footer}}
+{{> footer}}

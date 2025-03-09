@@ -58,6 +58,7 @@ public class SecurityConfig {
                         // API access: Only logged-in users
                         .requestMatchers("/api/users/**").hasRole("USER")  //  Only users with ROLE_USER can access
                         .requestMatchers("/api/users/verify-password", "/api/users/update-username", "/api/users/update-password").authenticated()
+                        .requestMatchers("/api/loans/valid-borrowers").authenticated() // ✅ Allow only authenticated users
                         .requestMatchers("/api/**").authenticated()  // Require authentication for all APIs except the ones above
 
 
@@ -65,6 +66,7 @@ public class SecurityConfig {
                         //.requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/myaccount").hasRole("USER")
                         .requestMatchers("/books").authenticated()
+                        .requestMatchers("/loans").authenticated()
 
 
                         // Admin-only pages

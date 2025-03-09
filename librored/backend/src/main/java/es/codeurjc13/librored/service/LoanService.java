@@ -92,5 +92,10 @@ public class LoanService {
     public void saveLoan(Loan loan) {
         loanRepository.save(loan);
     }
+
+    public List<Loan> getLoansByLender(User lender) {
+        return loanRepository.findByLender(lender);
+    }
+
 }
 

@@ -7,6 +7,7 @@ import es.codeurjc13.librored.service.BookService;
 import es.codeurjc13.librored.service.LoanService;
 import es.codeurjc13.librored.service.UserService;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -31,10 +32,22 @@ public class LoanController {
 
 
     @GetMapping("/loans")
-    public String listLoans(Model model) {
-        List<Loan> loans = loanService.getAllLoans();
+    public String listLoans(@AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails, Model model) {
+        if (userDetails == null) {
+            return "redirect:/login";
+        }
+
+        User user = userService.getUserByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isAdmin = user.getRoles().contains("ROLE_ADMIN");
+
+        List<Loan> loans = isAdmin ? loanService.getAllLoans() : loanService.getLoansByLender(user);
+
         model.addAttribute("loans", loans);
-        return "loans";
+        model.addAttribute("isAdmin", isAdmin);
+
+        return "loans";  // ✅ Reuses loans.html for both users and admins
     }
 
     @GetMapping("/loans/edit/{id}")
@@ -116,11 +129,28 @@ public class LoanController {
     }
 
     @GetMapping("/loans/create")
-    public String createLoanForm(Model model) {
+    public String createLoanForm(@AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails, Model model) {
+        if (userDetails == null) {
+            return "redirect:/login";
+        }
+
+        User lender = userService.getUserByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isAdmin = lender.getRoles().contains("ROLE_ADMIN");
+
+        model.addAttribute("isAdmin", isAdmin);
+        model.addAttribute("userId", lender.getId()); // ✅ Pass the logged-in user's ID
         model.addAttribute("loan", new Loan());
-        model.addAttribute("users", userService.getAllUsers());  // Load lenders & borrowers
+        model.addAttribute("books", bookService.getAvailableBooksByOwnerId(lender.getId())); // ✅ Fetch only user's available books
+
+        if (isAdmin) {
+            model.addAttribute("users", userService.getAllUsersExcept(lender)); // Load all users except lender for admin selection
+        }
+
         return "create-loan";
     }
+
 
     @PostMapping("/loans/create")
     public String createLoan(@RequestParam Long bookId,
