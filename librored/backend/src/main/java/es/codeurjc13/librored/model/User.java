@@ -3,6 +3,8 @@ package es.codeurjc13.librored.model;
 import jakarta.persistence.*;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 @Entity
 public class User {
@@ -22,7 +24,7 @@ public class User {
     private Role role;
 
     public enum Role {
-        USER, ADMIN
+        ROLE_USER, ROLE_ADMIN
     }
 
     @OneToMany(mappedBy = "lender", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -89,6 +91,23 @@ public class User {
 
     public void setRole(Role role) {
         this.role = role;
+    }
+
+    public Set<String> getRoles() {
+        return Set.of(role.name().replace("ROLE_", "")); // ✅ Ensure Spring Security does not get duplicate "ROLE_"
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        User user = (User) obj;
+        return Objects.equals(id, user.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 
 }

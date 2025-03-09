@@ -10,9 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -24,9 +23,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.Principal;
-import java.sql.Blob;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 
 
 @Controller
@@ -66,39 +65,49 @@ public class BookController {
 
     // Render the books.mustache template with all books
     @GetMapping("/books")
-    public String listBooks(Model model) {
-        List<Book> books = bookService.getAllBooks();
-
-        // Ensure each book's `getCoverPicUrl()` is available for Mustache
-        for (Book book : books) {
-            book.getCoverPicUrl(); // This ensures it's computed
+    public String listBooks(@AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails, Model model) {
+        if (userDetails == null) {
+            return "redirect:/login";
         }
 
-        model.addAttribute("books", books);
-        return "books";
-    }
+        User user = userService.getUserByEmail(userDetails.getUsername()).orElseThrow(() -> new RuntimeException("User not found"));
 
+        boolean isAdmin = user.getRoles().contains("ROLE_ADMIN");
+
+        List<Book> books = isAdmin ? bookService.getAllBooks() : bookService.getBooksByOwner(user);
+
+        model.addAttribute("books", books);
+        model.addAttribute("isAdmin", isAdmin);
+        return "books"; // Reuses books.html
+    }
 
 
     // CREATE
     @GetMapping("/books/create")
-    public String createBookForm(Model model) {
-        model.addAttribute("book", new Book());
-        model.addAttribute("users", userService.getAllUsers());
-        model.addAttribute("genres", Book.Genre.values());  // Pass genres to the template
+    public String createBookForm(@AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails, Model model) {
+        if (userDetails == null) {
+            return "redirect:/login";
+        }
+
+        User user = userService.getUserByEmail(userDetails.getUsername()).orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isAdmin = user.getRoles().contains("ROLE_ADMIN");
+
+        model.addAttribute("isAdmin", isAdmin);
+        model.addAttribute("userId", user.getId()); // Pass logged-in user's ID for non-admins
+        model.addAttribute("book", new Book()); // Ensure book attribute is always available
+        model.addAttribute("genreList", Book.Genre.values()); // ✅ Pass list of genres
+
+        if (isAdmin) {
+            model.addAttribute("users", userService.getAllUsers()); // Load users for admin dropdown
+        }
+
         return "create-book";
     }
 
 
     @PostMapping("/books/create")
-    public String createBook(
-            @RequestParam("title") String title,
-            @RequestParam("author") String author,
-            @RequestParam("genre") String genre,
-            @RequestParam("description") String description,
-            @RequestParam("ownerId") Long ownerId,
-            @RequestParam(value = "coverImage", required = false) MultipartFile coverImage,
-            RedirectAttributes redirectAttributes) {
+    public String createBook(@RequestParam("title") String title, @RequestParam("author") String author, @RequestParam("genre") String genre, @RequestParam("description") String description, @RequestParam("ownerId") Long ownerId, @RequestParam(value = "coverImage", required = false) MultipartFile coverImage, RedirectAttributes redirectAttributes) {
 
         Book book = new Book();
         book.setTitle(title);
@@ -136,8 +145,7 @@ public class BookController {
 
             Resource file = new InputStreamResource(book.get().getCoverPic().getBinaryStream());
 
-            return ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, "image/jpeg")
-                    .contentLength(book.get().getCoverPic().length()).body(file);
+            return ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, "image/jpeg").contentLength(book.get().getCoverPic().length()).body(file);
 
         } else {
             return ResponseEntity.notFound().build();
@@ -154,32 +162,43 @@ public class BookController {
 
     // EDIT
     @GetMapping("/books/edit/{id}")
-    public String editBookForm(@PathVariable Long id, Model model) {
-        Optional<Book> book = bookService.getBookById(id);
-        if (book.isPresent()) {
-            model.addAttribute("book", book.get());
-            model.addAttribute("users", userService.getAllUsers()); // Pass users for owner selection
-            model.addAttribute("genres", Book.Genre.values());  // Pass genres to the template
-            return "edit-book";
+    public String editBookForm(@PathVariable Long id, @AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails, Model model) {
+
+        if (userDetails == null) {
+            return "redirect:/login";
         }
-        return "redirect:/books";
+
+        User user = userService.getUserByEmail(userDetails.getUsername()).orElseThrow(() -> new RuntimeException("User not found"));
+
+        Book book = bookService.getBookById(id).orElseThrow(() -> new RuntimeException("Book not found"));
+
+        boolean isAdmin = user.getRoles().contains("ROLE_ADMIN");
+
+        // Allow users to edit only their own books
+        if (!isAdmin && !book.getOwner().getId().equals(user.getId())) {
+            System.out.println(" --->  NOT LETTING USER TO EDIT ITS BOOKS");
+            return "redirect:/books";  // ✅ Redirect to `/books` if they try to edit someone else's book
+        }
+
+
+        model.addAttribute("isAdmin", isAdmin);
+        model.addAttribute("book", book);
+        model.addAttribute("genreList", Book.Genre.values());
+
+        if (isAdmin) {
+            model.addAttribute("users", userService.getAllUsers()); // Load users only for admins
+        }
+
+        return "edit-book";
     }
 
     @PostMapping("/books/edit/{id}")
-    public String updateBook(@PathVariable Long id,
-                             @RequestParam String title,
-                             @RequestParam String author,
-                             @RequestParam Book.Genre genre,
-                             @RequestParam String description,
-                             @RequestParam(required = false) MultipartFile coverPic,
-                             @RequestParam("currentCover") String currentCover, // Receive the old image URL
+    public String updateBook(@PathVariable Long id, @RequestParam String title, @RequestParam String author, @RequestParam Book.Genre genre, @RequestParam String description, @RequestParam(required = false) MultipartFile coverPic, @RequestParam("currentCover") String currentCover, // Receive the old image URL
                              @RequestParam Long ownerId) throws SQLException, IOException {
 
-        Book book = bookService.getBookById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid book ID"));
+        Book book = bookService.getBookById(id).orElseThrow(() -> new IllegalArgumentException("Invalid book ID"));
 
-        User owner = userService.getUserById(ownerId)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
+        User owner = userService.getUserById(ownerId).orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
 
         book.setTitle(title);
         book.setAuthor(author);

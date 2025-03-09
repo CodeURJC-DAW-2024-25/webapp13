@@ -33,23 +33,33 @@
 
         <div class="form-group">
             <label>Genre</label>
-            <p>Current: <strong>{{book.genre}}</strong></p>
-            <select name="genre" class="form-control">
-                {{#genres}}
-                <option value="{{.}}" {{#book.genre}}{{.}}{{/book.genre}}>{{.}}</option>
-                {{/genres}}
+            <select name="genre" class="form-control" required>
+                <option value="" disabled>Select a Genre</option>
+                {{#genreList}}
+                <option value="{{this}}" {{#selectedGenre}}{{this}}{{/selectedGenre}}>{{this}}</option>
+                {{/genreList}}
             </select>
         </div>
 
+
+        <!--  Owner Selection (Only for Admins) -->
+        {{#isAdmin}}
         <div class="form-group">
             <label>Owner</label>
-            <p>Current: <strong>{{book.owner.id}}</strong></p>
             <select name="ownerId" class="form-control">
+                <option value="{{book.owner.id}}" selected>{{book.owner.username}}</option>
                 {{#users}}
-                <option value="{{id}}" {{#book.owner.id}}{{#id}}selected{{/id}}{{/book.owner.id}}>{{username}}</option>
+                <option value="{{id}}">{{username}}</option>
                 {{/users}}
             </select>
         </div>
+        {{/isAdmin}}
+
+        <!--  Hidden Owner Field (For Users) -->
+        {{^isAdmin}}
+        <input type="hidden" name="ownerId" value="{{book.owner.id}}">
+        {{/isAdmin}}
+
 
         <button type="submit" class="btn btn-success mt-3">Update Book</button>
         <a href="/admin/books" class="btn btn-secondary mt-3">Cancel</a>

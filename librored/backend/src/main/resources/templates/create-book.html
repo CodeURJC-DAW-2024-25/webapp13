@@ -19,9 +19,9 @@
             <label>Genre</label>
             <select name="genre" class="form-control" required>
                 <option value="" disabled selected>-- Select a Genre --</option>
-                {{#genres}}
-                <option value="{{.}}">{{.}}</option>
-                {{/genres}}
+                {{#genreList}}
+                <option value="{{this}}">{{this}}</option>
+                {{/genreList}}
             </select>
         </div>
 
@@ -41,7 +41,8 @@
             <img id="imagePreview" src="{{book.coverPicUrl}}" style="max-height: 150px; display: none; margin-top: 10px;">
         </div>
 
-        <!-- ✅ Owner Dropdown -->
+        <!-- ✅ Owner Selection (Only for Admins) -->
+        {{#isAdmin}}
         <div class="form-group">
             <label>Owner</label>
             <select name="ownerId" class="form-control" required>
@@ -51,6 +52,13 @@
                 {{/users}}
             </select>
         </div>
+        {{/isAdmin}}
+
+        <!-- ✅ Hidden Owner Field (For Users) -->
+        {{^isAdmin}}
+        <input type="hidden" name="ownerId" value="{{userId}}">
+        {{/isAdmin}}
+
 
         <button type="submit" class="btn btn-success">Create Book</button>
     </form>

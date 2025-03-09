@@ -2,6 +2,7 @@ package es.codeurjc13.librored.controller;
 
 import es.codeurjc13.librored.model.Book;
 import es.codeurjc13.librored.service.BookService;
+import es.codeurjc13.librored.service.UserService;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
@@ -18,9 +19,11 @@ import java.util.Map;
 public class BookRestController {
 
     private final BookService bookService;
+    private final UserService userService;
 
-    public BookRestController(BookService bookService) {
+    public BookRestController(BookService bookService, UserService userService) {
         this.bookService = bookService;
+        this.userService = userService;
     }
 
     // Paginated books API

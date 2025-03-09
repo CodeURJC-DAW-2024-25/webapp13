@@ -64,6 +64,7 @@ public class SecurityConfig {
                         // User dashboard and protected actions (only for authenticated users)
                         //.requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/myaccount").hasRole("USER")
+                        .requestMatchers("/books").authenticated()
 
 
                         // Admin-only pages
