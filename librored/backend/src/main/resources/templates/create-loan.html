@@ -47,6 +47,9 @@
                 <option value="Completed">Completed</option>
             </select>
         </div>
+        {{#error}}
+        <div class="alert alert-danger">{{error}}</div>
+        {{/error}}
 
         <button type="submit" class="btn btn-success">Create Loan</button>
     </form>

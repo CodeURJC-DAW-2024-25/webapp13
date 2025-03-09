@@ -62,4 +62,11 @@ public class UserService {
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         return passwordEncoder.encode(rawPassword);
     }
+
+    public List<User> getAllUsersExcept(User user) {
+        List<User> users = userRepository.findAll();
+        users.remove(user); // Remove the lender from the list
+        return users;
+    }
+
 }

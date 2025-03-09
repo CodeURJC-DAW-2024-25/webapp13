@@ -3,6 +3,7 @@ package es.codeurjc13.librored.service;
 import es.codeurjc13.librored.model.Book;
 import es.codeurjc13.librored.model.Loan;
 import es.codeurjc13.librored.model.User;
+import es.codeurjc13.librored.repository.BookRepository;
 import es.codeurjc13.librored.repository.LoanRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,8 @@ public class LoanService {
 
     @Autowired
     private LoanRepository loanRepository;
+    @Autowired
+    private BookRepository bookRepository;
 
     public List<Loan> getAllLoans() {
         return loanRepository.findAll();
@@ -26,27 +29,50 @@ public class LoanService {
     }
 
     public void updateLoan(Long id, Loan updatedLoan) {
-        Optional<Loan> existingLoan = loanRepository.findById(id);
-        if (existingLoan.isPresent()) {
-            Loan loan = existingLoan.get();
+        Optional<Loan> existingLoanOpt = loanRepository.findById(id);
+        if (existingLoanOpt.isPresent()) {
+            Loan loan = existingLoanOpt.get();
 
-            // Update book, lender, borrower, dates, and status
+            // ✅ Prevent lender change (Fixed Lender Rule)
+            if (!loan.getLender().equals(updatedLoan.getLender())) {
+                throw new IllegalArgumentException(
+                        "Lender cannot be changed. The loan must remain under " + loan.getLender().getUsername() + ".");
+            }
+
+            // ✅ Ensure the book belongs to the lender and is not currently loaned
             if (updatedLoan.getBook() != null) {
+                List<Book> availableBooks = bookRepository.findAvailableBooksByOwnerId(loan.getLender().getId());
+                if (!availableBooks.contains(updatedLoan.getBook())) {
+                    throw new IllegalArgumentException(
+                            "The selected book is either not owned by " + loan.getLender().getUsername() +
+                                    " or is currently loaned out. Please choose an available book.");
+                }
                 loan.setBook(updatedLoan.getBook());
             }
-            if (updatedLoan.getLender() != null) {
-                loan.setLender(updatedLoan.getLender());
-            }
+
+            // ✅ Ensure borrower is valid
             if (updatedLoan.getBorrower() != null) {
                 loan.setBorrower(updatedLoan.getBorrower());
             }
+
+            // ✅ Validate start and end dates
             if (updatedLoan.getStartDate() != null) {
                 loan.setStartDate(updatedLoan.getStartDate());
             }
             if (updatedLoan.getEndDate() != null) {
+                if (updatedLoan.getEndDate().isBefore(loan.getStartDate())) {
+                    throw new IllegalArgumentException(
+                            "End date cannot be before the start date. Please select a date after " + loan.getStartDate() + ".");
+                }
                 loan.setEndDate(updatedLoan.getEndDate());
             }
+
+            // ✅ Ensure status change is logical
             if (updatedLoan.getStatus() != null) {
+                if (loan.getStatus() == Loan.Status.Completed && updatedLoan.getStatus() == Loan.Status.Active) {
+                    throw new IllegalArgumentException(
+                            "A completed loan cannot be reactivated. Consider creating a new loan instead.");
+                }
                 loan.setStatus(updatedLoan.getStatus());
             }
 
@@ -59,9 +85,12 @@ public class LoanService {
         loanRepository.save(loan);
     }
 
-
     public void deleteLoan(Long id) {
         loanRepository.deleteById(id);
+    }
+
+    public void saveLoan(Loan loan) {
+        loanRepository.save(loan);
     }
 }
 
