@@ -4,6 +4,7 @@ import es.codeurjc13.librored.model.Book;
 import es.codeurjc13.librored.model.User;
 import es.codeurjc13.librored.repository.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -23,10 +24,17 @@ public class BookService {
         return bookRepository.findAll();
     }
 
-    public List<Book> getBooks(int page, int size) {
+    public Page<Book> getBooks(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return bookRepository.findAll(pageable).getContent();
+        return bookRepository.findAll(pageable);
     }
+
+    // for the api endpoint @GetMapping("/{id}/cover")
+    public Book findBookById(Long id) {
+        Optional<Book> bookOptional = bookRepository.findById(id);
+        return bookOptional.orElseThrow(() -> new RuntimeException("Book not found with id: " + id));
+    }
+
 
     public List<Book> getAllBooks() {
         return bookRepository.findAll();
@@ -56,8 +64,8 @@ public class BookService {
         return booksPerGenre;
     }
 
-    public void createBook(String title, String author, String description, String coverPic, Book.Genre genre, User owner) {
-        Book book = new Book(title, author, genre, description, coverPic, owner);
+    public void createBook(String title, String author, String description, Book.Genre genre, User owner) {
+        Book book = new Book(title, author, genre, description, owner);
         bookRepository.save(book);
     }
 

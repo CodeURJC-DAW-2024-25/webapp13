@@ -10,6 +10,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 
 @Configuration
@@ -37,16 +38,18 @@ public class SecurityConfig {
 
         http.authenticationProvider(authenticationProvider());
 
-        http.csrf(AbstractHttpConfigurer::disable)  // Disable CSRF protection
+        //http.csrf(AbstractHttpConfigurer::disable)  // Disable CSRF protection
+        http
                 .authorizeHttpRequests(auth -> auth
                         // Public resources (CSS, JS, Images)
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
 
                         // Public pages
-                        .requestMatchers("/", "/login", "/register", "/error/**").permitAll()
+                        .requestMatchers("/", "/login", "/register", "/error/**", "/perform_login", "/loginerror").permitAll()
 
                         // API access: Public endpoints
-                        .requestMatchers("/api/books", "/api/books/books-per-genre").permitAll()
+                        .requestMatchers("/api/books", "/api/books/books-per-genre","/api/books/**" ).permitAll()
+
 
                         // API access: Only logged-in users
                         .requestMatchers("/api/**").authenticated()
@@ -60,7 +63,7 @@ public class SecurityConfig {
                 // Any other request requires authentication
                 .anyRequest().authenticated())
                 .formLogin(formLogin -> formLogin
-                        .loginPage("/login")
+                        .loginPage("/perform_login")
                         .failureUrl("/loginerror")
                         .defaultSuccessUrl("/")
                         .permitAll())

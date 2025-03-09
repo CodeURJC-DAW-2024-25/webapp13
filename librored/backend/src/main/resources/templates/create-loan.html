@@ -3,6 +3,7 @@
 <div class="container mt-5">
     <h2 class="text-center">Create Loan</h2>
     <form action="/loans/create" method="post">
+        <input type="hidden" name="_csrf" value="{{_csrf.token}}">
         <div class="form-group">
             <label>Lender</label>
             <select name="lenderId" id="lenderSelect" class="form-control" required>
@@ -46,6 +47,9 @@
                 <option value="Completed">Completed</option>
             </select>
         </div>
+        {{#error}}
+        <div class="alert alert-danger">{{error}}</div>
+        {{/error}}
 
         <button type="submit" class="btn btn-success">Create Loan</button>
     </form>

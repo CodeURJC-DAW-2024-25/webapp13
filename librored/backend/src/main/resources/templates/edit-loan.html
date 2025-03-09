@@ -2,66 +2,83 @@
 
 <div class="container mt-5">
     <h2 class="text-center">Edit Loan</h2>
-    <form action="/admin/loans/edit/{{loan.id}}" method="post">
-        <div class="form-group">
-            <label>Book</label>
-            <p>Current: <strong>{{loan.book.title}}</strong></p>
+
+    <!-- Loan Details (Read-Only) -->
+    <div class="card p-3 mb-3">
+        <h5>Loan Information</h5>
+        <p><strong>Book:</strong> {{loan.book.title}}</p>
+        <p><strong>Lender:</strong> {{loan.lender.username}}</p>
+        <p><strong>Borrower:</strong> {{loan.borrower.username}}</p>
+        <p><strong>Start Date:</strong> {{loan.startDate}}</p>
+        <p><strong>End Date:</strong> {{loan.endDate}}</p>
+        <p><strong>Status:</strong> {{loan.status}}</p>
+    </div>
+
+    <!-- Step 1: Buttons to choose what to change -->
+    <h5>Select Field to Edit:</h5>
+    <div class="btn-group mb-3">
+        <button type="button" class="btn btn-primary" onclick="showField('bookField')">Change Book</button>
+        <button type="button" class="btn btn-primary" onclick="showField('borrowerField')">Change Borrower</button>
+        <button type="button" class="btn btn-primary" onclick="showField('dateField')">Change Dates</button>
+        <button type="button" class="btn btn-primary" onclick="showField('statusField')">Change Status</button>
+    </div>
+
+    <!-- Step 2: Form fields that appear dynamically -->
+    <form action="/loans/edit/{{loan.id}}" method="post">
+        <input type="hidden" name="_csrf" value="{{_csrf.token}}">
+
+        <!-- Change Book -->
+        <div id="bookField" class="form-group d-none">
+            <label>New Book (Only Available Books from Lender)</label>
             <select name="book.id" class="form-control">
                 {{#books}}
-                <option value="{{id}}" {{#loan.book.id}}{{^loan.book.id}}{{
-                /loan.book.id}}{{#id}}{{^id}}{{/id}}selected{{/id}}{{/loan.book.id}}>{{title}}</option>
+                <option value="{{id}}">{{title}}</option>
                 {{/books}}
             </select>
         </div>
 
-        <div class="form-group">
-            <label>Lender</label>
-            <p>Current: <strong>{{loan.lender.username}}</strong></p>
-            <select name="lender.id" class="form-control">
-                {{#users}}
-                <option value="{{id}}" {{#loan.lender}}{{#id}}{{^id}}{{
-                /id}}selected{{/id}}{{/loan.lender}}>{{username}}</option>
-                {{/users}}
-            </select>
-        </div>
 
-        <div class="form-group">
-            <label>Borrower</label>
-            <p>Current: <strong>{{loan.borrower.username}}</strong></p>
+        <!-- Change Borrower -->
+        <div id="borrowerField" class="form-group d-none">
+            <label>New Borrower</label>
             <select name="borrower.id" class="form-control">
                 {{#users}}
-                <option value="{{id}}" {{#loan.borrower}}{{#id}}{{^id}}{{
-                /id}}selected{{/id}}{{/loan.borrower}}>{{username}}</option>
+                <option value="{{id}}">{{username}}</option>
                 {{/users}}
             </select>
         </div>
 
-        <div class="form-group">
-            <label>Start Date</label>
-            <p>Current: <strong>{{loan.startDate}}</strong></p>
-            <input type="date" name="startDate" class="form-control">
+
+        <!-- Change Dates -->
+        <div id="dateField" class="form-group d-none">
+            <label>New Start Date</label>
+            <input type="date" name="startDate" class="form-control" value="{{loan.startDate}}">
+
+            <label>New End Date</label>
+            <input type="date" name="endDate" class="form-control" value="{{loan.endDate}}">
         </div>
 
-        <div class="form-group">
-            <label>End Date</label>
-            <p>Current: <strong>{{loan.endDate}}</strong></p>
-            <input type="date" name="endDate" class="form-control">
-        </div>
-
-        <div class="form-group">
-            <label>Status</label>
-            <p>Current: <strong>{{loan.status}}</strong></p>
+        <!-- Change Status -->
+        <div id="statusField" class="form-group d-none">
+            <label>New Status</label>
             <select name="status" class="form-control">
-                <option value="Active" {{#loan.status}} {{#Active}}selected{{
-                /Active}} {{/loan.status}}>Active</option>
-                <option value="Completed" {{#loan.status}} {{#Completed}}selected{{
-                /Completed}} {{/loan.status}}>Completed</option>
+                <option value="Active" {{#loan.status}} {{#Active}}selected{{/Active}} {{/loan.status}}>Active</option>
+                <option value="Completed" {{#loan.status}} {{#Completed}}selected{{/Completed}} {{/loan.status}}>Completed</option>
             </select>
         </div>
 
         <button type="submit" class="btn btn-success mt-3">Update Loan</button>
-        <a href="/admin/loans" class="btn btn-secondary mt-3">Cancel</a>
+        <a href="/loans" class="btn btn-secondary mt-3">Cancel</a>
     </form>
 </div>
+
+<script>
+    function showField(fieldId) {
+        document.querySelectorAll('.form-group').forEach(field => {
+            field.classList.add('d-none'); // Hide all fields
+        });
+        document.getElementById(fieldId).classList.remove('d-none'); // Show selected field
+    }
+</script>
 
 {{> footer}}

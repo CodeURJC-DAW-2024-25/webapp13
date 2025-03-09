@@ -3,7 +3,7 @@
 <div class="container mt-5">
     <h2 class="text-center">Edit Book</h2>
     <form action="/books/edit/{{book.id}}" method="post" enctype="multipart/form-data">
-
+        <input type="hidden" name="_csrf" value="{{_csrf.token}}">
         <div class="form-group">
             <label>Title</label>
             <p>Current: <strong>{{book.title}}</strong></p>
@@ -18,7 +18,9 @@
 
         <div class="form-group">
             <label>Cover Picture</label>
-            <p>Current: <strong>{{book.coverPic}}</strong></p>
+            <p>Current:</p>
+            <img src="{{book.coverPicUrl}}" alt="Book Cover" style="max-height: 150px;">
+            <input type="hidden" name="currentCover" value="{{book.coverPic}}">
             <input type="file" id="coverUpload" name="coverPic" class="form-control">
             <button type="button" id="uploadBtn" class="btn btn-secondary mt-2">Upload from Local</button>
         </div>

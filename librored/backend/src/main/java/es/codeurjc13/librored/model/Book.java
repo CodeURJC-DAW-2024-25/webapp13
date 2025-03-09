@@ -1,8 +1,12 @@
 package es.codeurjc13.librored.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+
+import java.sql.Blob;
+import java.util.List;
 
 @Entity
 public class Book {
@@ -17,12 +21,22 @@ public class Book {
 
     @Column(columnDefinition = "TEXT")
     private String description;
-    private String coverPic;
+    //private String coverPic;
+
+
+    @Lob
+    @JsonIgnore // 👈 This prevents serialization issues
+    private Blob coverPic;
 
     @ManyToOne
     @JoinColumn(name = "owner_id", nullable = false, foreignKey = @ForeignKey(name = "FK_book_owner"))
     @OnDelete(action = OnDeleteAction.CASCADE)
     private User owner;
+
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore // Prevent infinite recursion in JSON serialization
+    private List<Loan> loans;
+
 
     public enum Genre {
         Fiction, Non_Fiction, Mystery_Thriller, SciFi_Fantasy, Romance, Historical_Fiction, Horror
@@ -31,12 +45,12 @@ public class Book {
     public Book() {
     }
 
-    public Book(String title, String author, Genre genre, String description, String coverPic, User owner) {
+    public Book(String title, String author, Genre genre, String description, User owner) {
         this.title = title;
         this.author = author;
         this.genre = genre;
         this.description = description;
-        this.coverPic = coverPic;
+        this.coverPic = null;
         this.owner = owner;
     }
 
@@ -70,6 +84,7 @@ public class Book {
     }
 
     public void setGenre(Genre genre) {
+        this.genre = genre;
     }
 
     public String getDescription() {
@@ -80,12 +95,20 @@ public class Book {
         this.description = description;
     }
 
-    public String getCoverPic() {
+    public Blob getCoverPic() {
         return coverPic;
     }
 
-    public void setCoverPic(String coverPic) {
+    public void setCoverPic(Blob coverPic) {
         this.coverPic = coverPic;
+    }
+
+    public String getCoverPicUrl() {
+        if (this.coverPic != null) {
+            return "/books/" + this.id + "/image";
+        } else {
+            return "/images/default_cover.jpg"; // Return default image when cover is null
+        }
     }
 
     public User getOwner() {
