@@ -35,7 +35,6 @@ public class BookService {
         return bookOptional.orElseThrow(() -> new RuntimeException("Book not found with id: " + id));
     }
 
-
     public List<Book> getAllBooks() {
         return bookRepository.findAll();
     }
@@ -47,7 +46,6 @@ public class BookService {
     public void saveBook(Book book) {
         bookRepository.save(book);
     }
-
 
     public Map<String, Long> getBooksPerGenre() {
         List<Object[]> results = bookRepository.countBooksByGenre();
@@ -64,19 +62,16 @@ public class BookService {
         return booksPerGenre;
     }
 
-    public void createBook(String title, String author, String description, Book.Genre genre, User owner) {
-        Book book = new Book(title, author, genre, description, owner);
-        bookRepository.save(book);
-    }
-
-
     public List<Book> getAvailableBooksByOwnerId(Long ownerId) {
         return bookRepository.findAvailableBooksByOwnerId(ownerId);
     }
 
-
     public void deleteBook(Long id) {
         bookRepository.deleteById(id);
+    }
+
+    public List<Book> getBooksByOwner(User owner) {
+        return bookRepository.findByOwner(owner);
     }
 
 }

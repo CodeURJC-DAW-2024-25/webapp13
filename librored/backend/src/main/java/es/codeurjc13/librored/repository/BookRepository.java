@@ -1,6 +1,7 @@
 package es.codeurjc13.librored.repository;
 
 import es.codeurjc13.librored.model.Book;
+import es.codeurjc13.librored.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,5 +15,7 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
     @Query("SELECT b FROM Book b WHERE b.owner.id = :ownerId AND " + "b.id NOT IN (SELECT l.book.id FROM Loan l WHERE l.status = 'Active')")
     List<Book> findAvailableBooksByOwnerId(@Param("ownerId") Long ownerId);
+
+    List<Book> findByOwner(User owner);
 
 }
