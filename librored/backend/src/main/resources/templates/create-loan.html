@@ -4,15 +4,24 @@
     <h2 class="text-center">Create Loan</h2>
     <form action="/loans/create" method="post">
         <input type="hidden" name="_csrf" value="{{_csrf.token}}">
+        <!-- ✅ Lender Selection (Only for Admins) -->
+        {{#isAdmin}}
         <div class="form-group">
             <label>Lender</label>
-            <select name="lenderId" id="lenderSelect" class="form-control" required>
-                <option value="">-- Select Lender --</option>
+            <select name="lenderId" class="form-control">
+                <option value="" disabled selected>-- Select a Lender --</option>
                 {{#users}}
                 <option value="{{id}}">{{username}}</option>
                 {{/users}}
             </select>
         </div>
+        {{/isAdmin}}
+
+        <!-- ✅ Hidden Lender Field (For Users) -->
+        {{^isAdmin}}
+        <input type="hidden" name="lenderId" value="{{userId}}">
+        {{/isAdmin}}
+
 
         <div class="form-group">
             <label>Book</label>
