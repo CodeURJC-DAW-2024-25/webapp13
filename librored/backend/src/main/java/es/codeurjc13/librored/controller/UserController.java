@@ -2,6 +2,7 @@ package es.codeurjc13.librored.controller;
 
 import es.codeurjc13.librored.model.User;
 import es.codeurjc13.librored.service.UserService;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -59,4 +60,26 @@ public class UserController {
         userService.registerUser(user);  // Ensure password encoding
         return "redirect:/users";
     }
+
+    @GetMapping("/myaccount")
+    public String myAccount(@AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails, Model model) {
+        if (userDetails == null) {
+            System.out.println("🔴 User is not authenticated!");
+            return "redirect:/login"; // Redirect if user is not logged in
+        }
+
+        System.out.println("✅ Authenticated user: " + userDetails.getUsername());
+
+        Optional<User> user = userService.getUserByUsername(userDetails.getUsername());
+
+        if (user.isEmpty()) {
+            System.out.println("🔴 User not found in the database!");
+            return "redirect:/login";
+        }
+
+        model.addAttribute("user", user.get());
+        model.addAttribute("logged", true);
+        return "myaccount";
+    }
+
 }

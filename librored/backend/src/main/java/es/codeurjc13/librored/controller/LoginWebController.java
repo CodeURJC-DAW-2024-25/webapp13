@@ -8,7 +8,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-
+import org.springframework.web.bind.annotation.RequestParam;
 
 
 @Controller
@@ -18,8 +18,11 @@ public class LoginWebController {
     private UserService userService;
 
     @GetMapping("/login")
-    public String login() {
-        return "login";
+    public String login(@RequestParam(value = "error", required = false) String error, Model model) {
+        if (error != null) {
+            model.addAttribute("loginError", "Invalid username or password.");
+        }
+        return "login"; // ✅ Ensure this maps to an actual login page
     }
 
     // Muestra el formulario de registro

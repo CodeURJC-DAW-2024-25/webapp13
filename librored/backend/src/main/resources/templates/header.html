@@ -63,25 +63,20 @@
                         {{/logged}}
 
 
-                        {{#logged}} <!-- If logged in (Users & Admins) -->
-                        {{^admin}}
-                        <li>
-                            <a href="javascript:void(0);"><i class="fa fa-user"></i> My Account <i
-                                    class="fa fa-angle-down"></i></a>
-                            <ul class="dropdown_style">
-                                <li><a href="/user/userbook">My Books</a></li>
-                                <li><a href="/user/userloan">My Loans</a></li>
-                            </ul>
-                        </li>
-                        {{/admin}}
-                        <li class="nav-item">
-                            <form action="/logout" method="post" class="d-inline">
-                                <input type="hidden" name="_csrf" value="{{_csrf.token}}">
-                                <button class="btn btn-primary btn-nowrap" type="submit"
-                                        onclick="document.forms[0].submit();">Log Out
-                                </button>
-                            </form>
-                        </li>
+                        {{#logged}} <!-- If logged in (Users) -->
+                            {{^admin}}
+                            <li>
+                                <a href="/myaccount">My Account</a>
+                            </li>
+                            {{/admin}}
+                            <li class="nav-item">
+                                <form action="/logout" method="post" class="d-inline">
+                                    <input type="hidden" name="_csrf" value="{{_csrf.token}}">
+                                    <button class="btn btn-primary btn-nowrap" type="submit"
+                                            onclick="document.forms[0].submit();">Log Out
+                                    </button>
+                                </form>
+                            </li>
                         {{/logged}}
 
                         {{#admin}} <!-- If the user is an admin -->

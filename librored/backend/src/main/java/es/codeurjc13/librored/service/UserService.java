@@ -57,16 +57,33 @@ public class UserService {
         userRepository.deleteById(id);  // Use the built-in delete method
     }
 
-
-    public String encodePassword(String rawPassword) {
-        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        return passwordEncoder.encode(rawPassword);
-    }
-
     public List<User> getAllUsersExcept(User user) {
         List<User> users = userRepository.findAll();
         users.remove(user); // Remove the lender from the list
         return users;
+    }
+
+    public void updateUsername(User user, String newUsername) {
+        user.setUsername(newUsername);
+        userRepository.save(user);
+    }
+
+    public void updatePassword(User user, String newEncodedPassword) {
+        user.setPassword(newEncodedPassword);
+        userRepository.save(user);
+    }
+
+    public Optional<User> getUserByUsername(String username) {
+        System.out.println("🔍 Searching for user in DB: " + username);
+        return userRepository.findByUsername(username);
+    }
+
+    public User saveUser(User user) {
+        if (user == null) {
+            throw new IllegalArgumentException("User cannot be null.");
+        }
+        System.out.println("💾 Saving user: " + user.getEmail());
+        return userRepository.save(user);  // ✅ Return the saved user
     }
 
 }
