@@ -37,8 +37,8 @@ public class UserRestController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("success", false, "error", "User not authenticated."));
         }
 
-        String username = userDetails.getUsername(); // ✅ Use username
-        User user = userService.getUserByUsername(username)
+        String email = userDetails.getUsername();  // ✅ Fetch user by email
+        User user = userService.getUserByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found in the database!"));
 
         user.setUsername(newUsername);
@@ -52,6 +52,7 @@ public class UserRestController {
     }
 
 
+
     @PostMapping("/update-password")
     public ResponseEntity<Map<String, Object>> updatePassword(
             @AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails,
@@ -62,8 +63,8 @@ public class UserRestController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("success", false, "error", "User not authenticated."));
         }
 
-        String username = userDetails.getUsername(); // ✅ Use username, not email
-        User user = userService.getUserByUsername(username)
+        String email = userDetails.getUsername(); // ✅ Fetch by email, not username
+        User user = userService.getUserByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found in the database!"));
 
         if (!passwordEncoder.matches(currentPassword, user.getEncodedPassword())) {
@@ -81,9 +82,7 @@ public class UserRestController {
         return ResponseEntity.ok(Map.of("success", true, "message", "Password updated successfully!"));
     }
 
-
-
-
+    
 
     @PostMapping(value = "/verify-password", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public ResponseEntity<Map<String, Object>> verifyPassword(

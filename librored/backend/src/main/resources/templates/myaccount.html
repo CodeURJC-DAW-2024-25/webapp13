@@ -21,7 +21,7 @@
             <input type="hidden" id="csrf_header" value="{{_csrf.headerName}}">
             <label>New Username:</label>
             <input type="text" id="new-username" class="form-control" required>
-            <button type="button" class="btn btn-primary mt-2" onclick="updateUsername()">Update Username</button>
+            <button type="button" id="update-username-btn" class="btn btn-primary mt-2">Update Username</button>
         </form>
     </div>
 
@@ -35,7 +35,7 @@
             <!-- Step 1: Verify Current Password -->
             <label>Current Password:</label>
             <input type="password" id="current-password" class="form-control" required>
-            <button type="button" class="btn btn-warning mt-2" onclick="verifyCurrentPassword()">Verify Password</button>
+            <<button type="button" id="verify-password-btn" class="btn btn-warning mt-2">Verify Password</button>
 
             <!-- Step 2: Enter New Password (Initially Hidden) -->
             <div id="new-password-section" style="display: none;">
@@ -43,7 +43,7 @@
                 <input type="password" id="new-password" class="form-control" required>
                 <label>Confirm New Password:</label>
                 <input type="password" id="confirm-password" class="form-control" required>
-                <button type="button" class="btn btn-primary mt-2" onclick="updatePassword()">Update Password</button>
+                <button type="button" id="update-password-btn" class="btn btn-primary mt-2">Update Password</button>
             </div>
         </form>
     </div>
@@ -51,6 +51,12 @@
 
 <!-- AJAX Script -->
 <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.getElementById("verify-password-btn").addEventListener("click", verifyCurrentPassword);
+        document.getElementById("update-username-btn").addEventListener("click", updateUsername);
+        document.getElementById("update-password-btn").addEventListener("click", updatePassword);
+    });
+
     function getCsrfToken() {
         return document.getElementById("csrf_token").value;
     }
@@ -61,16 +67,23 @@
 
     function updateUsername() {
         let newUsername = document.getElementById("new-username").value;
+        let csrfHeader = document.getElementById("csrf_header").value;
+        let csrfToken = document.getElementById("csrf_token").value;
 
         fetch("/api/users/update-username", {
             method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
-                [document.getElementById("csrf_header").value]: document.getElementById("csrf_token").value
+                [csrfHeader]: csrfToken
             },
             body: `newUsername=${encodeURIComponent(newUsername)}`
         })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Server responded with ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
                 let messageBox = document.getElementById("message-box");
                 if (data.success) {
@@ -81,6 +94,7 @@
                 }
             })
             .catch(error => {
+                console.error("🔴 Error in updateUsername:", error);
                 document.getElementById("message-box").innerHTML = `<div class="alert alert-danger">Error updating username.</div>`;
             });
     }
@@ -88,18 +102,21 @@
 
     function verifyCurrentPassword() {
         let currentPassword = document.getElementById("current-password").value;
-        let csrfHeader = document.getElementById("csrf_header").value;
-        let csrfToken = document.getElementById("csrf_token").value;
 
         fetch("/api/users/verify-password", {
             method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
-                [csrfHeader]: csrfToken
+                [getCsrfHeaderName()]: getCsrfToken()
             },
             body: `currentPassword=${encodeURIComponent(currentPassword)}`
         })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Server responded with ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
                 let messageBox = document.getElementById("message-box");
                 if (data.success) {
@@ -124,29 +141,6 @@
             method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
-                [document.getElementById("csrf_header").value]: document.getElementById("csrf_token").value
-            },
-            body: `currentPassword=${encodeURIComponent(currentPassword)}&newPassword=${encodeURIComponent(newPassword)}`
-        })
-            .then(response => response.json())
-            .then(data => {
-                let messageBox = document.getElementById("message-box");
-                if (data.success) {
-                    messageBox.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
-                } else {
-                    messageBox.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
-                }
-            })
-            .catch(error => {
-                document.getElementById("message-box").innerHTML = `<div class="alert alert-danger">Error updating password.</div>`;
-            });
-    }
-
-
-        fetch("/api/users/update-password", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
                 [getCsrfHeaderName()]: getCsrfToken()
             },
             body: `currentPassword=${encodeURIComponent(currentPassword)}&newPassword=${encodeURIComponent(newPassword)}`
@@ -161,6 +155,7 @@
                 }
             })
             .catch(error => {
+                console.error("🔴 Error in updatePassword:", error);
                 document.getElementById("message-box").innerHTML = `<div class="alert alert-danger">Error updating password.</div>`;
             });
     }
