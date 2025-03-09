@@ -7,16 +7,22 @@
         <div class="row">
             <div class="col-lg-6 offset-lg-3 col-md-8 offset-md-2 col-12">
                 <div class="account-form form-style">
+                    {{#successMessage}}
+                    <div class="alert alert-success">{{successMessage}}</div>
+                    {{/successMessage}}
+
+                    {{#loginError}}
+                    <div class="alert alert-danger">{{loginError}}</div>
+                    {{/loginError}}
 
                     <form action="/perform_login" method="post">
                         <input type="hidden" name="_csrf" value="{{_csrf.token}}">
                         <label for="email">Email:</label>
-                        <input type="text" name="username" id="email" required>  <!-- Use `name="username"` for Spring Security -->
+                        <input type="text" name="username" id="email" required> <!-- Use `name="username"` for Spring Security -->
                         <label for="password">Password:</label>
                         <input type="password" name="password" id="password" required>
                         <button type="submit">Login</button>
                     </form>
-
 
                     <div class="text-center">
                         <a href="register">Or Creat an Account</a>

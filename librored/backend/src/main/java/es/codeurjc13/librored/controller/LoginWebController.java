@@ -18,12 +18,22 @@ public class LoginWebController {
     private UserService userService;
 
     @GetMapping("/login")
-    public String login(@RequestParam(value = "error", required = false) String error, Model model) {
+    public String login(
+            @RequestParam(value = "error", required = false) String error,
+            @RequestParam(value = "successMessage", required = false) String successMessage,
+            Model model) {
+
         if (error != null) {
             model.addAttribute("loginError", "Invalid username or password.");
         }
-        return "login"; // ✅ Ensure this maps to an actual login page
+
+        if (successMessage != null) {
+            model.addAttribute("successMessage", successMessage);
+        }
+
+        return "login"; // ✅ Ensure login.html displays the message
     }
+
 
     // Muestra el formulario de registro
     @GetMapping("/register")

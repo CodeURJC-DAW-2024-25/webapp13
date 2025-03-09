@@ -69,24 +69,32 @@ public class UserRestController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("success", false, "error", "User not authenticated."));
         }
 
-        String email = userDetails.getUsername(); // ✅ Fetch by email, not username
-        User user = userService.getUserByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found in the database!"));
+        String email = userDetails.getUsername(); // ✅ Always fetch by email
+        Optional<User> user = userService.getUserByEmail(email);
 
-        if (!passwordEncoder.matches(currentPassword, user.getEncodedPassword())) {
+        if (user.isEmpty()) {
+            System.out.println("🔴 User not found in the database!");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("success", false, "error", "User not found."));
+        }
+
+        if (!passwordEncoder.matches(currentPassword, user.get().getEncodedPassword())) {
             return ResponseEntity.ok(Map.of("success", false, "error", "Incorrect current password."));
         }
 
         // Encode and update the new password
-        user.setEncodedPassword(passwordEncoder.encode(newPassword));
-        userService.saveUser(user);
+        user.get().setEncodedPassword(passwordEncoder.encode(newPassword));
+        userService.saveUser(user.get());
 
-        // Update authentication context
-        Authentication authentication = new UsernamePasswordAuthenticationToken(user, newPassword, userDetails.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+        // Invalidate session after password change
+        SecurityContextHolder.clearContext();
 
-        return ResponseEntity.ok(Map.of("success", true, "message", "Password updated successfully!"));
+        // Redirect to login page with success message
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Password updated successfully! Redirecting to login..."
+        ));
     }
+
 
 
 

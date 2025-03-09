@@ -35,7 +35,7 @@
             <!-- Step 1: Verify Current Password -->
             <label>Current Password:</label>
             <input type="password" id="current-password" class="form-control" required>
-            <<button type="button" id="verify-password-btn" class="btn btn-warning mt-2">Verify Password</button>
+            <button type="button" id="verify-password-btn" class="btn btn-warning mt-2">Verify Password</button>
 
             <!-- Step 2: Enter New Password (Initially Hidden) -->
             <div id="new-password-section" style="display: none;">
@@ -136,22 +136,24 @@
     function updatePassword() {
         let currentPassword = document.getElementById("current-password").value;
         let newPassword = document.getElementById("new-password").value;
+        let csrfHeader = document.getElementById("csrf_header").value;
+        let csrfToken = document.getElementById("csrf_token").value;
 
         fetch("/api/users/update-password", {
             method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
-                [getCsrfHeaderName()]: getCsrfToken()
+                [csrfHeader]: csrfToken
             },
             body: `currentPassword=${encodeURIComponent(currentPassword)}&newPassword=${encodeURIComponent(newPassword)}`
         })
             .then(response => response.json())
             .then(data => {
-                let messageBox = document.getElementById("message-box");
                 if (data.success) {
-                    messageBox.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
+                    // Redirect to login page with success message
+                    window.location.href = `/login?successMessage=${encodeURIComponent(data.message)}`;
                 } else {
-                    messageBox.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                    document.getElementById("message-box").innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
                 }
             })
             .catch(error => {
@@ -159,6 +161,7 @@
                 document.getElementById("message-box").innerHTML = `<div class="alert alert-danger">Error updating password.</div>`;
             });
     }
+
 </script>
 
 {{> footer}}
