@@ -83,7 +83,9 @@ Generates a PDF containing details of **Users, Books, and Loans**.
 
 ## DB Entity Diagram
 
+Here is the entity diagram image of librored DB
 
+![DB Diagram](README-IMAGES/librored-diagram.png)
 
 ## Structured Class Diagram
 
