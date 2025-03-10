@@ -23,7 +23,6 @@ public class UserService {
     private PasswordEncoder passwordEncoder;
 
 
-
     public void registerUser(User user) {
         if (user.getUsername() == null || user.getUsername().isEmpty()) {
             throw new IllegalArgumentException("Username cannot be null or empty");

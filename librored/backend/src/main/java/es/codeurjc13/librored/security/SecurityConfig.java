@@ -55,7 +55,7 @@ public class SecurityConfig {
                         .requestMatchers("/", "/login", "/register", "/error/**", "/perform_login", "/loginerror").permitAll()
 
                         // API access: Public endpoints
-                        .requestMatchers("/api/books", "/api/books/books-per-genre","/api/books/**" ).permitAll()
+                        .requestMatchers("/api/books", "/api/books/books-per-genre", "/api/books/**").permitAll()
 
                         // API access: Only logged-in users
                         .requestMatchers("/api/users/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")  //  Only users with ROLE_USER or ROLE_ADMIN can access
@@ -85,8 +85,8 @@ public class SecurityConfig {
                         // Admin-only pages
                         .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
 
-                // Any other request requires authentication
-                .anyRequest().authenticated())
+                        // Any other request requires authentication
+                        .anyRequest().authenticated())
                 .formLogin(formLogin -> formLogin
                         .loginPage("/perform_login")
                         .failureUrl("/login?error=true")

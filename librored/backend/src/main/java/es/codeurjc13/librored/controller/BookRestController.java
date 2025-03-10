@@ -46,7 +46,6 @@ public class BookRestController {
     }
 
 
-
     @GetMapping("/{id}/cover")
     public ResponseEntity<Resource> getBookCover(@PathVariable Long id) {
         try {
@@ -65,7 +64,6 @@ public class BookRestController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-
 
 
     // Books per genre (for graphs or analytics)

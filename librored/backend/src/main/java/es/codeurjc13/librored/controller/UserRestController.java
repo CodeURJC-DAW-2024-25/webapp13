@@ -58,7 +58,6 @@ public class UserRestController {
     }
 
 
-
     @PostMapping("/update-password")
     public ResponseEntity<Map<String, Object>> updatePassword(
             @AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails,
@@ -95,8 +94,6 @@ public class UserRestController {
     }
 
 
-
-
     @PostMapping("/verify-password")
     public ResponseEntity<Map<String, Object>> verifyPassword(
             @AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails,
@@ -119,7 +116,6 @@ public class UserRestController {
 
         return ResponseEntity.ok(Map.of("success", true, "message", "Password verified! You can now enter a new password."));
     }
-
 
 
 }
