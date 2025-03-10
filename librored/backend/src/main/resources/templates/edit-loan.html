@@ -30,42 +30,22 @@
         <!-- Change Book -->
         <div id="bookField" class="form-group d-none">
             <label>New Book (Only Available Books from Lender)</label>
-<!--
-
-            <select name="book.id" class="form-control">
-                {{#books}}
-                <option value="{{id}}">{{title}}</option>
-                {{/books}}
-            </select>
-
--->
             <select name="book.id" class="form-control">
                 {{#books}}
                 <option value="{{id}}" {{#loan.book}} {{#id}}{{#loan.book.id}}selected{{/loan.book.id}}{{/id}} {{/loan.book}}> {{title}}</option>
                 {{/books}}
             </select>
-
-
         </div>
 
 
         <!-- Change Borrower -->
         <div id="borrowerField" class="form-group d-none">
             <label>New Borrower</label>
-<!--
-                <select name="borrower.id" class="form-control">
-                    {{#users}}
-                    <option value="{{id}}">{{username}}</option>
-                    {{/users}}
-                </select>
--->
-
             <select name="borrower.id" class="form-control">
                 {{#users}}
                 <option value="{{id}}" {{#loan.borrower}} {{#id}}{{#loan.borrower.id}}selected{{/loan.borrower.id}}{{/id}} {{/loan.borrower}}> {{username}} </option>
                 {{/users}}
             </select>
-
         </div>
 
         <!-- Change Dates -->
