@@ -24,7 +24,7 @@ public class UserService {
             throw new IllegalArgumentException("Username cannot be null or empty");
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setRole(User.Role.valueOf("USER"));
+        user.setRole(User.Role.ROLE_USER);  // Default assign ROLE_USER
         userRepository.save(user);
     }
 
