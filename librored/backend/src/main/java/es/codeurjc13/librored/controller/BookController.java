@@ -78,7 +78,7 @@ public class BookController {
 
         model.addAttribute("books", books);
         model.addAttribute("isAdmin", isAdmin);
-        return "books"; // Reuses books.html
+        return "books";
     }
 
 
