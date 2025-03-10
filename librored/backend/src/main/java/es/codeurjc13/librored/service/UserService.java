@@ -1,14 +1,11 @@
 package es.codeurjc13.librored.service;
 
-import es.codeurjc13.librored.model.Loan;
 import es.codeurjc13.librored.model.User;
-import es.codeurjc13.librored.repository.UserRepository;
 import es.codeurjc13.librored.repository.LoanRepository;
+import es.codeurjc13.librored.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,7 +21,6 @@ public class UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
-
 
 
     public void registerUser(User user) {
