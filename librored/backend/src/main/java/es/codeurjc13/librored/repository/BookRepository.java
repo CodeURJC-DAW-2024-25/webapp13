@@ -18,4 +18,16 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
     List<Book> findByOwner(User owner);
 
+    // This query selects books from genres the user has borrowed but excludes books they have already borrowed.
+    // - Count the number of times a user has borrowed books from each genre.
+    // - Recommend books based on the most borrowed genre.
+    // - Exclude books the user already owns.
+    @Query("SELECT b FROM Book b WHERE b.genre IN " +
+            "(SELECT lb.genre FROM Loan l JOIN l.book lb WHERE l.borrower.id = :userId " +
+            "GROUP BY lb.genre ORDER BY COUNT(lb.id) DESC) " +
+            "AND b.id NOT IN (SELECT lb.id FROM Loan l JOIN l.book lb WHERE l.borrower.id = :userId) " +
+            "AND b.owner.id <> :userId")
+    List<Book> findRecommendedBooks(@Param("userId") Long userId);
+
+
 }
