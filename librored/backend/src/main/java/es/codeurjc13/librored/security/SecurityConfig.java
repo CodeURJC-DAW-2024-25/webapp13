@@ -67,6 +67,7 @@ public class SecurityConfig {
                         .requestMatchers("/myaccount").hasRole("USER")
                         .requestMatchers("/books").authenticated()
                         .requestMatchers("/loans").authenticated()
+                        .requestMatchers("/recommendations").authenticated()
 
 
                         // Admin-only pages
