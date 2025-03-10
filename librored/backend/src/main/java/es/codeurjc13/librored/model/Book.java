@@ -29,7 +29,7 @@ public class Book {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private User owner;
 
-    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "book", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore // Prevent infinite recursion in JSON serialization
     private List<Loan> loans;
 
@@ -118,6 +118,15 @@ public class Book {
 
     public void setOwner(User owner) {
         this.owner = owner;
+    }
+
+    // LOANs relationship
+    public boolean isCurrentlyOnLoan() {
+        if (this.loans == null || this.loans.isEmpty()) {
+            return false;
+        }
+        // Check if any loan is still active
+        return this.loans.stream().anyMatch(loan -> loan.getStatus() == Loan.Status.Active);
     }
 
 }

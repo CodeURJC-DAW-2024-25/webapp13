@@ -2,6 +2,7 @@ package es.codeurjc13.librored.repository;
 
 import es.codeurjc13.librored.model.Book;
 import es.codeurjc13.librored.model.User;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,6 +17,12 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     @Query("SELECT b FROM Book b WHERE b.owner.id = :ownerId AND " + "b.id NOT IN (SELECT l.book.id FROM Loan l WHERE l.status = 'Active')")
     List<Book> findAvailableBooksByOwnerId(@Param("ownerId") Long ownerId);
 
+    // EntityGraph: ensures that when fetching books, Hibernate also retrieves associated loans. LazyInitializationException.
+    @EntityGraph(attributePaths = {"loans"})
+    List<Book> findAll();
+
+    // EntityGraph: ensures that when fetching books, Hibernate also retrieves associated loans. LazyInitializationException.
+    @EntityGraph(attributePaths = {"loans"})
     List<Book> findByOwner(User owner);
 
     // This query selects books from genres the user has borrowed but excludes books they have already borrowed.
