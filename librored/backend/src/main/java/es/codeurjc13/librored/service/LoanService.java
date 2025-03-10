@@ -7,6 +7,7 @@ import es.codeurjc13.librored.repository.BookRepository;
 import es.codeurjc13.librored.repository.LoanRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -85,6 +86,7 @@ public class LoanService {
         loanRepository.save(loan);
     }
 
+    @Transactional
     public void deleteLoan(Long id) {
         loanRepository.deleteById(id);
     }

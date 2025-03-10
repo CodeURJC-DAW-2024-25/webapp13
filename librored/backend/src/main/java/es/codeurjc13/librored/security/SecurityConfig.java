@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -45,6 +46,7 @@ public class SecurityConfig {
         http
 
                 .csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/loans/delete/**") // ✅ Explicitly allow DELETE
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()) // Ensure CSRF token is accessible
                 )
                 .authorizeHttpRequests(auth -> auth
@@ -73,7 +75,7 @@ public class SecurityConfig {
 
                             boolean isSelf = authentication.get().getName().equals(request.getRequest().getServletPath().split("/")[3]);
 
-                            return new org.springframework.security.authorization.AuthorizationDecision(isAdmin || isSelf);
+                            return new AuthorizationDecision(isAdmin || isSelf);
                         })
 
                         .requestMatchers("/books").authenticated()

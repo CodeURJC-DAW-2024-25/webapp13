@@ -77,9 +77,17 @@
 <script>
     function showField(fieldId) {
         document.querySelectorAll('.form-group').forEach(field => {
-            field.classList.add('d-none'); // Hide all fields
+            if (field) {
+                field.classList.add('d-none'); // Hide all fields
+            }
         });
-        document.getElementById(fieldId).classList.remove('d-none'); // Show selected field
+
+        var field = document.getElementById(fieldId);
+        if (field) {
+            field.classList.remove('d-none');
+        } else {
+            console.error("❌ Error: Element with ID '" + fieldId + "' not found.");
+        }
     }
 </script>
 

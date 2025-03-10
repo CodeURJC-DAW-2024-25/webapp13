@@ -173,8 +173,9 @@ public class LoanController {
 
 
     @PostMapping("/loans/delete/{id}")
-    public String deleteLoan(@PathVariable Long id) {
+    public String deleteLoan(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         loanService.deleteLoan(id);
+        redirectAttributes.addFlashAttribute("message", "Loan successfully deleted.");
         return "redirect:/loans";
     }
 
@@ -182,7 +183,9 @@ public class LoanController {
     @GetMapping("/loans/books/{lenderId}")
     @ResponseBody
     public List<Book> getAvailableBooksByLender(@PathVariable Long lenderId) {
-        return bookService.getAvailableBooksByOwnerId(lenderId);  // Now filters out books in active loans
+        List<Book> books = bookService.getAvailableBooksByOwnerId(lenderId);
+        System.out.println("🔍 DEBUG: Found " + books.size() + " available books for lender " + lenderId);
+        return books;
     }
 
 }
