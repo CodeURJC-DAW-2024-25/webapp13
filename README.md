@@ -79,7 +79,8 @@ Generates a PDF containing details of **Users, Books, and Loans**.
 
 ## Navigation Diagram
 
-
+![Navigation Diagram](README-IMAGES/navigation-diagram.png)
+[Link to Exaclidraw](https://excalidraw.com/#json=630FFVgKYQWqjaHvjUj_Y,McZxkSjNhwxS2j8aCc2-mw)
 
 ## DB Entity Diagram
 
@@ -89,9 +90,11 @@ Here is the entity diagram image of librored DB
 
 ## Structured Class Diagram
 
+![Class Diagram](README-IMAGES/improved_class_diagram.png)
+
 
 ---
-## How to Configure your Environment (MacOs)
+# How to Configure your Environment (MacOs)
 To configure and run the Spring Boot application in a completely new environment on macOS, follow these detailed instructions:
 
 ### 1. Install Homebrew
