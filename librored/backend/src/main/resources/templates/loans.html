@@ -46,6 +46,21 @@
         {{/loans}}
         </tbody>
     </table>
+    <div class="row-cols-1">
+        <!-- Back button for Admin -->
+        {{#isAdmin}}
+        <div class="d-flex justify-content-end mt-3">
+            <a href="/admin" class="btn btn-secondary mt-3">Back</a>
+        </div>
+        {{/isAdmin}}
+
+        <!-- Back button for USER -->
+        {{^isAdmin}}
+        <div class="d-flex justify-content-end mt-3">
+            <a href="/myaccount" class="btn btn-secondary mt-3">Back</a>
+        </div>
+        {{/isAdmin}}
+    </div>
 </div>
 
 {{> footer}}
