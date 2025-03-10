@@ -28,7 +28,6 @@
         <input type="hidden" name="_csrf" value="{{_csrf.token}}">
 
         <!-- Change Book -->
-        {{#isAdmin}}
         <div id="bookField" class="form-group d-none">
             <label>New Book (Only Available Books from Lender)</label>
             <select name="book.id" class="form-control">
@@ -37,7 +36,7 @@
                 {{/books}}
             </select>
         </div>
-        {{/isAdmin}}
+
 
         <!-- Change Borrower -->
         <div id="borrowerField" class="form-group d-none">
@@ -59,7 +58,6 @@
         </div>
 
         <!-- Change Status -->
-        {{#isAdmin}}
         <div id="statusField" class="form-group d-none">
             <label>New Status</label>
             <select name="status" class="form-control">
@@ -67,7 +65,7 @@
                 <option value="Completed" {{#loan.status}} {{#Completed}}selected{{/Completed}} {{/loan.status}}>Completed</option>
             </select>
         </div>
-        {{/isAdmin}}
+
 
         <button type="submit" class="btn btn-success mt-3">Update Loan</button>
         <a href="/loans" class="btn btn-secondary mt-3">Cancel</a>
