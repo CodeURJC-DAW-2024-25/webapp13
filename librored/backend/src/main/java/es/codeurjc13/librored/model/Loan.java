@@ -13,15 +13,17 @@ public class Loan {
     private Long id;
 
     @ManyToOne
+    @JoinColumn(name = "book_id", nullable = false, foreignKey = @ForeignKey(name = "FK_loan_book"))
     private Book book;
 
     @ManyToOne
-    @JoinColumn(name = "lender_id", nullable = false, foreignKey = @ForeignKey(name = "FK1epll7mdosrbax5th2tlnym38"))
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private User lender;
+    @JoinColumn(name = "borrower_id", nullable = false, foreignKey = @ForeignKey(name = "FK_loan_borrower"))
+    private User borrower;
 
     @ManyToOne
-    private User borrower;
+    @JoinColumn(name = "lender_id", nullable = false, foreignKey = @ForeignKey(name = "FK_loan_lender"))
+    private User lender;
+
 
     private LocalDate startDate;
     private LocalDate endDate;

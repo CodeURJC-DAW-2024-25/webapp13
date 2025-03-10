@@ -1,5 +1,6 @@
 package es.codeurjc13.librored.controller;
 
+import es.codeurjc13.librored.model.User;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,7 +26,7 @@ public class GlobalModelAttributes {
     public boolean isAdmin() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated() && !(authentication instanceof AnonymousAuthenticationToken)) {
-            return authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+            return authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals(User.Role.ROLE_ADMIN.name()));
         }
         return false;
     }

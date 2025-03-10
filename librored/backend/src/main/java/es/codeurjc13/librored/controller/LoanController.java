@@ -40,7 +40,8 @@ public class LoanController {
         User user = userService.getUserByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        boolean isAdmin = user.getRoles().contains("ROLE_ADMIN");
+        boolean isAdmin = user.getRole() == User.Role.ROLE_ADMIN; // Correct way to check admin role
+
 
         List<Loan> loans = isAdmin ? loanService.getAllLoans() : loanService.getLoansByLender(user);
 
@@ -55,16 +56,31 @@ public class LoanController {
         Loan loan = loanService.getLoanById(id)
                 .orElseThrow(() -> new RuntimeException("Loan not found"));
 
-        // ✅ Get available books owned by the lender (not in active loans)
+        // ✅ Get available books owned by the lender (not currently loaned)
         List<Book> availableBooks = bookService.getAvailableBooksByOwnerId(loan.getLender().getId());
 
-        // ✅ Get borrowers, but exclude the lender
+        // ✅ Get valid borrowers (excluding the lender)
         List<User> possibleBorrowers = userService.getAllUsersExcept(loan.getLender());
-        possibleBorrowers.remove(loan.getLender()); // Remove lender from borrower list
 
+        // ✅ Convert loan status to string format
+        String formattedStatus = loan.getStatus().name();
+
+        // ✅ Ensure endDate is formatted properly for Mustache
+        String formattedEndDate = (loan.getEndDate() != null) ? loan.getEndDate().toString() : "";
+
+        // 🔥 Pass necessary attributes to Mustache
         model.addAttribute("loan", loan);
-        model.addAttribute("books", availableBooks); // Pass only valid books
-        model.addAttribute("users", possibleBorrowers); // Pass only valid borrowers
+        model.addAttribute("books", availableBooks);  // ✅ Pass books list
+        model.addAttribute("users", possibleBorrowers);  // ✅ Pass users list
+        model.addAttribute("formattedStatus", formattedStatus);
+        model.addAttribute("isStatusActive", "Active".equals(formattedStatus));
+        model.addAttribute("isStatusCompleted", "Completed".equals(formattedStatus));
+        model.addAttribute("loanEndDate", formattedEndDate);
+
+        System.out.println("📌 DEBUG: Available Books: " + availableBooks.size());
+        System.out.println("📌 DEBUG: Possible Borrowers: " + possibleBorrowers.size());
+
+
         return "edit-loan";
     }
 
@@ -98,7 +114,7 @@ public class LoanController {
                 loan.setStartDate(LocalDate.parse(newStartDate));
             }
 
-            if (newEndDate != null) {
+            if (newEndDate != null && !newEndDate.isEmpty()) {  // Prevents parsing errors
                 LocalDate parsedEndDate = LocalDate.parse(newEndDate);
                 if (parsedEndDate.isBefore(loan.getStartDate())) {
                     redirectAttributes.addFlashAttribute("error",
@@ -106,17 +122,29 @@ public class LoanController {
                     return "redirect:/loans/edit/" + id;
                 }
                 loan.setEndDate(parsedEndDate);
+            } else {
+                loan.setEndDate(null);  // Ensures null values are correctly stored
             }
 
             if (newStatus != null) {
-                Loan.Status status = Loan.Status.valueOf(newStatus);
-                if (loan.getStatus() == Loan.Status.Completed && status == Loan.Status.Active) {
-                    redirectAttributes.addFlashAttribute("error",
-                            "You cannot reactivate a completed loan. Create a new loan instead.");
+                try {
+                    //  Handle case sensitivity properly: Accepts "Active" and "Completed"
+                    Loan.Status status = newStatus.equalsIgnoreCase("Active") ? Loan.Status.Active : Loan.Status.Completed;
+
+                    //  Prevent reactivation of completed loans
+                    if (loan.getStatus() == Loan.Status.Completed && status == Loan.Status.Active) {
+                        redirectAttributes.addFlashAttribute("error",
+                                "You cannot reactivate a completed loan. Create a new loan instead.");
+                        return "redirect:/loans/edit/" + id;
+                    }
+
+                    loan.setStatus(status);
+                } catch (IllegalArgumentException e) {
+                    redirectAttributes.addFlashAttribute("error", "Invalid status value.");
                     return "redirect:/loans/edit/" + id;
                 }
-                loan.setStatus(status);
             }
+
 
             loanService.saveLoan(loan);
             redirectAttributes.addFlashAttribute("message", "Loan updated successfully!");
@@ -124,7 +152,6 @@ public class LoanController {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "redirect:/loans/edit/" + id;
         }
-
         return "redirect:/loans";
     }
 
@@ -137,7 +164,8 @@ public class LoanController {
         User lender = userService.getUserByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        boolean isAdmin = lender.getRoles().contains("ROLE_ADMIN");
+        boolean isAdmin = lender.getRole() == User.Role.ROLE_ADMIN; // Correct way to check admin role
+
 
         model.addAttribute("isAdmin", isAdmin);
         model.addAttribute("userId", lender.getId()); // ✅ Pass the logged-in user's ID
@@ -171,8 +199,9 @@ public class LoanController {
 
 
     @PostMapping("/loans/delete/{id}")
-    public String deleteLoan(@PathVariable Long id) {
+    public String deleteLoan(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         loanService.deleteLoan(id);
+        redirectAttributes.addFlashAttribute("message", "Loan successfully deleted.");
         return "redirect:/loans";
     }
 
@@ -180,7 +209,11 @@ public class LoanController {
     @GetMapping("/loans/books/{lenderId}")
     @ResponseBody
     public List<Book> getAvailableBooksByLender(@PathVariable Long lenderId) {
-        return bookService.getAvailableBooksByOwnerId(lenderId);  // Now filters out books in active loans
+        //System.out.println("📚 DEBUG: Available books size = " + availableBooks.size());
+        System.out.println("\uD83D\uDCDA DEBUG: available books for lender " + lenderId);
+        List<Book> books = bookService.getAvailableBooksByOwnerId(lenderId);
+        System.out.println("🔍 DEBUG: Found " + books.size() + " available books for lender " + lenderId);
+        return books;
     }
 
 }

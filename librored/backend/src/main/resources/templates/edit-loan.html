@@ -10,7 +10,7 @@
         <p><strong>Lender:</strong> {{loan.lender.username}}</p>
         <p><strong>Borrower:</strong> {{loan.borrower.username}}</p>
         <p><strong>Start Date:</strong> {{loan.startDate}}</p>
-        <p><strong>End Date:</strong> {{loan.endDate}}</p>
+        <p><strong>End Date:</strong> {{loanEndDate}}</p>
         <p><strong>Status:</strong> {{loan.status}}</p>
     </div>
 
@@ -28,25 +28,44 @@
         <input type="hidden" name="_csrf" value="{{_csrf.token}}">
 
         <!-- Change Book -->
-        {{#isAdmin}}
         <div id="bookField" class="form-group d-none">
             <label>New Book (Only Available Books from Lender)</label>
+<!--
+
             <select name="book.id" class="form-control">
                 {{#books}}
                 <option value="{{id}}">{{title}}</option>
                 {{/books}}
             </select>
+
+-->
+            <select name="book.id" class="form-control">
+                {{#books}}
+                <option value="{{id}}" {{#loan.book}} {{#id}}{{#loan.book.id}}selected{{/loan.book.id}}{{/id}} {{/loan.book}}> {{title}}</option>
+                {{/books}}
+            </select>
+
+
         </div>
-        {{/isAdmin}}
+
 
         <!-- Change Borrower -->
         <div id="borrowerField" class="form-group d-none">
             <label>New Borrower</label>
+<!--
+                <select name="borrower.id" class="form-control">
+                    {{#users}}
+                    <option value="{{id}}">{{username}}</option>
+                    {{/users}}
+                </select>
+-->
+
             <select name="borrower.id" class="form-control">
                 {{#users}}
-                <option value="{{id}}">{{username}}</option>
+                <option value="{{id}}" {{#loan.borrower}} {{#id}}{{#loan.borrower.id}}selected{{/loan.borrower.id}}{{/id}} {{/loan.borrower}}> {{username}} </option>
                 {{/users}}
             </select>
+
         </div>
 
         <!-- Change Dates -->
@@ -55,19 +74,19 @@
             <input type="date" name="startDate" class="form-control" value="{{loan.startDate}}">
 
             <label>New End Date</label>
-            <input type="date" name="endDate" class="form-control" value="{{loan.endDate}}">
+            <input type="date" name="endDate" class="form-control" value="{{loanEndDate}}">
         </div>
 
         <!-- Change Status -->
-        {{#isAdmin}}
         <div id="statusField" class="form-group d-none">
             <label>New Status</label>
             <select name="status" class="form-control">
-                <option value="Active" {{#loan.status}} {{#Active}}selected{{/Active}} {{/loan.status}}>Active</option>
-                <option value="Completed" {{#loan.status}} {{#Completed}}selected{{/Completed}} {{/loan.status}}>Completed</option>
+                <option value="Active" {{#isStatusActive}}selected{{/isStatusActive}}>Active</option>
+                <option value="Completed" {{#isStatusCompleted}}selected{{/isStatusCompleted}}>Completed</option>
             </select>
         </div>
-        {{/isAdmin}}
+
+
 
         <button type="submit" class="btn btn-success mt-3">Update Loan</button>
         <a href="/loans" class="btn btn-secondary mt-3">Cancel</a>
@@ -76,10 +95,14 @@
 
 <script>
     function showField(fieldId) {
-        document.querySelectorAll('.form-group').forEach(field => {
-            field.classList.add('d-none'); // Hide all fields
-        });
-        document.getElementById(fieldId).classList.remove('d-none'); // Show selected field
+        console.log("🔍 Trying to show field: " + fieldId);
+        var field = document.getElementById(fieldId);
+        if (field) {
+            console.log("✅ Field found, displaying it.");
+            field.classList.remove('d-none');
+        } else {
+            console.error("❌ Field not found in the DOM!");
+        }
     }
 </script>
 

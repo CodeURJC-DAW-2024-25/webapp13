@@ -63,6 +63,7 @@
 
         <button type="submit" class="btn btn-success">Create Loan</button>
     </form>
+    <a href="/loans" class="btn btn-secondary">Cancel</a>
 </div>
 
 <script>
@@ -72,7 +73,12 @@
 
         if (lenderId) {
             fetch("/loans/books/" + lenderId)
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     bookSelect.innerHTML = "<option value=''>-- Select Available Book --</option>";
                     if (data.length === 0) {
@@ -84,7 +90,8 @@
                         });
                         bookSelect.disabled = false;
                     }
-                });
+                })
+                .catch(error => console.error("❌ Error loading books:", error));
         } else {
             bookSelect.innerHTML = "<option value=''>-- Select a Lender First --</option>";
             bookSelect.disabled = true;

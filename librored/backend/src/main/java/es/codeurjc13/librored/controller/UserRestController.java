@@ -3,12 +3,10 @@ package es.codeurjc13.librored.controller;
 import es.codeurjc13.librored.model.User;
 import es.codeurjc13.librored.service.UserService;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -41,7 +39,6 @@ public class UserRestController {
         Optional<User> user = userService.getUserByEmail(email);
 
         if (user.isEmpty()) {
-            System.out.println("🔴 User not found in the database!");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("success", false, "error", "User not found."));
         }
 
@@ -49,7 +46,7 @@ public class UserRestController {
         user.get().setUsername(newUsername);
         userService.saveUser(user.get());
 
-        // ✅ Refresh authentication to ensure future requests still work
+        //  Refresh authentication to ensure future requests still work
         Authentication authentication = new UsernamePasswordAuthenticationToken(
                 user.get(), user.get().getEncodedPassword(), userDetails.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -69,11 +66,10 @@ public class UserRestController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("success", false, "error", "User not authenticated."));
         }
 
-        String email = userDetails.getUsername(); // ✅ Always fetch by email
+        String email = userDetails.getUsername(); //  Always fetch by email
         Optional<User> user = userService.getUserByEmail(email);
 
         if (user.isEmpty()) {
-            System.out.println("🔴 User not found in the database!");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("success", false, "error", "User not found."));
         }
 
@@ -104,7 +100,6 @@ public class UserRestController {
             @RequestParam String currentPassword) {
 
         if (userDetails == null) {
-            System.out.println("🔴 User is not authenticated!");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("success", false, "error", "User is not authenticated."));
         }
 
@@ -112,11 +107,8 @@ public class UserRestController {
         Optional<User> user = userService.getUserByEmail(email);
 
         if (user.isEmpty()) {
-            System.out.println("🔴 User not found in the database!");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("success", false, "error", "User not found."));
         }
-
-        System.out.println("🔍 Verifying password for: " + user.get().getEmail());
 
         if (!passwordEncoder.matches(currentPassword, user.get().getEncodedPassword())) {
             return ResponseEntity.ok(Map.of("success", false, "error", "Incorrect current password."));
