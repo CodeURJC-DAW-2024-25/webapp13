@@ -1,7 +1,6 @@
 package es.codeurjc13.librored.security;
 
 import es.codeurjc13.librored.model.User;
-import es.codeurjc13.librored.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,7 +8,6 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -46,7 +44,7 @@ public class SecurityConfig {
         http
 
                 .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/loans/delete/**") // ✅ Explicitly allow DELETE
+                        // .ignoringRequestMatchers("/loans/delete/**") // ?!?! Explicitly allow DELETE
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()) // Ensure CSRF token is accessible
                 )
                 .authorizeHttpRequests(auth -> auth
@@ -80,6 +78,7 @@ public class SecurityConfig {
 
                         .requestMatchers("/books").authenticated()
                         .requestMatchers("/loans").authenticated()
+                        .requestMatchers("/loans/**").authenticated()
                         .requestMatchers("/recommendations").authenticated()
 
 
