@@ -16,13 +16,9 @@ public class Book {
     private String title;
     private String author;
 
-    @Enumerated(EnumType.STRING)
-    private Genre genre;
-
     @Column(columnDefinition = "TEXT")
     private String description;
     //private String coverPic;
-
 
     @Lob
     @JsonIgnore // 👈 This prevents serialization issues
@@ -37,11 +33,14 @@ public class Book {
     @JsonIgnore // Prevent infinite recursion in JSON serialization
     private List<Loan> loans;
 
+    @Enumerated(EnumType.STRING)
+    private Genre genre;
 
     public enum Genre {
         Fiction, Non_Fiction, Mystery_Thriller, SciFi_Fantasy, Romance, Historical_Fiction, Horror
     }
 
+    // CONSTRUCTORS
     public Book() {
     }
 
@@ -54,7 +53,7 @@ public class Book {
         this.owner = owner;
     }
 
-    // Getters and setters
+    // GETTERS AND SETTERS
     public Long getId() {
         return id;
     }
@@ -107,10 +106,12 @@ public class Book {
         if (this.coverPic != null) {
             return "/books/" + this.id + "/image";
         } else {
-            return "/images/default_cover.jpg"; // Return default image when cover is null
+            return "/images/default_cover.jpg";
         }
     }
 
+
+    // OWNER (it is a user) GETTERS AND SETTERS
     public User getOwner() {
         return owner;
     }

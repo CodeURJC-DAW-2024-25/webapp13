@@ -74,4 +74,8 @@ public class BookService {
         return bookRepository.findByOwner(owner);
     }
 
+    public List<Book> getRecommendationsForUser(Long userId) {
+        return bookRepository.findRecommendedBooks(userId);
+    }
+
 }

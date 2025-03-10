@@ -220,4 +220,21 @@ public class BookController {
         return "redirect:/books";
     }
 
+
+    // RECOMMENDED BOOKS
+    @GetMapping("/recommendations")
+    public String getAccountPage(Model model, @AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails) {
+        if (userDetails == null) {
+            return "redirect:/login";
+        }
+
+        User user = userService.getUserByEmail(userDetails.getUsername()).orElseThrow(() -> new RuntimeException("User not found"));
+
+        List<Book> recommendedBooks = bookService.getRecommendationsForUser(user.getId());
+        model.addAttribute("recommendedBooks", recommendedBooks);
+        model.addAttribute("user", user);
+
+        return "recommendations";
+    }
+
 }
