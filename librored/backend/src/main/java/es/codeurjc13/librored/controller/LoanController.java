@@ -40,7 +40,8 @@ public class LoanController {
         User user = userService.getUserByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        boolean isAdmin = user.getRoles().contains("ROLE_ADMIN");
+        boolean isAdmin = user.getRole() == User.Role.ROLE_ADMIN; // Correct way to check admin role
+
 
         List<Loan> loans = isAdmin ? loanService.getAllLoans() : loanService.getLoansByLender(user);
 
@@ -137,7 +138,8 @@ public class LoanController {
         User lender = userService.getUserByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        boolean isAdmin = lender.getRoles().contains("ROLE_ADMIN");
+        boolean isAdmin = lender.getRole() == User.Role.ROLE_ADMIN; // Correct way to check admin role
+
 
         model.addAttribute("isAdmin", isAdmin);
         model.addAttribute("userId", lender.getId()); // ✅ Pass the logged-in user's ID

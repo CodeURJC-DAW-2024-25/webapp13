@@ -4,13 +4,12 @@ import es.codeurjc13.librored.model.Book;
 import es.codeurjc13.librored.model.User;
 import es.codeurjc13.librored.service.BookService;
 import es.codeurjc13.librored.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +19,10 @@ public class UserController {
 
     private final UserService userService;
     private final BookService bookService; // Inject BookService to fetch recommendations
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
 
     public UserController(UserService userService, BookService bookService) {
         this.userService = userService;
@@ -43,10 +46,44 @@ public class UserController {
     }
 
     @PostMapping("/users/edit/{id}")
-    public String updateUser(@PathVariable Long id, @ModelAttribute User updatedUser) {
-        userService.updateUser(id, updatedUser);
+    public String updateUser(@PathVariable Long id,
+                             @RequestParam String username,
+                             @RequestParam(required = false) String email,
+                             @RequestParam(required = false) String password,
+                             @RequestParam(required = false) String role,
+                             @AuthenticationPrincipal org.springframework.security.core.userdetails.User loggedUser) {
+        System.out.println("🔍 DEBUG: Received role = " + role);
+
+        User user = userService.getUserById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isAdmin = loggedUser.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals(User.Role.ROLE_ADMIN.name()));
+
+        // ✅ Users can update only their own account
+        if (!isAdmin && !user.getEmail().equals(loggedUser.getUsername())) {
+            return "redirect:/users"; // Redirect unauthorized users
+        }
+
+        user.setUsername(username);
+
+        if (isAdmin) {
+            if (email != null) user.setEmail(email);
+            if (role != null) {
+                String formattedRole = role.startsWith("ROLE_") ? role : "ROLE_" + role;
+                user.setRole(User.Role.valueOf(formattedRole));
+            }
+        }
+
+        if (password != null && !password.isEmpty()) {
+            user.setEncodedPassword(passwordEncoder.encode(password));
+        }
+
+        userService.saveUser(user);
+
         return "redirect:/users";
     }
+
 
     @PostMapping("/users/delete/{id}")
     public String deleteUser(@PathVariable Long id) {

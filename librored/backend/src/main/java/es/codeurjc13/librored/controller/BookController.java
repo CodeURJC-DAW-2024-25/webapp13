@@ -72,7 +72,7 @@ public class BookController {
 
         User user = userService.getUserByEmail(userDetails.getUsername()).orElseThrow(() -> new RuntimeException("User not found"));
 
-        boolean isAdmin = user.getRoles().contains("ROLE_ADMIN");
+        boolean isAdmin = user.getRole() == User.Role.ROLE_ADMIN; // Correct way to check admin role
 
         List<Book> books = isAdmin ? bookService.getAllBooks() : bookService.getBooksByOwner(user);
 
@@ -91,7 +91,7 @@ public class BookController {
 
         User user = userService.getUserByEmail(userDetails.getUsername()).orElseThrow(() -> new RuntimeException("User not found"));
 
-        boolean isAdmin = user.getRoles().contains("ROLE_ADMIN");
+        boolean isAdmin = user.getRole() == User.Role.ROLE_ADMIN; // Correct way to check admin role
 
         model.addAttribute("isAdmin", isAdmin);
         model.addAttribute("userId", user.getId()); // Pass logged-in user's ID for non-admins
@@ -172,7 +172,8 @@ public class BookController {
 
         Book book = bookService.getBookById(id).orElseThrow(() -> new RuntimeException("Book not found"));
 
-        boolean isAdmin = user.getRoles().contains("ROLE_ADMIN");
+        boolean isAdmin = user.getRole() == User.Role.ROLE_ADMIN; // Correct way to check admin role
+
 
         // Allow users to edit only their own books
         if (!isAdmin && !book.getOwner().getId().equals(user.getId())) {
