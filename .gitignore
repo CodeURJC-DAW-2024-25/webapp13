@@ -22,6 +22,7 @@ librored/backend/build/
 
 # File formats
 *.class
+*.crt
 *.sql
 *.sqlite
 *.db
