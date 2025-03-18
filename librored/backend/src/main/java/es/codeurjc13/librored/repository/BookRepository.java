@@ -36,5 +36,6 @@ public interface BookRepository extends JpaRepository<Book, Long> {
             "AND b.owner.id <> :userId")
     List<Book> findRecommendedBooks(@Param("userId") Long userId);
 
-
+    // Custom query method to find books by title (case-insensitive search with pagination)
+    Page<Book> findByTitleContainingIgnoreCase(String title, Pageable pageable);
 }
