@@ -2,6 +2,8 @@ package es.codeurjc13.librored.repository;
 
 import es.codeurjc13.librored.model.Book;
 import es.codeurjc13.librored.model.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -11,9 +13,11 @@ import java.util.List;
 
 public interface BookRepository extends JpaRepository<Book, Long> {
 
+    // Number of books per genre
     @Query("SELECT b.genre, COUNT(b) FROM Book b GROUP BY b.genre")
     List<Object[]> countBooksByGenre();
 
+    // Get the books owned by a user
     @Query("SELECT b FROM Book b WHERE b.owner.id = :ownerId AND " + "b.id NOT IN (SELECT l.book.id FROM Loan l WHERE l.status = 'Active')")
     List<Book> findAvailableBooksByOwnerId(@Param("ownerId") Long ownerId);
 
@@ -21,6 +25,7 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     @EntityGraph(attributePaths = {"loans"})
     List<Book> findAll();
 
+    // Fetches all books belonging to a specific user
     // EntityGraph: ensures that when fetching books, Hibernate also retrieves associated loans. LazyInitializationException.
     @EntityGraph(attributePaths = {"loans"})
     List<Book> findByOwner(User owner);
