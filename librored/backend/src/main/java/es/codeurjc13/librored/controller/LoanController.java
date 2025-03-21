@@ -180,13 +180,32 @@ public class LoanController {
 
 
     @PostMapping("/loans/create")
-    public String createLoan(@RequestParam Long bookId,
+    public String createLoan(@AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails,
+                             @RequestParam Long bookId,
                              @RequestParam Long lenderId,
                              @RequestParam Long borrowerId,
                              @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
                              @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-                             @RequestParam Loan.Status status) {
+                             @RequestParam Loan.Status status,
+                             RedirectAttributes redirectAttributes) {
 
+        // Check if the lender is different from the borrower
+        if (lenderId.equals(borrowerId)) {
+            redirectAttributes.addFlashAttribute("error", "Lender and borrower cannot be the same.");
+            return "redirect:/lendererror"; // Replace with the actual error page template
+        }
+
+        // Get the logged-in user
+        User loggedUser = userService.getUserByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Check if the lender is equal to the logged user or if the logged user is ADMIN
+        if (!lenderId.equals(loggedUser.getId()) && loggedUser.getRole() != User.Role.ROLE_ADMIN) {
+            redirectAttributes.addFlashAttribute("error", "You are not authorized to create this loan.");
+            return "redirect:/lendererror"; // Replace with the actual error page template
+        }
+
+        // Proceed with loan creation
         Book book = bookService.getBookById(bookId).orElseThrow(() -> new IllegalArgumentException("Invalid book ID"));
         User lender = userService.getUserById(lenderId).orElseThrow(() -> new IllegalArgumentException("Invalid lender ID"));
         User borrower = userService.getUserById(borrowerId).orElseThrow(() -> new IllegalArgumentException("Invalid borrower ID"));
