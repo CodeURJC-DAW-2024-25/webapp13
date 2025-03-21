@@ -121,22 +121,22 @@
             </form>
         </div>
 
-        <div id="books-container">
-            <ul class="row" id="book-list" >
-                <!-- Book list will be inserted here with AJAX-->
-            </ul>
+        <div class="container mt-4">
+            <div class="row justify-content-center" id="book-list">
+                <!-- Book list will be inserted here with AJAX -->
+            </div>
         </div>
-            <!-- Spinner -->
-            <div class="row">
-                <div id="loading-spinner" style="text-align: center; display: none;">
-                <img src="/images/spinner.gif" alt="Loading..." width="200">
+        <!-- Spinner -->
+        <div class="row">
+            <div id="loading-spinner" style="text-align: center; display: none;">
+            <img src="/images/spinner.gif" alt="Loading..." width="200">
             </div>
             <!-- "Load More" button -->
             <div class="text-center mt-4">
                 <button id="load-more" class="btn btn-primary">Load More</button>
             </div>
         </div>
-</div>
+    </div>
 </div>
 <!-- product-area end -->
 
@@ -265,17 +265,17 @@
 
                 const coverImage = `/api/books/${book.id}/cover`;
 
+                bookCol.className = "col-lg-4 col-md-6 col-sm-12 d-flex justify-content-center";
                 bookCol.innerHTML = `
-                    <li class="col-md-3 book-item">
-                      <div class="book-card">
-                        <img src="${coverImage}" alt="${book.title}" class="book-cover"
+                    <div class="book-card text-center p-3 shadow-sm">
+                        <img src="${coverImage}" alt="${book.title}" class="book-cover img-fluid"
                              onerror="this.onerror=null;this.src='images/default_cover.jpg';">
-                        <h4 class="book-title">${book.title}</h4>
+                        <h4 class="book-title mt-2">${book.title}</h4>
                         <p><strong>Author:</strong> ${book.author}</p>
                         <p><strong>Genre:</strong> ${book.genre ? book.genre.replace("_", " ") : "Unknown"}</p>
-                      </div>
-                    </li>
+                    </div>
                 `;
+
                 list.appendChild(bookCol);
             });
 
