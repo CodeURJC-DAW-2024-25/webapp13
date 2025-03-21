@@ -54,6 +54,7 @@ public class BookRestController {
         }
     }
 
+    // Paginated books API
     @GetMapping
     public ResponseEntity<Page<Book>> getAllBooks(
             @RequestParam(required = false) String title,
@@ -99,25 +100,6 @@ public class BookRestController {
         }
         bookService.delete(id);
         return ResponseEntity.noContent().build();
-    }
-
-    // Paginated books API
-    @GetMapping
-    public ResponseEntity<Map<String, Object>> getBooks(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "8") int size
-    ) {
-        Page<Book> books = bookService.getBooks(page, size);
-
-        // Convert Page<Book> to a stable JSON format
-        Map<String, Object> response = new HashMap<>();
-        response.put("content", books.getContent());  // List of books
-        response.put("currentPage", books.getNumber());
-        response.put("totalPages", books.getTotalPages());
-        response.put("totalItems", books.getTotalElements());
-        response.put("last", books.isLast());
-
-        return ResponseEntity.ok(response);
     }
 
     // Books per genre (for graphs or analytics)
