@@ -107,4 +107,17 @@ public class BookRestController {
     public ResponseEntity<Map<String, Long>> getBooksPerGenre() {
         return ResponseEntity.ok(bookService.getBooksPerGenre());
     }
+
+    // Search books by title, author or genre
+    @GetMapping("/search")
+    public ResponseEntity<Page<Book>> searchBooks(
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String author,
+            @RequestParam(required = false) String genre,
+            Pageable pageable) {
+
+        return ResponseEntity.ok(
+                bookService.searchBooks(title, author, genre, pageable)
+        );
+    }
 }

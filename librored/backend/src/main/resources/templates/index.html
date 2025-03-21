@@ -99,15 +99,39 @@
                 </div>
             </div>
         </div>
+        <div class="container mt-5">
+            <form id="search-form" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label for="filter-title" class="form-label">Title</label>
+                    <input type="search" id="filter-title" class="form-control" placeholder="Search title">
+                </div>
+                <div class="col-md-4">
+                    <label for="filter-author" class="form-label">Author</label>
+                    <input type="search" id="filter-author" class="form-control" placeholder="Search author">
+                </div>
+                <div class="col-md-4">
+                    <label for="filter-genre" class="form-label">Genre</label>
+                    <select id="filter-genre" class="form-select">
+                            <option value="">All Genres</option>
+                    </select>
+                </div>
+                <div class="col-md-12 text-end">
+                    <button type="submit" class="btn btn-success">Search</button>
+                </div>
+            </form>
+        </div>
+
         <div id="books-container">
             <ul class="row" id="book-list" >
                 <!-- Book list will be inserted here with AJAX-->
             </ul>
         </div>
             <!-- "Load More" button -->
-            <button id="load-more" style="display: none;">Load More</button>
+            <div class="text-center mt-4">
+                <button id="load-more" class="btn btn-primary">Load More</button>
+            </div>
         </div>
-    </div>
+</div>
 </div>
 <!-- product-area end -->
 
@@ -174,72 +198,110 @@
 
 <!-- AJAX SCRIPT -->
 <script>
-    let currentPage = 0;  // Ensure this starts at 0
+    let currentPage = 0;
     const pageSize = 8;
 
-    // Fetch books from API
-    async function fetchBooks(page, size, append = false) {
+    let activeFilters = {
+        title: "",
+        author: "",
+        genre: ""
+    };
+
+    const spinner = document.getElementById("loading-spinner");
+
+    async function loadGenres() {
         try {
-            if (isNaN(page)) page = 0;  // Ensure valid page number
-
-            const response = await fetch(`/api/books?page=${page}&size=${size}`);
-            if (!response.ok) throw new Error("Failed to fetch books");
-
+            const response = await fetch('/api/books/books-per-genre');
             const data = await response.json();
 
-            if (!append) {
-                $("#book-list").empty(); // Clear the list only for first load
+            const genreSelect = document.getElementById('filter-genre');
+            genreSelect.innerHTML = '<option value="">All Genres</option>'; // reset dropdown
+
+            Object.keys(data).forEach(genre => {
+                const option = document.createElement('option');
+                option.value = genre;
+                option.textContent = genre;
+                genreSelect.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Error loading genres:', error);
+        }
+    }
+
+    async function loadFilteredBooks(reset = false) {
+        if (reset) {
+            document.getElementById("book-list").innerHTML = "";
+            currentPage = 0;
+            document.getElementById("load-more").disabled = false;
+            document.getElementById("load-more").innerText = "Load More";
+        }
+
+        const params = new URLSearchParams({
+            page: currentPage,
+            size: pageSize
+        });
+
+        if (activeFilters.title) params.append("title", activeFilters.title);
+        if (activeFilters.author) params.append("author", activeFilters.author);
+        if (activeFilters.genre) params.append("genre", activeFilters.genre);
+
+        spinner.style.display = "block";
+
+        try {
+            const response = await fetch(`/api/books/search?${params}`);
+            const data = await response.json();
+            const books = data.content;
+
+            const list = document.getElementById("book-list");
+
+            books.forEach(book => {
+                const bookCol = document.createElement("div");
+                bookCol.className = "col-md-4";
+
+                const coverImage = `/api/books/${book.id}/cover`;
+
+                bookCol.innerHTML = `
+                    <li class="col-md-3 book-item">
+                      <div class="book-card">
+                        <img src="${coverImage}" alt="${book.title}" class="book-cover"
+                             onerror="this.onerror=null;this.src='images/default_cover.jpg';">
+                        <h4 class="book-title">${book.title}</h4>
+                        <p><strong>Author:</strong> ${book.author}</p>
+                        <p><strong>Genre:</strong> ${book.genre ? book.genre.replace("_", " ") : "Unknown"}</p>
+                      </div>
+                    </li>
+                `;
+                list.appendChild(bookCol);
+            });
+
+            if (data.last) {
+                const btn = document.getElementById("load-more");
+                btn.disabled = true;
+                btn.innerText = "No more books";
             }
 
-            appendBooksToPage(data.content);
-            updatePagination(data);
-        } catch (error) {
-            console.error('Error fetching books:', error);
+            currentPage++;
+        } catch (err) {
+            console.error("Error loading books:", err);
+        } finally {
+            spinner.style.display = "none";
         }
     }
 
-    // Append books to the page
-    function appendBooksToPage(books) {
-        books.forEach(book => {
-            let coverImage = `/api/books/${book.id}/cover`;
-
-            $("#book-list").append(`
-            <li class="col-md-3 book-item">
-                <div class="book-card">
-                    <img src="${coverImage}" alt="${book.title}" class="book-cover"
-                         onerror="this.onerror=null;this.src='images/default_cover.jpg';">
-                    <h4 class="book-title">${book.title}</h4>
-                    <p><strong>Author:</strong> ${book.author}</p>
-                    <p><strong>Genre:</strong> ${book.genre ? book.genre.replace("_", " ") : "Unknown"}</p>
-                </div>
-            </li>
-        `);
-        });
-    }
-
-    // Update pagination and toggle "LOAD MORE" button
-    function updatePagination(data) {
-        currentPage = data.currentPage !== undefined ? data.currentPage : 0;  // Ensure valid page number
-        if (data.last) {
-            $("#load-more").hide(); // Hide the button when no more books
-        } else {
-            $("#load-more").show();
-        }
-    }
-
-    // "Load More" button logic
-    $("#load-more").click(() => {
-        if (isNaN(currentPage)) currentPage = 0;  // Ensure valid page number
-        currentPage++; // Move to the next page
-        fetchBooks(currentPage, pageSize, true); // Append new books
+    document.getElementById("search-form").addEventListener("submit", function (e) {
+        e.preventDefault();
+        activeFilters.title = document.getElementById("filter-title").value;
+        activeFilters.author = document.getElementById("filter-author").value;
+        activeFilters.genre = document.getElementById("filter-genre").value;
+        loadFilteredBooks(true);
     });
 
-    // Initial load
-    fetchBooks(0, pageSize);
+    document.getElementById("load-more").addEventListener("click", () => loadFilteredBooks());
 
-
-
-
+    window.addEventListener("load", () => {
+        loadGenres();
+        loadFilteredBooks(true);
+    });
 </script>
 
 </body>

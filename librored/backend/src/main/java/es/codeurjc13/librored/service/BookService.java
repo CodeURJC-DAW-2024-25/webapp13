@@ -106,4 +106,13 @@ public class BookService {
     public Page<Book> findAllPage(Pageable pageable) {
         return bookRepository.findAll(pageable);
     }
+
+    public Page<Book> searchBooks(String title, String author, String genre, Pageable pageable) {
+        return bookRepository.searchBooks(
+                (title != null && !title.isEmpty()) ? title : null,
+                (author != null && !author.isEmpty()) ? author : null,
+                (genre != null && !genre.isEmpty()) ? genre : null,
+                pageable
+        );
+    }
 }

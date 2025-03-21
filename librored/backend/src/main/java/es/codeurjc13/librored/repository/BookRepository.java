@@ -43,4 +43,15 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
     // Custom query method to find books by title (case-insensitive search with pagination)
     Page<Book> findByTitleContainingIgnoreCase(String title, Pageable pageable);
+
+    // Custom query method to find books by title, author or genre (case-insensitive search with pagination)
+    @Query("SELECT b FROM Book b WHERE " +
+            "(:title IS NULL OR LOWER(b.title) LIKE LOWER(CONCAT('%', :title, '%'))) AND " +
+            "(:author IS NULL OR LOWER(b.author) LIKE LOWER(CONCAT('%', :author, '%'))) AND " +
+            "(:genre IS NULL OR LOWER(b.genre) LIKE LOWER(CONCAT('%', :genre, '%')))")
+    Page<Book> searchBooks(@Param("title") String title,
+                           @Param("author") String author,
+                           @Param("genre") String genre,
+                           Pageable pageable);
+
 }
