@@ -99,6 +99,7 @@
                 </div>
             </div>
         </div>
+        <!-- Search-->
         <div class="container mt-5">
             <form id="search-form" class="row g-3 align-items-end">
                 <div class="col-md-4">
@@ -120,7 +121,7 @@
                 </div>
             </form>
         </div>
-
+        <!-- Books Display -->
         <div class="container mt-4">
             <div class="row justify-content-center" id="book-list">
                 <!-- Book list will be inserted here with AJAX -->
@@ -257,25 +258,22 @@
             const data = await response.json();
             const books = data.content;
 
+            const template = document.getElementById('book-template').innerHTML;
             const list = document.getElementById("book-list");
 
             books.forEach(book => {
+                const view = {
+                    id: book.id,
+                    title: book.title,
+                    author: book.author,
+                    genre: book.genre ? book.genre.replace("_", " ") : "Unknown",
+                    coverImage: `/api/books/${book.id}/cover`
+                };
+
+                const rendered = Mustache.render(template, view);
                 const bookCol = document.createElement("div");
-                bookCol.className = "col-md-4";
-
-                const coverImage = `/api/books/${book.id}/cover`;
-
                 bookCol.className = "col-lg-4 col-md-6 col-sm-12 d-flex justify-content-center";
-                bookCol.innerHTML = `
-                    <div class="book-card text-center p-3 shadow-sm">
-                        <img src="${coverImage}" alt="${book.title}" class="book-cover img-fluid"
-                             onerror="this.onerror=null;this.src='images/default_cover.jpg';">
-                        <h4 class="book-title mt-2">${book.title}</h4>
-                        <p><strong>Author:</strong> ${book.author}</p>
-                        <p><strong>Genre:</strong> ${book.genre ? book.genre.replace("_", " ") : "Unknown"}</p>
-                    </div>
-                `;
-
+                bookCol.innerHTML = rendered;
                 list.appendChild(bookCol);
             });
 
@@ -308,6 +306,18 @@
         loadFilteredBooks(true);
     });
 </script>
+<script id="book-template" type="x-tmpl-mustache">
+      <li class="col-md-3 book-item">
+        <div class="book-card">
+          <img src="{{coverImage}}" alt="{{title}}" class="book-cover"
+               onerror="this.onerror=null;this.src='images/default_cover.jpg';">
+          <h4 class="book-title">{{title}}</h4>
+          <p><strong>Author:</strong> {{author}}</p>
+          <p><strong>Genre:</strong> {{genre}}</p>
+        </div>
+      </li>
+</script>
+
 
 </body>
 
