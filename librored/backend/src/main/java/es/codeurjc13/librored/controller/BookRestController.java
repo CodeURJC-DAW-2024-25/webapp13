@@ -74,20 +74,38 @@ public class BookRestController {
 
     //  Update an existing book
     @PutMapping("/{id}")
-    public ResponseEntity<Book> updateBook(@PathVariable Long id, @RequestBody Book book) {
+    public ResponseEntity<Book> updateBook(
+            @PathVariable Long id,
+            @RequestBody Book updatedBook,
+            Authentication authentication) {
+
         if (!bookService.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
-        book.setId(id);
-        return ResponseEntity.ok(bookService.save(book));
+
+        if (!bookService.isOwnerOrAdmin(id, authentication.getName(), authentication.getAuthorities())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        // keep the original owner
+        Book existingBook = bookService.findBookById(id);
+        updatedBook.setId(id);
+        updatedBook.setOwner(existingBook.getOwner());
+
+        return ResponseEntity.ok(bookService.save(updatedBook));
     }
 
     //  Delete a book
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteBook(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteBook(@PathVariable Long id, Authentication authentication) {
         if (!bookService.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
+
+        if (!bookService.isOwnerOrAdmin(id, authentication.getName(), authentication.getAuthorities())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
         bookService.delete(id);
         return ResponseEntity.noContent().build();
     }

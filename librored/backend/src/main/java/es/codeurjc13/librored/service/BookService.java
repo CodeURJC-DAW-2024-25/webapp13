@@ -10,6 +10,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
@@ -157,6 +158,19 @@ public class BookService {
         book.setCoverPicFile(null);
         book.setCoverPicUrl(null);
         bookRepository.save(book);
+    }
+
+    public boolean isOwnerOrAdmin(Long bookId, String userEmail, Collection<? extends GrantedAuthority> authorities) {
+        Optional<Book> bookOpt = bookRepository.findById(bookId);
+        if (bookOpt.isEmpty()) {
+            return false;
+        }
+
+        Book book = bookOpt.get();
+        boolean isAdmin = authorities.stream()
+                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+
+        return isAdmin || book.getOwner().getEmail().equals(userEmail);
     }
 
 }
