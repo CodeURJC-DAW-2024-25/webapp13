@@ -104,7 +104,6 @@ public class BookService {
         return saved;
     }
 
-
     // Check if a book exists by ID
     public boolean existsById(Long id) {
         return !bookRepository.existsById(id);
@@ -120,12 +119,7 @@ public class BookService {
     }
 
     public Page<Book> searchBooks(String title, String author, String genre, Pageable pageable) {
-        return bookRepository.searchBooks(
-                (title != null && !title.isEmpty()) ? title : null,
-                (author != null && !author.isEmpty()) ? author : null,
-                (genre != null && !genre.isEmpty()) ? genre : null,
-                pageable
-        );
+        return bookRepository.searchBooks((title != null && !title.isEmpty()) ? title : null, (author != null && !author.isEmpty()) ? author : null, (genre != null && !genre.isEmpty()) ? genre : null, pageable);
     }
 
     // Image Endpoint related methods
@@ -167,8 +161,7 @@ public class BookService {
         }
 
         Book book = bookOpt.get();
-        boolean isAdmin = authorities.stream()
-                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+        boolean isAdmin = authorities.stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
 
         return isAdmin || book.getOwner().getEmail().equals(userEmail);
     }
