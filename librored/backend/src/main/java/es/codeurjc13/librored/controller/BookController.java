@@ -119,11 +119,11 @@ public class BookController {
         try {
             if (coverImage != null && !coverImage.isEmpty()) {
                 // Convert uploaded image to Blob and store it
-                book.setCoverPic(new SerialBlob(coverImage.getBytes()));
+                book.setCoverPicFile(new SerialBlob(coverImage.getBytes()));
             } else {
                 // Use the default cover image from resources
                 byte[] defaultImageBytes = Files.readAllBytes(Paths.get("src/main/resources/static/images/default_cover.jpg"));
-                book.setCoverPic(new SerialBlob(defaultImageBytes));
+                book.setCoverPicFile(new SerialBlob(defaultImageBytes));
             }
         } catch (IOException | SQLException e) {
             throw new RuntimeException("Error processing cover image", e);
@@ -141,11 +141,11 @@ public class BookController {
     public ResponseEntity<Object> downloadImage(@PathVariable long id) throws SQLException {
 
         Optional<Book> book = bookService.getBookById(id);
-        if (book.isPresent() && book.get().getCoverPic() != null) {
+        if (book.isPresent() && book.get().getCoverPicFile() != null) {
 
-            Resource file = new InputStreamResource(book.get().getCoverPic().getBinaryStream());
+            Resource file = new InputStreamResource(book.get().getCoverPicFile().getBinaryStream());
 
-            return ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, "image/jpeg").contentLength(book.get().getCoverPic().length()).body(file);
+            return ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, "image/jpeg").contentLength(book.get().getCoverPicFile().length()).body(file);
 
         } else {
             return ResponseEntity.notFound().build();
@@ -155,7 +155,7 @@ public class BookController {
     private void setCoverPic(Book book, MultipartFile imageField) throws IOException, SQLException {
 
         if (!imageField.isEmpty()) {
-            book.setCoverPic(BlobProxy.generateProxy(imageField.getInputStream(), imageField.getSize()));
+            book.setCoverPicFile(BlobProxy.generateProxy(imageField.getInputStream(), imageField.getSize()));
         }
     }
 
