@@ -3,16 +3,19 @@ package es.codeurjc13.librored.service;
 import es.codeurjc13.librored.model.Book;
 import es.codeurjc13.librored.model.User;
 import es.codeurjc13.librored.repository.BookRepository;
+import org.hibernate.engine.jdbc.BlobProxy;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.io.InputStream;
+import java.net.URI;
+import java.sql.SQLException;
+import java.util.*;
 
 @Service
 public class BookService {
@@ -90,12 +93,20 @@ public class BookService {
 
     // Save a new or existing book
     public Book save(Book book) {
-        return bookRepository.save(book);
+        Book saved = bookRepository.save(book);
+
+        if (saved.getCoverPicUrl() == null || saved.getCoverPicUrl().isEmpty()) {
+            saved.setCoverPicUrl("/api/books/" + saved.getId() + "/cover");
+            saved = bookRepository.save(saved); // Save again to persist URL
+        }
+
+        return saved;
     }
+
 
     // Check if a book exists by ID
     public boolean existsById(Long id) {
-        return bookRepository.existsById(id);
+        return !bookRepository.existsById(id);
     }
 
     // Delete a book by ID
@@ -115,4 +126,37 @@ public class BookService {
                 pageable
         );
     }
+
+    // Image Endpoint related methods
+    public void createBookImage(long id, URI location, InputStream inputStream, long size) {
+        Book book = bookRepository.findById(id).orElseThrow();
+        book.setCoverPicUrl(location.toString());
+        book.setCoverPicFile(BlobProxy.generateProxy(inputStream, size));
+        bookRepository.save(book);
+    }
+
+    public Resource getBookImage(long id) throws SQLException {
+        Book book = bookRepository.findById(id).orElseThrow();
+        if (book.getCoverPicFile() != null) {
+            return new InputStreamResource(book.getCoverPicFile().getBinaryStream());
+        } else {
+            throw new NoSuchElementException();
+        }
+    }
+
+    public void replaceBookImage(long id, InputStream inputStream, long size) {
+        Book book = bookRepository.findById(id).orElseThrow();
+        if (book.getCoverPicUrl() == null) throw new NoSuchElementException();
+        book.setCoverPicFile(BlobProxy.generateProxy(inputStream, size));
+        bookRepository.save(book);
+    }
+
+    public void deleteBookImage(long id) {
+        Book book = bookRepository.findById(id).orElseThrow();
+        if (book.getCoverPicUrl() == null) throw new NoSuchElementException();
+        book.setCoverPicFile(null);
+        book.setCoverPicUrl(null);
+        bookRepository.save(book);
+    }
+
 }
