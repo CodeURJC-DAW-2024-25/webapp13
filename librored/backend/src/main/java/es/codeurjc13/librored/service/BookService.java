@@ -78,4 +78,41 @@ public class BookService {
         return bookRepository.findRecommendedBooks(userId);
     }
 
+    // Find books by title with pagination
+    public Page<Book> findByTitle(String title, Pageable pageable) {
+        return bookRepository.findByTitleContainingIgnoreCase(title, pageable);
+    }
+
+    // Find a book by ID
+    public Optional<Book> findById(Long id) {
+        return bookRepository.findById(id);
+    }
+
+    // Save a new or existing book
+    public Book save(Book book) {
+        return bookRepository.save(book);
+    }
+
+    // Check if a book exists by ID
+    public boolean existsById(Long id) {
+        return bookRepository.existsById(id);
+    }
+
+    // Delete a book by ID
+    public void delete(Long id) {
+        bookRepository.deleteById(id);
+    }
+
+    public Page<Book> findAllPage(Pageable pageable) {
+        return bookRepository.findAll(pageable);
+    }
+
+    public Page<Book> searchBooks(String title, String author, String genre, Pageable pageable) {
+        return bookRepository.searchBooks(
+                (title != null && !title.isEmpty()) ? title : null,
+                (author != null && !author.isEmpty()) ? author : null,
+                (genre != null && !genre.isEmpty()) ? genre : null,
+                pageable
+        );
+    }
 }
