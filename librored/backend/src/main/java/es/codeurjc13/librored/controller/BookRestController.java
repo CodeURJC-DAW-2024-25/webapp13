@@ -1,6 +1,7 @@
 package es.codeurjc13.librored.controller;
 
 import es.codeurjc13.librored.model.Book;
+import es.codeurjc13.librored.model.User;
 import es.codeurjc13.librored.service.BookService;
 import es.codeurjc13.librored.service.UserService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -12,10 +13,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.HashMap;
 import java.util.Map;
 
 @Tag(name = "Books", description = "Book management API")
@@ -23,10 +24,10 @@ import java.util.Map;
 @RequestMapping("/api/books")
 public class BookRestController {
 
-    @Autowired
+
     private final BookService bookService;
 
-    @Autowired
+
     private final UserService userService;
 
     public BookRestController(BookService bookService, UserService userService) {
@@ -77,8 +78,14 @@ public class BookRestController {
 
     //  Create a new book
     @PostMapping
-    public ResponseEntity<Book> createBook(@RequestBody Book book) {
+    public ResponseEntity<Book> createBook(@RequestBody Book book, Authentication authentication) {
+        String email = authentication.getName();
+        User user = userService.getUserByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found: " + email));
+
+        book.setOwner(user);
         Book savedBook = bookService.save(book);
+
         return ResponseEntity.created(URI.create("/api/books/" + savedBook.getId())).body(savedBook);
     }
 
