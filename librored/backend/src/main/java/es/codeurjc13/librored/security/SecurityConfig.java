@@ -65,10 +65,16 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/books/{id}").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/books/{id}/cover").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/books").permitAll()
+                        .requestMatchers("/api/books/*/cover").permitAll()
+
                         // Allow POST, PUT, DELETE only for authenticated users
-                        .requestMatchers(HttpMethod.POST, "/api/books").authenticated() // Require auth for POST
-                        .requestMatchers(HttpMethod.PUT, "/api/books").authenticated() // Require auth for POST
-                        .requestMatchers(HttpMethod.DELETE, "/api/books").authenticated() // Require auth for POST
+                        .requestMatchers(HttpMethod.POST, "/api/books/**").authenticated() // Require auth for POST
+                        .requestMatchers(HttpMethod.PUT, "/api/books/**").authenticated() // Require auth for POST
+                        .requestMatchers(HttpMethod.DELETE, "/api/books/**").authenticated() // Require auth for POST
+                        .requestMatchers(HttpMethod.POST, "/api/books/*/cover").authenticated() // Require auth for POST
+                        .requestMatchers(HttpMethod.PUT, "/api/books/*/cover").authenticated() // Require auth for POST
+                        .requestMatchers(HttpMethod.DELETE, "/api/books/*/cover").authenticated() // Require auth for POST
+
 
 
                         // API access: Only logged-in users
