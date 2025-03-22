@@ -18,11 +18,12 @@ public class Book {
 
     @Column(columnDefinition = "TEXT")
     private String description;
-    //private String coverPic;
 
     @Lob
-    @JsonIgnore // 👈 This prevents serialization issues
-    private Blob coverPic;
+    @JsonIgnore // This prevents serialization issues
+    private Blob coverPicFile;
+    private String coverPicUrl; // This is the URL of the image (e.g. "/api/books/{id}/cover")
+
 
     @ManyToOne
     @JoinColumn(name = "owner_id", nullable = false, foreignKey = @ForeignKey(name = "FK_book_owner"))
@@ -49,7 +50,8 @@ public class Book {
         this.author = author;
         this.genre = genre;
         this.description = description;
-        this.coverPic = null;
+        this.coverPicFile = null; // Will be filled in when image is uploaded
+        this.coverPicUrl = null; // Optional, but make it explicit
         this.owner = owner;
     }
 
@@ -94,22 +96,21 @@ public class Book {
         this.description = description;
     }
 
-    public Blob getCoverPic() {
-        return coverPic;
+    public Blob getCoverPicFile() {
+        return coverPicFile;
     }
 
-    public void setCoverPic(Blob coverPic) {
-        this.coverPic = coverPic;
+    public void setCoverPicFile(Blob coverPicFile) {
+        this.coverPicFile = coverPicFile;
     }
 
     public String getCoverPicUrl() {
-        if (this.coverPic != null) {
-            return "/books/" + this.id + "/image";
-        } else {
-            return "/images/default_cover.jpg";
-        }
+        return coverPicUrl;
     }
 
+    public void setCoverPicUrl(String coverPicUrl) {
+        this.coverPicUrl = coverPicUrl;
+    }
 
     // OWNER (it is a user) GETTERS AND SETTERS
     public User getOwner() {
