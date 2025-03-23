@@ -141,7 +141,8 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .formLogin(formLogin -> formLogin
-                        .loginPage("/perform_login")
+                        .loginPage("/login")
+                        .loginProcessingUrl("/perform_login") // Endpoint for login form POST
                         .failureUrl("/login?error=true")
                         .defaultSuccessUrl("/")
                         .permitAll()
