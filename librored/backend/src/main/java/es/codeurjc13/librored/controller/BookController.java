@@ -119,11 +119,11 @@ public class BookController {
         try {
             if (coverImage != null && !coverImage.isEmpty()) {
                 // Convert uploaded image to Blob and store it
-                book.setCoverPicFile(new SerialBlob(coverImage.getBytes()));
+                book.setCoverPic(new SerialBlob(coverImage.getBytes()));
             } else {
                 // Use the default cover image from resources
                 byte[] defaultImageBytes = Files.readAllBytes(Paths.get("src/main/resources/static/images/default_cover.jpg"));
-                book.setCoverPicFile(new SerialBlob(defaultImageBytes));
+                book.setCoverPic(new SerialBlob(defaultImageBytes));
             }
         } catch (IOException | SQLException e) {
             throw new RuntimeException("Error processing cover image", e);
@@ -136,29 +136,34 @@ public class BookController {
     }
 
 
-    // PAINT IMAGE FROM DB
-    @GetMapping("/books/{id}/image")
+    // MANAGE IMAGE FROM DB
+    @PostMapping("/{id}/cover")
+    public String handleCoverUpload(@PathVariable Long id, @RequestParam MultipartFile imageFile) throws IOException {
+        bookService.createBookImage(id, imageFile.getInputStream(), imageFile.getSize());
+        return "redirect:/books/" + id; // o donde quieras redirigir tras subir la imagen
+    }
+
+    @GetMapping("/books/{id}/cover")
     public ResponseEntity<Object> downloadImage(@PathVariable long id) throws SQLException {
 
         Optional<Book> book = bookService.getBookById(id);
-        if (book.isPresent() && book.get().getCoverPicFile() != null) {
+        if (book.isPresent() && book.get().getCoverPic() != null) {
 
-            Resource file = new InputStreamResource(book.get().getCoverPicFile().getBinaryStream());
+            Resource file = new InputStreamResource(book.get().getCoverPic().getBinaryStream());
 
-            return ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, "image/jpeg").contentLength(book.get().getCoverPicFile().length()).body(file);
+            return ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, "image/jpg").contentLength(book.get().getCoverPic().length()).body(file);
 
         } else {
             return ResponseEntity.notFound().build();
         }
     }
 
-    private void setCoverPic(Book book, MultipartFile imageField) throws IOException, SQLException {
+    private void setCoverPic(Book book, MultipartFile imageField) throws IOException {
 
         if (!imageField.isEmpty()) {
-            book.setCoverPicFile(BlobProxy.generateProxy(imageField.getInputStream(), imageField.getSize()));
+            book.setCoverPic(BlobProxy.generateProxy(imageField.getInputStream(), imageField.getSize()));
         }
     }
-
 
     // EDIT
     @GetMapping("/books/edit/{id}")
@@ -178,7 +183,7 @@ public class BookController {
         // Allow users to edit only their own books
         if (!isAdmin && !book.getOwner().getId().equals(user.getId())) {
             System.out.println(" --->  NOT LETTING USER TO EDIT ITS BOOKS");
-            return "redirect:/books";  // ✅ Redirect to `/books` if they try to edit someone else's book
+            return "redirect:/books";  // Redirect to `/books` if they try to edit someone else's book
         }
 
 

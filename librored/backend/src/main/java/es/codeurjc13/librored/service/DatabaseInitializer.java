@@ -163,6 +163,6 @@ public class DatabaseInitializer {
     public void setBookImage(Book book, String classpathResource) throws IOException {
         //book.setImage(true);
         Resource image = new ClassPathResource(classpathResource);
-        book.setCoverPicFile(BlobProxy.generateProxy(image.getInputStream(), image.contentLength()));
+        book.setCoverPic(BlobProxy.generateProxy(image.getInputStream(), image.contentLength()));
     }
 }

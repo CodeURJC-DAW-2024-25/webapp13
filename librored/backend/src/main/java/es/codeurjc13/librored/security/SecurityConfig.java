@@ -5,22 +5,39 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.authorization.AuthorizationDecision;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.core.annotation.Order;
+import org.springframework.security.config.http.SessionCreationPolicy;
 
+/*import es.codeurjc13.librored.security.jwt.JwtRequestFilter;
+import es.codeurjc13.librored.security.jwt.UnauthorizedHandlerJwt;*/
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
+/*
+    @Autowired
+    private JwtRequestFilter jwtRequestFilter;
+
+    @Autowired
+    private UnauthorizedHandlerJwt unauthorizedHandlerJwt;
+*/
+
     @Autowired
     RepositoryUserDetailsService userDetailsService;
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -30,66 +47,84 @@ public class SecurityConfig {
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService);  // ✅ Now using email instead of username
+        authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+        return authConfig.getAuthenticationManager();
+    }
+
+    // === API FILTER CHAIN ===
+    @Bean
+    @Order(1)
+    public SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
+
+        http.authenticationProvider(authenticationProvider());
+        http
+                .securityMatcher("/api/**");
+                //.exceptionHandling(handling -> handling.authenticationEntryPoint(unauthorizedHandlerJwt));
+
+
+        http
+                .authorizeHttpRequests(auth -> auth
+
+                        // Public API endpoints
+                        .requestMatchers(HttpMethod.GET, "/api/books", "/api/books/{id}", "/api/books/{id}/cover").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/books/search", "/api/books/books-per-genre").permitAll()
+
+                        // Private API endpoints
+                        // BOOKS
+                        .requestMatchers(HttpMethod.POST, "/api/books/**").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/books/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/books/**").authenticated()
+                        // USERS
+                        .requestMatchers("/api/users/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+                        // LOANS
+                        .requestMatchers("/api/loans/**").authenticated()
+
+                        // Everything else under /api/** requires authentication
+                        .anyRequest().authenticated()
+                )
+                .httpBasic(httpBasic -> httpBasic.realmName("LibroRed API"));
+
+        // Disable Form login Authentication
+        http.formLogin(AbstractHttpConfigurer::disable);
+
+        // Disable CSRF protection (it is difficult to implement in REST APIs)
+        http.csrf(AbstractHttpConfigurer::disable);
+
+        // Disable Basic Authentication
+        http.httpBasic(AbstractHttpConfigurer::disable);
+
+        // Stateless session
+        http.sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
+        // Add JWT Token filter
+/*        http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class); */
+        return http.build();
+    }
+
+    // === WEB FILTER CHAIN ===
+    @Bean
+    @Order(1)
+    public SecurityFilterChain webFilterChain(HttpSecurity http) throws Exception {
 
         http.authenticationProvider(authenticationProvider());
 
-        //http.csrf(AbstractHttpConfigurer::disable)  // Disable CSRF protection USE only when developing
-
         http
-                .csrf(csrf -> csrf
-                        // TODO: Fix DELETE LOANS
-                        // .ignoringRequestMatchers("/loans/delete/**") // ?!?! Explicitly allow DELETE
-                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()) // Ensure CSRF token is accessible
-                        .ignoringRequestMatchers("/api/**")  // Disable CSRF for all API endpoints
-                )
                 .authorizeHttpRequests(auth -> auth
-                        // Public resources (CSS, JS, Images)
+                        .requestMatchers("/",
+                                "/login",
+                                "/register",
+                                "/error/**",
+                                "/perform_login",
+                                "/loginerror").permitAll()
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
 
-                        // Public pages
-                        .requestMatchers("/", "/login", "/register", "/error/**", "/perform_login", "/loginerror").permitAll()
-
-                        // API access: Public endpoints
-                        // BOOKS
-                        // Allow GET for non-authenticated users
-                        .requestMatchers(HttpMethod.GET, "/api/books").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/books/books-per-genre").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/books/search").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/books/{id}").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/books/{id}/cover").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/books").permitAll()
-                        .requestMatchers("/api/books/*/cover").permitAll()
-
-                        // Allow POST, PUT, DELETE only for authenticated users
-                        .requestMatchers(HttpMethod.POST, "/api/books/**").authenticated() // Require auth for POST
-                        .requestMatchers(HttpMethod.PUT, "/api/books/**").authenticated() // Require auth for POST
-                        .requestMatchers(HttpMethod.DELETE, "/api/books/**").authenticated() // Require auth for POST
-                        .requestMatchers(HttpMethod.POST, "/api/books/*/cover").authenticated() // Require auth for POST
-                        .requestMatchers(HttpMethod.PUT, "/api/books/*/cover").authenticated() // Require auth for POST
-                        .requestMatchers(HttpMethod.DELETE, "/api/books/*/cover").authenticated() // Require auth for POST
-
-
-
-                        // API access: Only logged-in users
-                        // For any other API endpoint not , require authentication for any other method not expressly written
-                        .requestMatchers("/api/**").authenticated() // everything else (POST, DELETE)
-
-                        // USERS
-                        .requestMatchers("/api/users/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")  //  Only users with ROLE_USER or ROLE_ADMIN can access
-                        .requestMatchers("/api/users/verify-password", "/api/users/update-username", "/api/users/update-password").authenticated()
-                        // LOANS
-                        .requestMatchers("/api/loans/valid-borrowers").authenticated() // Allow only authenticated users
-
-
-                        //  Protected actions (only for authenticated users)
-                        .requestMatchers("/users/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")  //  Only users with ROLE_USER or ROLE_ADMIN can access
+                        .requestMatchers("/users/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
                         .requestMatchers("/myaccount").authenticated()
                         .requestMatchers("/users/edit/{id}").access((authentication, request) -> {
                             boolean isAdmin = authentication.get().getAuthorities().stream()
@@ -97,33 +132,27 @@ public class SecurityConfig {
                             boolean isSelf = authentication.get().getName().equals(request.getRequest().getServletPath().split("/")[3]);
                             return new AuthorizationDecision(isAdmin || isSelf);
                         })
-
-                        // Templates only for authenticated users
-                        .requestMatchers("/books").authenticated()
-                        .requestMatchers("/loans").authenticated()
-                        .requestMatchers("/loans/**").authenticated()
-                        .requestMatchers("/recommendations").authenticated()
-
-                        // Admin-only pages
+                        .requestMatchers("/books", "/loans", "/loans/**", "/recommendations").authenticated()
                         .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
 
-                        // Any other request requires authentication
-                        .anyRequest().authenticated())
+                        .anyRequest().authenticated()
+                )
                 .formLogin(formLogin -> formLogin
                         .loginPage("/perform_login")
                         .failureUrl("/login?error=true")
                         .defaultSuccessUrl("/")
-                        .permitAll())
+                        .permitAll()
+                )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/")
-                        .permitAll());
+                        .permitAll()
+                );
 
-        // Basic Authentication
-        // Enable this for REST API clients - Postman
-        http.httpBasic(httpBasic -> httpBasic.realmName("LibroRed API")); //Add this for REST API clients - Postman
+        http
+                .csrf(csrf -> csrf
+                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()));
 
         return http.build();
     }
-
 }

@@ -1,5 +1,8 @@
 package es.codeurjc13.librored.service;
 
+import es.codeurjc13.librored.dto.BookCreateDTO;
+import es.codeurjc13.librored.mapper.BookMapper;
+import es.codeurjc13.librored.dto.BookUpdateDTO;
 import es.codeurjc13.librored.model.Book;
 import es.codeurjc13.librored.model.User;
 import es.codeurjc13.librored.repository.BookRepository;
@@ -14,7 +17,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
-import java.net.URI;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -23,6 +25,9 @@ public class BookService {
 
     @Autowired
     private BookRepository bookRepository;
+
+    @Autowired
+    private BookMapper bookMapper;
 
     public List<Book> findAll() {
         return bookRepository.findAll();
@@ -94,19 +99,12 @@ public class BookService {
 
     // Save a new or existing book
     public Book save(Book book) {
-        Book saved = bookRepository.save(book);
-
-        if (saved.getCoverPicUrl() == null || saved.getCoverPicUrl().isEmpty()) {
-            saved.setCoverPicUrl("/api/books/" + saved.getId() + "/cover");
-            saved = bookRepository.save(saved); // Save again to persist URL
-        }
-
-        return saved;
+        return bookRepository.save(book);
     }
 
     // Check if a book exists by ID
     public boolean existsById(Long id) {
-        return !bookRepository.existsById(id);
+        return bookRepository.existsById(id);
     }
 
     // Delete a book by ID
@@ -123,17 +121,17 @@ public class BookService {
     }
 
     // Image Endpoint related methods
-    public void createBookImage(long id, URI location, InputStream inputStream, long size) {
+    public void createBookImage(long id, InputStream inputStream, long size) {
         Book book = bookRepository.findById(id).orElseThrow();
-        book.setCoverPicUrl(location.toString());
-        book.setCoverPicFile(BlobProxy.generateProxy(inputStream, size));
+        book.setCoverPic(BlobProxy.generateProxy(inputStream, size));
         bookRepository.save(book);
     }
 
     public Resource getBookImage(long id) throws SQLException {
         Book book = bookRepository.findById(id).orElseThrow();
-        if (book.getCoverPicFile() != null) {
-            return new InputStreamResource(book.getCoverPicFile().getBinaryStream());
+
+        if (book.getCoverPic() != null) {
+            return new InputStreamResource(book.getCoverPic().getBinaryStream());
         } else {
             throw new NoSuchElementException();
         }
@@ -141,16 +139,23 @@ public class BookService {
 
     public void replaceBookImage(long id, InputStream inputStream, long size) {
         Book book = bookRepository.findById(id).orElseThrow();
-        if (book.getCoverPicUrl() == null) throw new NoSuchElementException();
-        book.setCoverPicFile(BlobProxy.generateProxy(inputStream, size));
+
+        if (book.getCoverPic() == null) {
+            throw new NoSuchElementException();
+        }
+
+        book.setCoverPic(BlobProxy.generateProxy(inputStream, size));
         bookRepository.save(book);
     }
 
     public void deleteBookImage(long id) {
         Book book = bookRepository.findById(id).orElseThrow();
-        if (book.getCoverPicUrl() == null) throw new NoSuchElementException();
-        book.setCoverPicFile(null);
-        book.setCoverPicUrl(null);
+
+        if (book.getCoverPic() == null) {
+            throw new NoSuchElementException();
+        }
+
+        book.setCoverPic(null);
         bookRepository.save(book);
     }
 
@@ -165,5 +170,21 @@ public class BookService {
 
         return isAdmin || book.getOwner().getEmail().equals(userEmail);
     }
+
+    public Book createBook(BookCreateDTO dto, User owner) {
+        Book book = bookMapper.toDomain(dto);
+        book.setOwner(owner); // asignar manualmente el owner
+        return bookRepository.save(book);
+    }
+
+    public Book updateBook(Long id, BookUpdateDTO dto) {
+        Book book = bookRepository.findById(id).orElseThrow();
+        Book updated = bookMapper.toDomain(dto);
+        updated.setId(id);
+        updated.setOwner(book.getOwner()); // mantener el mismo owner
+        updated.setCoverPic(book.getCoverPic()); // mantener imagen
+        return bookRepository.save(updated);
+    }
+
 
 }

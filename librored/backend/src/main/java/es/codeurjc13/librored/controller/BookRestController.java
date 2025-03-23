@@ -1,46 +1,45 @@
 package es.codeurjc13.librored.controller;
 
+import es.codeurjc13.librored.dto.BookCreateDTO;
+import es.codeurjc13.librored.dto.BookDTO;
+import es.codeurjc13.librored.dto.BookUpdateDTO;
+import es.codeurjc13.librored.mapper.BookMapper;
 import es.codeurjc13.librored.model.Book;
 import es.codeurjc13.librored.model.User;
 import es.codeurjc13.librored.service.BookService;
 import es.codeurjc13.librored.service.UserService;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
 import java.net.URI;
+import java.sql.SQLException;
 import java.util.Map;
-
-import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentRequest;
 
 @Tag(name = "Books", description = "Book management API")
 @RestController
 @RequestMapping("/api/books")
 public class BookRestController {
 
-
     private final BookService bookService;
-
-
     private final UserService userService;
+    private final BookMapper bookMapper;
 
-    public BookRestController(BookService bookService, UserService userService) {
+    public BookRestController(BookService bookService, UserService userService, BookMapper bookMapper) {
         this.bookService = bookService;
         this.userService = userService;
+        this.bookMapper = bookMapper;
     }
 
-    // Paginated books API
     @GetMapping
-    public ResponseEntity<Page<Book>> getAllBooks(
+    public ResponseEntity<Page<BookDTO>> getAllBooks(
             @RequestParam(required = false) String title,
             Pageable pageable) {
 
@@ -48,35 +47,32 @@ public class BookRestController {
                 ? bookService.findByTitle(title, pageable)
                 : bookService.findAllPage(pageable);
 
-        return ResponseEntity.ok(books);
+        return ResponseEntity.ok(books.map(bookMapper::toDTO));
     }
 
-    // Get a single book by ID
     @GetMapping("/{id}")
-    public ResponseEntity<Book> getBook(@PathVariable Long id) {
+    public ResponseEntity<BookDTO> getBook(@PathVariable Long id) {
         return bookService.findById(id)
+                .map(bookMapper::toDTO)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    //  Create a new book
     @PostMapping
-    public ResponseEntity<Book> createBook(@RequestBody Book book, Authentication authentication) {
+    public ResponseEntity<BookDTO> createBook(@RequestBody BookCreateDTO bookDTO, Authentication authentication) {
         String email = authentication.getName();
         User user = userService.getUserByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found: " + email));
 
-        book.setOwner(user);
-        Book savedBook = bookService.save(book);
-
-        return ResponseEntity.created(URI.create("/api/books/" + savedBook.getId())).body(savedBook);
+        Book savedBook = bookService.createBook(bookDTO, user);
+        URI location = URI.create("/api/books/" + savedBook.getId());
+        return ResponseEntity.created(location).body(bookMapper.toDTO(savedBook));
     }
 
-    //  Update an existing book
     @PutMapping("/{id}")
-    public ResponseEntity<Book> updateBook(
+    public ResponseEntity<BookDTO> updateBook(
             @PathVariable Long id,
-            @RequestBody Book updatedBook,
+            @RequestBody BookUpdateDTO dto,
             Authentication authentication) {
 
         if (!bookService.existsById(id)) {
@@ -87,15 +83,10 @@ public class BookRestController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        // keep the original owner
-        Book existingBook = bookService.findBookById(id);
-        updatedBook.setId(id);
-        updatedBook.setOwner(existingBook.getOwner());
-
-        return ResponseEntity.ok(bookService.save(updatedBook));
+        Book updatedBook = bookService.updateBook(id, dto);
+        return ResponseEntity.ok(bookMapper.toDTO(updatedBook));
     }
 
-    //  Delete a book
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBook(@PathVariable Long id, Authentication authentication) {
         if (!bookService.existsById(id)) {
@@ -110,70 +101,48 @@ public class BookRestController {
         return ResponseEntity.noContent().build();
     }
 
-    // Books per genre (for graphs or analytics)
     @GetMapping("/books-per-genre")
     public ResponseEntity<Map<String, Long>> getBooksPerGenre() {
         return ResponseEntity.ok(bookService.getBooksPerGenre());
     }
 
-    // Search books by title, author or genre
     @GetMapping("/search")
-    public ResponseEntity<Page<Book>> searchBooks(
+    public ResponseEntity<Page<BookDTO>> searchBooks(
             @RequestParam(required = false) String title,
             @RequestParam(required = false) String author,
             @RequestParam(required = false) String genre,
             Pageable pageable) {
 
-        return ResponseEntity.ok(
-                bookService.searchBooks(title, author, genre, pageable)
-        );
+        Page<Book> books = bookService.searchBooks(title, author, genre, pageable);
+        return ResponseEntity.ok(books.map(bookMapper::toDTO));
     }
 
-    // API Image Endpoint related methods
-
-    // Get the cover of a book by id
-    @GetMapping("/{id}/cover")
-    public ResponseEntity<Resource> getBookCover(@PathVariable Long id) {
-        try {
-            Book book = bookService.findBookById(id);
-
-            if (book.getCoverPicFile() == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-            }
-
-            Resource file = new InputStreamResource(book.getCoverPicFile().getBinaryStream());
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_TYPE, "image/jpeg")
-                    .body(file);
-
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
+    // ---------- Cover Image Endpoints ----------
 
     @PostMapping("/{id}/cover")
-    public ResponseEntity<Object> createBookImage(
-            @PathVariable long id,
-            @RequestParam MultipartFile imageFile) throws IOException {
-
-        URI location = fromCurrentRequest().build().toUri();
-        bookService.createBookImage(id, location, imageFile.getInputStream(), imageFile.getSize());
+    public ResponseEntity<Object> uploadCover(@PathVariable long id, @RequestParam MultipartFile imageFile) throws IOException {
+        bookService.createBookImage(id, imageFile.getInputStream(), imageFile.getSize());
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
         return ResponseEntity.created(location).build();
     }
 
-    @PutMapping("/{id}/cover")
-    public ResponseEntity<Object> replaceBookImage(
-            @PathVariable long id,
-            @RequestParam MultipartFile imageFile) throws IOException {
+    @GetMapping("/{id}/cover")
+    public ResponseEntity<Resource> downloadCover(@PathVariable long id) throws SQLException {
+        Resource image = bookService.getBookImage(id);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_TYPE, "image/jpg")
+                .body(image);
+    }
 
+    @PutMapping("/{id}/cover")
+    public ResponseEntity<Object> replaceCover(@PathVariable long id, @RequestParam MultipartFile imageFile) throws IOException {
         bookService.replaceBookImage(id, imageFile.getInputStream(), imageFile.getSize());
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{id}/cover")
-    public ResponseEntity<Object> deleteBookImage(@PathVariable long id) {
+    public ResponseEntity<Object> deleteCover(@PathVariable long id) {
         bookService.deleteBookImage(id);
         return ResponseEntity.noContent().build();
     }
-
 }
