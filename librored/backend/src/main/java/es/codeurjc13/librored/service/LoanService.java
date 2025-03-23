@@ -40,8 +40,13 @@ public class LoanService {
                         "Lender cannot be changed. The loan must remain under " + loan.getLender().getUsername() + ".");
             }
 
-            // ✅ Ensure the book belongs to the lender and is not currently loaned
-            if (updatedLoan.getBook() != null) {
+            //  Ensure the book belongs to the lender and is not currently loaned
+            /*
+            - It compares the ID of the original book with the one you want to assign.
+            - Only if they are different, it checks that the new book is available.
+            - If it's the same book, it does **not** throw an exception, even if the book is currently loaned (because it's part of this same loan).
+            */
+            if (updatedLoan.getBook() != null && !updatedLoan.getBook().getId().equals(loan.getBook().getId())) {
                 List<Book> availableBooks = bookRepository.findAvailableBooksByOwnerId(loan.getLender().getId());
                 if (!availableBooks.contains(updatedLoan.getBook())) {
                     throw new IllegalArgumentException(
