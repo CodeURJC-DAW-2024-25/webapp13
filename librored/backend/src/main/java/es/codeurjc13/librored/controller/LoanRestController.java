@@ -10,6 +10,11 @@ import es.codeurjc13.librored.model.User;
 import es.codeurjc13.librored.service.BookService;
 import es.codeurjc13.librored.service.LoanService;
 import es.codeurjc13.librored.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +29,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/loans")
+@Tag(name = "Loans", description = "Loan management API")
 public class LoanRestController {
 
     private final UserService userService;
@@ -38,6 +44,9 @@ public class LoanRestController {
         this.loanMapper = loanMapper;
     }
 
+    @Operation(summary = "Get valid borrowers", description = "Retrieve a list of users eligible to borrow books from the current user.")
+    @ApiResponse(responseCode = "200", description = "Borrower list retrieved successfully")
+    @ApiResponse(responseCode = "401", description = "User is not authenticated")
     @GetMapping("/valid-borrowers")
     public ResponseEntity<List<User>> getValidBorrowers(@AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails) {
 
@@ -52,8 +61,9 @@ public class LoanRestController {
         return ResponseEntity.ok(borrowers);
     }
 
-    // GET ALL with pagination
     @GetMapping
+    @Operation(summary = "Get all loans", description = "Retrieve a paginated list of all loans.")
+    @ApiResponse(responseCode = "200", description = "Loans retrieved successfully")
     public ResponseEntity<Page<LoanDTO>> getAllLoans(Pageable pageable) {
         List<LoanDTO> dtos = loanService.getAllLoans().stream()
                 .map(loanMapper::toDTO)
@@ -66,7 +76,9 @@ public class LoanRestController {
         return ResponseEntity.ok(page);
     }
 
-    // GET BY ID
+    @Operation(summary = "Get loan by ID", description = "Retrieve a specific loan by its ID.")
+    @ApiResponse(responseCode = "200", description = "Loan found", content = @Content(schema = @Schema(implementation = LoanDTO.class)))
+    @ApiResponse(responseCode = "404", description = "Loan not found")
     @GetMapping("/{id}")
     public ResponseEntity<LoanDTO> getLoanById(@PathVariable Long id) {
         return loanService.getLoanById(id)
@@ -75,7 +87,9 @@ public class LoanRestController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // CREATE
+    @Operation(summary = "Create loan", description = "Create a new loan between a lender and borrower for a book.")
+    @ApiResponse(responseCode = "201", description = "Loan created", content = @Content(schema = @Schema(implementation = LoanDTO.class)))
+    @ApiResponse(responseCode = "404", description = "Book or user not found")
     @PostMapping
     public ResponseEntity<LoanDTO> createLoan(@RequestBody LoanCreateDTO dto) {
         Book book = bookService.getBookById(dto.bookId()).orElseThrow();
@@ -95,7 +109,10 @@ public class LoanRestController {
         return ResponseEntity.created(location).body(loanMapper.toDTO(created));
     }
 
-    // UPDATE
+    @Operation(summary = "Update loan", description = "Update an existing loan by ID.")
+    @ApiResponse(responseCode = "200", description = "Loan updated successfully")
+    @ApiResponse(responseCode = "400", description = "Invalid loan data provided")
+    @ApiResponse(responseCode = "404", description = "Loan not found")
     @PutMapping("/{id}")
     public ResponseEntity<?> updateLoan(@PathVariable Long id, @RequestBody LoanUpdateDTO dto) {
         try {
@@ -122,7 +139,9 @@ public class LoanRestController {
     }
 
 
-    // DELETE
+    @Operation(summary = "Delete loan", description = "Delete a loan by its ID.")
+    @ApiResponse(responseCode = "204", description = "Loan deleted successfully")
+    @ApiResponse(responseCode = "404", description = "Loan not found")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteLoan(@PathVariable Long id) {
         if (loanService.getLoanById(id).isEmpty()) {
