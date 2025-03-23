@@ -1,7 +1,6 @@
 package es.codeurjc13.librored.service;
 
 import es.codeurjc13.librored.model.User;
-import es.codeurjc13.librored.repository.LoanRepository;
 import es.codeurjc13.librored.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,9 +14,6 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private LoanRepository loanRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -98,4 +94,25 @@ public class UserService {
     public List<User> getValidBorrowers(User lender) {
         return userRepository.findAllValidBorrowers(lender);
     }
+
+    public List<User> findAll() {
+        return userRepository.findAll();
+    }
+
+    public Optional<User> findById(Long id) {
+        return userRepository.findById(id);
+    }
+
+    public User save(User user) {
+        return userRepository.save(user);
+    }
+
+    public boolean existsById(Long id) {
+        return userRepository.existsById(id);
+    }
+
+    public void delete(Long id) {
+        userRepository.deleteById(id);
+    }
+
 }

@@ -34,14 +34,19 @@ public class LoanService {
         if (existingLoanOpt.isPresent()) {
             Loan loan = existingLoanOpt.get();
 
-            // ✅ Prevent lender change (Fixed Lender Rule)
+            //  Prevent lender change (Fixed Lender Rule)
             if (!loan.getLender().equals(updatedLoan.getLender())) {
                 throw new IllegalArgumentException(
                         "Lender cannot be changed. The loan must remain under " + loan.getLender().getUsername() + ".");
             }
 
-            // ✅ Ensure the book belongs to the lender and is not currently loaned
-            if (updatedLoan.getBook() != null) {
+            //  Ensure the book belongs to the lender and is not currently loaned
+            /*
+            - It compares the ID of the original book with the one you want to assign.
+            - Only if they are different, it checks that the new book is available.
+            - If it's the same book, it does **not** throw an exception, even if the book is currently loaned (because it's part of this same loan).
+            */
+            if (updatedLoan.getBook() != null && !updatedLoan.getBook().getId().equals(loan.getBook().getId())) {
                 List<Book> availableBooks = bookRepository.findAvailableBooksByOwnerId(loan.getLender().getId());
                 if (!availableBooks.contains(updatedLoan.getBook())) {
                     throw new IllegalArgumentException(
@@ -51,12 +56,12 @@ public class LoanService {
                 loan.setBook(updatedLoan.getBook());
             }
 
-            // ✅ Ensure borrower is valid
+            //  Ensure borrower is valid
             if (updatedLoan.getBorrower() != null) {
                 loan.setBorrower(updatedLoan.getBorrower());
             }
 
-            // ✅ Validate start and end dates
+            //  Validate start and end dates
             if (updatedLoan.getStartDate() != null) {
                 loan.setStartDate(updatedLoan.getStartDate());
             }
@@ -68,7 +73,7 @@ public class LoanService {
                 loan.setEndDate(updatedLoan.getEndDate());
             }
 
-            // ✅ Ensure status change is logical
+            //  Ensure status change is logical
             if (updatedLoan.getStatus() != null) {
                 if (loan.getStatus() == Loan.Status.Completed && updatedLoan.getStatus() == Loan.Status.Active) {
                     throw new IllegalArgumentException(
@@ -82,6 +87,21 @@ public class LoanService {
     }
 
     public void createLoan(Book book, User lender, User borrower, LocalDate startDate, LocalDate endDate, Loan.Status status) {
+        // Book must belong to the lender
+        if (!book.getOwner().getId().equals(lender.getId())) {
+            throw new IllegalArgumentException("The book does not belong to the lender.");
+        }
+
+        // Lender and Borrower cannot be the same user
+        if (lender.getId().equals(borrower.getId())) {
+            throw new IllegalArgumentException("Lender and borrower cannot be the same.");
+        }
+
+        // Book must be available to be loaned
+        if (!book.isAvailable()) {
+            throw new IllegalArgumentException("The book is not available.");
+        }
+
         Loan loan = new Loan(book, lender, borrower, startDate, endDate, status);
         loanRepository.save(loan);
     }

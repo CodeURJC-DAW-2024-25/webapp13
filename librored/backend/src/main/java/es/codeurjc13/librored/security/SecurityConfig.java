@@ -8,6 +8,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.authorization.AuthorizationDecision;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -97,7 +98,9 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable);
 
         // Disable Basic Authentication
-        http.httpBasic(AbstractHttpConfigurer::disable);
+        // http.httpBasic(AbstractHttpConfigurer::disable);
+        // Enable Basic Auth ONLY FOR TESTING PURPOSES
+        http.httpBasic(Customizer.withDefaults());
 
         // Stateless session
         http.sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

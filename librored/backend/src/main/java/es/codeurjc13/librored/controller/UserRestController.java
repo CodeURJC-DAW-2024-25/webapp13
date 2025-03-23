@@ -17,18 +17,92 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Map;
 import java.util.Optional;
 
+
+import es.codeurjc13.librored.dto.UserCreateDTO;
+import es.codeurjc13.librored.dto.UserDTO;
+import es.codeurjc13.librored.dto.UserUpdateDTO;
+import es.codeurjc13.librored.mapper.UserMapper;
+import es.codeurjc13.librored.model.User;
+import es.codeurjc13.librored.service.UserService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.*;
+
+import java.net.URI;
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/users")
 public class UserRestController {
 
     private final UserService userService;
+    private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
 
-    public UserRestController(UserService userService, PasswordEncoder passwordEncoder) {
+    public UserRestController(UserService userService, UserMapper userMapper, PasswordEncoder passwordEncoder) {
         this.userService = userService;
+        this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
     }
 
+    // GET ALL
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<UserDTO> getAllUsers() {
+        return userService.findAll().stream()
+                .map(userMapper::toDTO)
+                .toList();
+    }
+
+    // GET BY ID
+    @GetMapping("/{id}")
+    public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
+        return userService.findById(id)
+                .map(userMapper::toDTO)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // CREATE
+    @PostMapping
+    public ResponseEntity<UserDTO> createUser(@RequestBody UserCreateDTO dto) {
+        User user = userMapper.toDomain(dto);
+        user.setEncodedPassword(passwordEncoder.encode(dto.password()));
+        user.setRole(User.Role.ROLE_USER); // Seguridad: nunca se asigna el rol desde el exterior
+
+        User savedUser = userService.save(user);
+
+        URI location = URI.create("/api/users/" + savedUser.getId());
+        return ResponseEntity.created(location).body(userMapper.toDTO(savedUser));
+    }
+
+    // UPDATE
+    @PutMapping("/{id}")
+    public ResponseEntity<UserDTO> updateUser(@PathVariable Long id, @RequestBody UserUpdateDTO dto) {
+        return userService.findById(id)
+                .map(user -> {
+                    userMapper.updateUserFromDto(dto, user);
+                    userService.save(user);
+                    return ResponseEntity.ok(userMapper.toDTO(user));
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // DELETE
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        if (!userService.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+
+        userService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+
+
+    // Custom endpoints for user profile management
     @PostMapping("/update-username")
     public ResponseEntity<Map<String, Object>> updateUsername(
             @AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails,
