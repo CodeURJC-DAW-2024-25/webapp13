@@ -1,5 +1,8 @@
 package es.codeurjc13.librored.security;
 
+import es.codeurjc13.librored.security.jwt.JwtAuthFilter;
+import es.codeurjc13.librored.security.jwt.UnauthorizedHandlerJwt;
+
 import es.codeurjc13.librored.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -18,25 +21,19 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
-/*import es.codeurjc13.librored.security.jwt.JwtRequestFilter;
-import es.codeurjc13.librored.security.jwt.UnauthorizedHandlerJwt;*/
 
 @Configuration
-@EnableWebSecurity
+//@EnableWebSecurity
 public class SecurityConfig {
 
-/*
     @Autowired
-    private JwtRequestFilter jwtRequestFilter;
+    private JwtAuthFilter jwtAuthFilter;
 
     @Autowired
     private UnauthorizedHandlerJwt unauthorizedHandlerJwt;
-*/
-
-    @Autowired
-    RepositoryUserDetailsService userDetailsService;
 
 
     @Bean
@@ -44,14 +41,15 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
+/*    @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
         authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
-    }
+    }*/
 
+    // Used for authenticating in JwtLoginController
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
@@ -62,11 +60,10 @@ public class SecurityConfig {
     @Order(1)
     public SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
 
-        http.authenticationProvider(authenticationProvider());
+        //http.authenticationProvider(authenticationProvider());
         http
-                .securityMatcher("/api/**");
-                //.exceptionHandling(handling -> handling.authenticationEntryPoint(unauthorizedHandlerJwt));
-
+                .securityMatcher("/api/**")
+                .exceptionHandling(e -> e.authenticationEntryPoint(unauthorizedHandlerJwt));
 
         http
                 .authorizeHttpRequests(auth -> auth
@@ -79,6 +76,8 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html"
                         ).permitAll()
+                        .requestMatchers("/api/auth/**", "/api/openlibrary/**").permitAll()
+
 
 
                         // Private API endpoints
@@ -88,13 +87,15 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/books/**").authenticated()
                         // USERS
                         .requestMatchers("/api/users/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         // LOANS
                         .requestMatchers("/api/loans/**").authenticated()
 
                         // Everything else under /api/** requires authentication
                         .anyRequest().authenticated()
                 )
-                .httpBasic(httpBasic -> httpBasic.realmName("LibroRed API"));
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                //.httpBasic(httpBasic -> httpBasic.realmName("LibroRed API"));
 
         // Disable Form login Authentication
         http.formLogin(AbstractHttpConfigurer::disable);
@@ -110,8 +111,6 @@ public class SecurityConfig {
         // Stateless session
         http.sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-        // Add JWT Token filter
-/*        http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class); */
         return http.build();
     }
 
@@ -120,17 +119,20 @@ public class SecurityConfig {
     @Order(2)
     public SecurityFilterChain webFilterChain(HttpSecurity http) throws Exception {
 
-        http.authenticationProvider(authenticationProvider());
+        //http.authenticationProvider(authenticationProvider());
 
         http
+                .securityMatcher("/**")
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/", "/css/**", "/img/**", "/images/**", "/js/**", "/webjars/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/",
                                 "/login",
                                 "/register",
+                                "/error",
                                 "/error/**",
                                 "/perform_login",
                                 "/loginerror").permitAll()
-                        .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
                         .requestMatchers(
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
