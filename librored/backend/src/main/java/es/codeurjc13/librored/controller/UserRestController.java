@@ -1,39 +1,34 @@
 package es.codeurjc13.librored.controller;
 
-import es.codeurjc13.librored.model.User;
-import es.codeurjc13.librored.service.UserService;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Map;
-import java.util.Optional;
-
-
 import es.codeurjc13.librored.dto.UserCreateDTO;
 import es.codeurjc13.librored.dto.UserDTO;
 import es.codeurjc13.librored.dto.UserUpdateDTO;
 import es.codeurjc13.librored.mapper.UserMapper;
 import es.codeurjc13.librored.model.User;
 import es.codeurjc13.librored.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/users")
+@Tag(name = "Users", description = "User management API")
 public class UserRestController {
 
     private final UserService userService;
@@ -49,13 +44,19 @@ public class UserRestController {
     // GET ALL
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Get all users", description = "Retrieve a list of all users.")
+    @ApiResponse(responseCode = "200", description = "List of users retrieved successfully",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class)))
     public List<UserDTO> getAllUsers() {
         return userService.findAll().stream()
                 .map(userMapper::toDTO)
                 .toList();
     }
 
-    // GET BY ID
+    @Operation(summary = "Get user by ID", description = "Retrieve a user by their ID.")
+    @ApiResponse(responseCode = "200", description = "User found",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class)))
+    @ApiResponse(responseCode = "404", description = "User not found")
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
         return userService.findById(id)
@@ -64,7 +65,10 @@ public class UserRestController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // CREATE
+    @Operation(summary = "Create a new user", description = "Register a new user with a username, email and password.")
+    @ApiResponse(responseCode = "201", description = "User created successfully",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class)))
+    @ApiResponse(responseCode = "400", description = "Invalid user data or email already in use")
     @PostMapping
     public ResponseEntity<UserDTO> createUser(@RequestBody UserCreateDTO dto) {
         User user = userMapper.toDomain(dto);
@@ -77,7 +81,10 @@ public class UserRestController {
         return ResponseEntity.created(location).body(userMapper.toDTO(savedUser));
     }
 
-    // UPDATE
+    @Operation(summary = "Update user", description = "Update the user's username and/or email.")
+    @ApiResponse(responseCode = "200", description = "User updated successfully",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class)))
+    @ApiResponse(responseCode = "404", description = "User not found")
     @PutMapping("/{id}")
     public ResponseEntity<UserDTO> updateUser(@PathVariable Long id, @RequestBody UserUpdateDTO dto) {
         return userService.findById(id)
@@ -89,7 +96,9 @@ public class UserRestController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // DELETE
+    @Operation(summary = "Delete user", description = "Delete a user account by their ID.")
+    @ApiResponse(responseCode = "204", description = "User deleted successfully")
+    @ApiResponse(responseCode = "404", description = "User not found")
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
@@ -101,8 +110,11 @@ public class UserRestController {
         return ResponseEntity.noContent().build();
     }
 
+    // Custom endpoints for user management
 
-    // Custom endpoints for user profile management
+    @Operation(summary = "Update username", description = "Update the username of the currently logged-in user.")
+    @ApiResponse(responseCode = "200", description = "Username updated successfully")
+    @ApiResponse(responseCode = "400", description = "New username is empty or invalid")
     @PostMapping("/update-username")
     public ResponseEntity<Map<String, Object>> updateUsername(
             @AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails,
@@ -131,7 +143,9 @@ public class UserRestController {
         return ResponseEntity.ok(Map.of("success", true, "message", "Username updated successfully!"));
     }
 
-
+    @Operation(summary = "Update password", description = "Change the password of the currently logged-in user.")
+    @ApiResponse(responseCode = "200", description = "Password updated successfully")
+    @ApiResponse(responseCode = "400", description = "Current password is invalid")
     @PostMapping("/update-password")
     public ResponseEntity<Map<String, Object>> updatePassword(
             @AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails,
@@ -167,7 +181,9 @@ public class UserRestController {
         ));
     }
 
-
+    @Operation(summary = "Verify password", description = "Verify the current password of the logged-in user.")
+    @ApiResponse(responseCode = "200", description = "Password verification result")
+    @ApiResponse(responseCode = "401", description = "User not authenticated")
     @PostMapping("/verify-password")
     public ResponseEntity<Map<String, Object>> verifyPassword(
             @AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails,
