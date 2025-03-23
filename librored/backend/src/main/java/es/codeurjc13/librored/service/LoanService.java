@@ -82,6 +82,21 @@ public class LoanService {
     }
 
     public void createLoan(Book book, User lender, User borrower, LocalDate startDate, LocalDate endDate, Loan.Status status) {
+        // Book must belong to the lender
+        if (!book.getOwner().getId().equals(lender.getId())) {
+            throw new IllegalArgumentException("The book does not belong to the lender.");
+        }
+
+        // Lender and Borrower cannot be the same user
+        if (lender.getId().equals(borrower.getId())) {
+            throw new IllegalArgumentException("Lender and borrower cannot be the same.");
+        }
+
+        // Book must be available to be loaned
+        if (!book.isAvailable()) {
+            throw new IllegalArgumentException("The book is not available.");
+        }
+
         Loan loan = new Loan(book, lender, borrower, startDate, endDate, status);
         loanRepository.save(loan);
     }
