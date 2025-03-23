@@ -12,14 +12,21 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.*;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.sql.rowset.serial.SerialBlob;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
+import java.sql.Blob;
 import java.sql.SQLException;
 import java.util.Map;
 
@@ -119,12 +126,42 @@ public class BookRestController {
 
     // ---------- Cover Image Endpoints ----------
 
+/*    @GetMapping("/{id}/cover")
+    public ResponseEntity<byte[]> getBookCover(@PathVariable Long id) {
+        Book book = bookService.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found"));
+
+        if (book.getCoverPic() == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        try (InputStream is = book.getCoverPic().getBinaryStream()) {
+            byte[] imageBytes = is.readAllBytes();
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.IMAGE_JPEG) // o IMAGE_PNG si tus imágenes son png
+                    .body(imageBytes);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error reading image", e);
+        }
+    }*/
+
     @PostMapping("/{id}/cover")
-    public ResponseEntity<Object> uploadCover(@PathVariable long id, @RequestParam MultipartFile imageFile) throws IOException {
-        bookService.createBookImage(id, imageFile.getInputStream(), imageFile.getSize());
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
-        return ResponseEntity.created(location).build();
+    public ResponseEntity<Void> uploadBookCover(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
+        Book book = bookService.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found"));
+
+        try {
+            Blob coverBlob = new SerialBlob(file.getBytes());
+            book.setCoverPic(coverBlob);
+            bookService.save(book);
+
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error uploading image", e);
+        }
     }
+
 
     @GetMapping("/{id}/cover")
     public ResponseEntity<Resource> downloadCover(@PathVariable long id) throws SQLException {

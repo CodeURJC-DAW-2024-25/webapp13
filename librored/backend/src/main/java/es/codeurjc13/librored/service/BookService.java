@@ -139,11 +139,6 @@ public class BookService {
 
     public void replaceBookImage(long id, InputStream inputStream, long size) {
         Book book = bookRepository.findById(id).orElseThrow();
-
-        if (book.getCoverPic() == null) {
-            throw new NoSuchElementException();
-        }
-
         book.setCoverPic(BlobProxy.generateProxy(inputStream, size));
         bookRepository.save(book);
     }

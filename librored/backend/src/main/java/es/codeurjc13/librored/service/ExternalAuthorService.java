@@ -5,10 +5,7 @@ import es.codeurjc13.librored.dto.external.OpenLibraryAuthorSearchResponseDTO;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.util.UriUtils;
 import reactor.core.publisher.Mono;
-
-import java.nio.charset.StandardCharsets;
 
 
 @Service

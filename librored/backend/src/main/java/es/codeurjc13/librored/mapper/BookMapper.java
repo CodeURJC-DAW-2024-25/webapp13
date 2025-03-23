@@ -31,4 +31,9 @@ public interface BookMapper {
     @Mapping(target = "owner", ignore = true)
     @Mapping(target = "coverPic", ignore = true)
     Book toDomain(BookUpdateDTO dto);
+
+    default String map(java.sql.Blob blob) {
+        return null; // Set to null to avoid compilation error
+    }
+
 }
