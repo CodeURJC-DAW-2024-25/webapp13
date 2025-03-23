@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/loans")
@@ -96,25 +97,30 @@ public class LoanRestController {
 
     // UPDATE
     @PutMapping("/{id}")
-    public ResponseEntity<LoanDTO> updateLoan(@PathVariable Long id, @RequestBody LoanUpdateDTO dto) {
-        Loan loan = loanService.getLoanById(id).orElseThrow();
+    public ResponseEntity<?> updateLoan(@PathVariable Long id, @RequestBody LoanUpdateDTO dto) {
+        try {
+            Loan loan = loanService.getLoanById(id).orElseThrow();
 
-        Loan updatedLoan = new Loan();
-        updatedLoan.setId(id);
-        updatedLoan.setLender(loan.getLender()); // Don't allow lender change
-        updatedLoan.setBook(loan.getBook());     // Only allow book change
-        updatedLoan.setBorrower(loan.getBorrower());
+            Loan updatedLoan = new Loan();
+            updatedLoan.setId(id);
+            updatedLoan.setLender(loan.getLender());
+            updatedLoan.setBook(loan.getBook());
+            updatedLoan.setBorrower(loan.getBorrower());
+            updatedLoan.setStartDate(dto.startDate());
+            updatedLoan.setEndDate(dto.endDate());
 
-        updatedLoan.setStartDate(dto.startDate());
-        updatedLoan.setEndDate(dto.endDate());
+            if (dto.status() != null) {
+                updatedLoan.setStatus(Loan.Status.valueOf(dto.status()));
+            }
 
-        if (dto.status() != null) {
-            updatedLoan.setStatus(Loan.Status.valueOf(dto.status()));
+            loanService.updateLoan(id, updatedLoan);
+            return ResponseEntity.ok(loanMapper.toDTO(loanService.getLoanById(id).orElseThrow()));
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
-
-        loanService.updateLoan(id, updatedLoan);
-        return ResponseEntity.ok(loanMapper.toDTO(loanService.getLoanById(id).orElseThrow()));
     }
+
 
     // DELETE
     @DeleteMapping("/{id}")
