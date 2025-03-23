@@ -16,6 +16,9 @@ public class Book {
     private String title;
     private String author;
 
+    @Column(length = 2000)
+    private String authorBio;
+
     @Column(columnDefinition = "TEXT")
     private String description;
 
@@ -78,6 +81,10 @@ public class Book {
     public void setAuthor(String author) {
         this.author = author;
     }
+
+    public String getAuthorBio() { return authorBio; }
+
+    public void setAuthorBio(String authorBio) { this.authorBio = authorBio; }
 
     public Genre getGenre() {
         return genre;
