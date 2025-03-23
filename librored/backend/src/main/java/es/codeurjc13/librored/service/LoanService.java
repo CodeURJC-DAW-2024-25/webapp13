@@ -34,7 +34,7 @@ public class LoanService {
         if (existingLoanOpt.isPresent()) {
             Loan loan = existingLoanOpt.get();
 
-            // ✅ Prevent lender change (Fixed Lender Rule)
+            //  Prevent lender change (Fixed Lender Rule)
             if (!loan.getLender().equals(updatedLoan.getLender())) {
                 throw new IllegalArgumentException(
                         "Lender cannot be changed. The loan must remain under " + loan.getLender().getUsername() + ".");
@@ -56,12 +56,12 @@ public class LoanService {
                 loan.setBook(updatedLoan.getBook());
             }
 
-            // ✅ Ensure borrower is valid
+            //  Ensure borrower is valid
             if (updatedLoan.getBorrower() != null) {
                 loan.setBorrower(updatedLoan.getBorrower());
             }
 
-            // ✅ Validate start and end dates
+            //  Validate start and end dates
             if (updatedLoan.getStartDate() != null) {
                 loan.setStartDate(updatedLoan.getStartDate());
             }
@@ -73,7 +73,7 @@ public class LoanService {
                 loan.setEndDate(updatedLoan.getEndDate());
             }
 
-            // ✅ Ensure status change is logical
+            //  Ensure status change is logical
             if (updatedLoan.getStatus() != null) {
                 if (loan.getStatus() == Loan.Status.Completed && updatedLoan.getStatus() == Loan.Status.Active) {
                     throw new IllegalArgumentException(
