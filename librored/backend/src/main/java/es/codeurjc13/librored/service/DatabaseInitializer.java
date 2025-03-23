@@ -213,24 +213,25 @@ public class DatabaseInitializer {
 
     private void enrichAuthorInfo(Book book) {
         externalAuthorService.getAuthorInfo(book.getAuthor())
-                .subscribe(author -> {
-                    if (author != null) {
-                        String bio = author.getName();
-                        if (author.getBirth_date() != null) {
-                            bio += " (born " + author.getBirth_date() + ")";
-                        }
-                        if (author.getTopWork() != null) {
-                            bio += ", best known for *" + author.getTopWork() + "*";
-                        }
-                        bio += ", authored " + author.getWork_count() + " works.";
-
-                        book.setAuthorBio(bio);
-                        bookRepository.save(book); // ✅ don't forget this
-                        System.out.println("✅ Saved bio for: " + book.getAuthor());
-                    } else {
-                        book.setAuthorBio("No additional author info found.");
-                        bookRepository.save(book); // ✅ save fallback too
+                // blockOption to fix bug enrichAuthorInfo(book) using Reactor's asynchronous .subscribe() inside a synchronous method
+                .blockOptional()
+                .ifPresentOrElse(author -> {
+                    String bio = author.getName();
+                    if (author.getBirth_date() != null) {
+                        bio += " (born " + author.getBirth_date() + ")";
                     }
+                    if (author.getTopWork() != null) {
+                        bio += ", best known for *" + author.getTopWork() + "*";
+                    }
+                    bio += ", authored " + author.getWork_count() + " works.";
+
+                    book.setAuthorBio(bio);
+                    bookRepository.save(book);
+                    System.out.println("Saved bio for: " + book.getAuthor());
+
+                }, () -> {
+                    book.setAuthorBio("No additional author info found.");
+                    bookRepository.save(book);
                 });
     }
 }
