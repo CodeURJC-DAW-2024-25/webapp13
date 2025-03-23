@@ -21,27 +21,27 @@ public class ExternalAuthorService {
         this.webClient = webClientBuilder.baseUrl("https://openlibrary.org").build();
     }
 
-    public Mono<OpenLibraryAuthorSearchResponseDTO.AuthorData> getAuthorInfo(String authorName) {
-        String uri = "/search/authors.json?q=" + UriUtils.encode(authorName, StandardCharsets.UTF_8);
-
+    public Mono<OpenLibraryAuthorSearchResponseDTO.AuthorData> getAuthorInfo(String name) {
         return webClient.get()
-                .uri(uri)
+                .uri(uriBuilder -> uriBuilder
+                        .path("/search/authors.json")
+                        .queryParam("q", name)
+                        .build())
                 .retrieve()
                 .bodyToMono(OpenLibraryAuthorSearchResponseDTO.class)
-                .flatMap(response -> {
-                    System.out.println("Received response from OpenLibrary for: " + authorName);
+                .map(response -> {
                     if (response.getDocs() != null && !response.getDocs().isEmpty()) {
-                        OpenLibraryAuthorSearchResponseDTO.AuthorData author = response.getDocs().get(0);
-                        System.out.println("Author found: " + author.getName());
-                        return Mono.just(author);
-                    } else {
-                        System.out.println("No author found for: " + authorName);
-                        return Mono.empty();
+                        return response.getDocs().stream()
+                                .filter(author -> author.getName() != null &&
+                                        author.getName().equalsIgnoreCase(name))
+                                .findFirst()
+                                .orElse(response.getDocs().getFirst()); // fallback to first result
                     }
+                    return null;
                 })
                 .onErrorResume(error -> {
                     log.warn("Error fetching author info from OpenLibrary: {}", error.getMessage());
-                    return Mono.empty();
+                    return Mono.just(new OpenLibraryAuthorSearchResponseDTO.AuthorData());
                 });
     }
 }
