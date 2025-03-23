@@ -9,23 +9,18 @@ import java.util.Set;
 @Entity
 public class User {
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     private String username;
-
     private String email;
-
     private String encodedPassword;
 
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    public enum Role {
-        ROLE_USER, ROLE_ADMIN
-    }
+    public enum Role {ROLE_USER, ROLE_ADMIN}
 
     @OneToMany(mappedBy = "lender", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Loan> loans;
@@ -33,9 +28,7 @@ public class User {
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Book> books;
 
-
-    public User() {
-    }
+    public User() {}
 
     public User(String username, String email, String encodedPassword, Role role) {
         this.username = username;
@@ -94,14 +87,13 @@ public class User {
     }
 
     public Set<String> getRoles() {
-        return Set.of(role.name().replace("ROLE_", "")); // ✅ Ensure Spring Security does not get duplicate "ROLE_"
+        return Set.of(role.name().replace("ROLE_", "")); // Ensure Spring Security does not get duplicate "ROLE_"
     }
 
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-        User user = (User) obj;
+        if (!(obj instanceof User user)) return false;
         return Objects.equals(id, user.id);
     }
 
@@ -109,5 +101,4 @@ public class User {
     public int hashCode() {
         return Objects.hash(id);
     }
-
 }
