@@ -88,9 +88,9 @@ Here is the entity diagram image of librored DB
 
 ![DB Diagram](README-IMAGES/librored-diagram.png)
 
-## Structured Class Diagram
+## Structured Class Diagram (updated)
 
-![Class Diagram](README-IMAGES/improved_class_diagram.png)
+![Class Diagram](README-IMAGES/class-diagram-p2.png)
 
 
 ---
@@ -205,6 +205,67 @@ server.ssl.key-password=your_key_password
 ```
 
 By following these steps, you should be able to configure and run the Spring Boot application in a new macOS environment.
+
+
+# Docker 
+Here’s your Markdown snippet, ready to copy and paste into your `README.md`:
+
+---
+
+## Running the Application with Docker Compose
+
+### Requirements
+
+- Docker installed on your system
+- Docker Compose installed (or Docker Desktop with Compose integrated)
+
+### Run Instructions
+
+1. Open a terminal at the root of the project (where `docker-compose.yml` is located).
+2. Run the following command:
+
+```bash
+docker-compose up --build
+```
+
+3. Wait for all services to start. Once the backend is ready, the application will be accessible at:
+
+```
+https://localhost:8443
+```
+
+> You may need to accept the self-signed certificate if your browser blocks access initially.
+
+---
+
+## Building the Docker Image
+
+### Requirements
+
+- Docker must be installed and running
+
+### Build & Publish Instructions
+
+1. To build the Docker image, run the provided script (usually from the root of the backend folder):
+
+```bash
+./build-docker.sh
+```
+
+2. If you want to push the image to Docker Hub (make sure you're logged in):
+
+```bash
+docker push your-dockerhub-username/your-image-name:tag
+```
+
+> Replace `your-dockerhub-username`, `your-image-name`, and `tag` with your actual values.
+
+---
+
+Let me know if you want this localized into Spanish or auto-filled with your image name or script path.
+
+# Virtual Machine
+
 
 
 # Members participation
