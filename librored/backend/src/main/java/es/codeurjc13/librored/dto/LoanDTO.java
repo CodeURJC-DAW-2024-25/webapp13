@@ -10,4 +10,5 @@ public record LoanDTO(
         LocalDate startDate,
         LocalDate endDate,
         String status
-) {}
+) {
+}

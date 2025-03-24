@@ -5,11 +5,8 @@ import es.codeurjc13.librored.dto.LoanDTO;
 import es.codeurjc13.librored.dto.LoanUpdateDTO;
 import es.codeurjc13.librored.dto.UserDTO;
 import es.codeurjc13.librored.mapper.LoanMapper;
-import es.codeurjc13.librored.mapper.UserMapper;
-import es.codeurjc13.librored.model.Book;
 import es.codeurjc13.librored.model.Loan;
 import es.codeurjc13.librored.model.User;
-import es.codeurjc13.librored.service.BookService;
 import es.codeurjc13.librored.service.LoanService;
 import es.codeurjc13.librored.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,18 +17,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/loans")
@@ -42,7 +35,6 @@ public class LoanRestController {
     private final LoanMapper loanMapper;
     @Autowired
     private UserService userService;
-
 
 
     public LoanRestController(LoanService loanService, LoanMapper loanMapper) {

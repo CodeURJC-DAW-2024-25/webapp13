@@ -1,7 +1,6 @@
 package es.codeurjc13.librored.controller;
 
 import es.codeurjc13.librored.dto.UserCreateDTO;
-import es.codeurjc13.librored.model.User;
 import es.codeurjc13.librored.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -32,7 +31,7 @@ public class LoginWebController {
             model.addAttribute("successMessage", successMessage);
         }
 
-        return "login"; // ✅ Ensure login.html displays the message
+        return "login"; // Ensure login.html displays the message
     }
 
 

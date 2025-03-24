@@ -1,9 +1,8 @@
 package es.codeurjc13.librored.security;
 
+import es.codeurjc13.librored.model.User;
 import es.codeurjc13.librored.security.jwt.JwtAuthFilter;
 import es.codeurjc13.librored.security.jwt.UnauthorizedHandlerJwt;
-
-import es.codeurjc13.librored.model.User;
 import es.codeurjc13.librored.service.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -13,10 +12,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.authorization.AuthorizationDecision;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -85,7 +82,6 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**", "/api/openlibrary/**").permitAll()
 
 
-
                         // Private API endpoints
                         // BOOKS
                         .requestMatchers(HttpMethod.POST, "/api/books/**").authenticated()
@@ -101,7 +97,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-                //.httpBasic(httpBasic -> httpBasic.realmName("LibroRed API"));
+        //.httpBasic(httpBasic -> httpBasic.realmName("LibroRed API"));
 
         // Disable Form login Authentication
         http.formLogin(AbstractHttpConfigurer::disable);
@@ -109,10 +105,11 @@ public class SecurityConfig {
         // Disable CSRF protection (it is difficult to implement in REST APIs)
         http.csrf(AbstractHttpConfigurer::disable);
 
+        // API TESTING PURPOSES
         // Disable Basic Authentication
         http.httpBasic(AbstractHttpConfigurer::disable);
         // Enable Basic Auth ONLY FOR TESTING PURPOSES
-        // http.httpBasic(Customizer.withDefaults());
+        //http.httpBasic(Customizer.withDefaults());
 
         // Stateless session
         http.sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
@@ -173,7 +170,7 @@ public class SecurityConfig {
 
         http
                 .csrf(csrf -> csrf
-                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()));
+                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()));
 
         return http.build();
     }

@@ -6,4 +6,5 @@ public record LoanUpdateDTO(
         LocalDate startDate,
         LocalDate endDate,
         String status
-) {}
+) {
+}

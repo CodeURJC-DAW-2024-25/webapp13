@@ -29,7 +29,8 @@ public class User {
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Book> books;
 
-    public User() {}
+    public User() {
+    }
 
     public User(String username, String email, String encodedPassword, Role role) {
         this.username = username;
