@@ -309,7 +309,7 @@
 <script id="book-template" type="x-tmpl-mustache">
       <li class="col-md-3 book-item">
         <div class="book-card">
-          <img src="{{coverImage}}" alt="{{title}}" class="book-cover"
+          <img src="/api/books/{{id}}/cover" alt="{{title}}" class="book-cover"
                onerror="this.onerror=null;this.src='images/default_cover.jpg';">
           <h4 class="book-title">{{title}}</h4>
           <p><strong>Author:</strong> {{author}}</p>
