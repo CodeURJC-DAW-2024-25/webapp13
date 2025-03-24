@@ -111,7 +111,7 @@ public class Book {
     }
 
     public boolean isAvailable() {
-        return available;
+        return this.available;
     }
 
     public void setAvailable(boolean available) {

@@ -88,6 +88,10 @@ public class User {
         return Set.of(role.name().replace("ROLE_", "")); // Ensure Spring Security does not get duplicate "ROLE_"
     }
 
+    public List<Book> getBooks() {
+        return this.books;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;

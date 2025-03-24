@@ -55,7 +55,7 @@ public class LoanService {
                     .map(loanMapper::toDTO)
                     .collect(Collectors.toList());
         } else {
-            return loanRepository.findByBorrowerOrLender(currentUser, currentUser).stream()
+            return loanRepository.findByBorrowerOrLender(currentUser).stream()
                     .map(loanMapper::toDTO)
                     .collect(Collectors.toList());
         }
@@ -96,14 +96,15 @@ public class LoanService {
     public LoanDTO createLoan(LoanCreateDTO dto, Authentication auth) {
         User currentUser = userService.getByEmail(auth.getName());
 
-        User lender = userService.getById(dto.getLenderId());
-        User borrower = userService.getById(dto.getBorrowerId());
+        User lender = userService.getById(dto.lenderId());
+        User borrower = userService.getById(dto.borrowerId());
 
         if (!currentUser.equals(borrower) && !currentUser.getRole().equals(User.Role.ROLE_ADMIN)) {
             throw new AccessDeniedException("You are not allowed to create this loan");
         }
 
-        Book book = bookService.findById(dto.getBookId());
+        Book book = bookService.findById(dto.bookId())
+                .orElseThrow(() -> new EntityNotFoundException("Book not found"));
 
         Loan loan = loanMapper.toDomain(dto);
         loan.setLender(lender);
@@ -119,9 +120,9 @@ public class LoanService {
 
         validateAccess(loan, auth);
 
-        loan.setStartDate(dto.getStartDate());
-        loan.setEndDate(dto.getEndDate());
-        loan.setStatus(dto.getStatus());
+        loan.setStartDate(dto.startDate());
+        loan.setEndDate(dto.endDate());
+        loan.setStatus(Loan.Status.valueOf(dto.status()));
 
         return loanMapper.toDTO(loanRepository.save(loan));
     }
@@ -135,7 +136,8 @@ public class LoanService {
     }
 
     public List<UserDTO> getValidBorrowers(Long bookId) {
-        Book book = bookService.findById(bookId);
+        Book book = bookService.findById(bookId)
+                .orElseThrow(() -> new EntityNotFoundException("Book not found"));
         User owner = book.getOwner();
 
         return userService.findAll().stream()

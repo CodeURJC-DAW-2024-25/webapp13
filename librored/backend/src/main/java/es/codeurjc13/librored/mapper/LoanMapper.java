@@ -21,7 +21,7 @@ public interface LoanMapper {
     @Mapping(target = "book", ignore = true)
     @Mapping(target = "lender", ignore = true)
     @Mapping(target = "borrower", ignore = true)
-    @Mapping(target = "status", constant = "ACTIVE")
+    @Mapping(target = "status", constant = "Active")
     Loan toDomain(LoanCreateDTO dto);
 
     // LoanUpdateDTO -> existing Loan

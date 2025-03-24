@@ -19,4 +19,7 @@ public interface LoanRepository extends JpaRepository<Loan, Long> {
     @Query("SELECT l FROM Loan l WHERE l.book = :book")
     List<Loan> findByBook(@Param("book") Book book);
 
+    @Query("SELECT l FROM Loan l WHERE l.borrower = :user OR l.lender = :user")
+    List<Loan> findByBorrowerOrLender(@Param("user") User user);
+
 }

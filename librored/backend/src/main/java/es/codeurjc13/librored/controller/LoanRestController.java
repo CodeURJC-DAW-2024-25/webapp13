@@ -18,6 +18,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -39,6 +40,9 @@ public class LoanRestController {
 
     private final LoanService loanService;
     private final LoanMapper loanMapper;
+    @Autowired
+    private UserService userService;
+
 
 
     public LoanRestController(LoanService loanService, LoanMapper loanMapper) {
@@ -109,7 +113,7 @@ public class LoanRestController {
     public ResponseEntity<Void> updateLoan(@PathVariable Long id, @RequestBody LoanUpdateDTO dto, Authentication auth) {
         if (!loanService.canEditLoan(id, auth)) return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 
-        loanService.updateLoan(id, dto);
+        loanService.updateLoan(id, dto, auth);
         return ResponseEntity.ok().build();
     }
 
@@ -123,7 +127,7 @@ public class LoanRestController {
     public ResponseEntity<Void> deleteLoan(@PathVariable Long id, Authentication auth) {
         if (!loanService.canEditLoan(id, auth)) return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 
-        loanService.deleteLoan(id);
+        loanService.deleteLoan(id, auth);
         return ResponseEntity.noContent().build();
     }
 

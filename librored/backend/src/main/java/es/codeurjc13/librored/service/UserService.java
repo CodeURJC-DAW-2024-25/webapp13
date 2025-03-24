@@ -5,6 +5,7 @@ import es.codeurjc13.librored.dto.UserDTO;
 import es.codeurjc13.librored.mapper.UserMapper;
 import es.codeurjc13.librored.model.User;
 import es.codeurjc13.librored.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -148,5 +149,10 @@ public class UserService {
             throw new IllegalArgumentException("User cannot be null.");
         }
         userRepository.save(user);
+    }
+
+    public User getById(Long id) {
+        return userRepository.findById(id).orElseThrow(() ->
+                new EntityNotFoundException("User not found"));
     }
 }
