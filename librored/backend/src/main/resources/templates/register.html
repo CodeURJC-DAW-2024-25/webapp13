@@ -5,19 +5,16 @@
     <h2>User Register</h2>
     <form action="/register" method="post">
         <input type="hidden" name="_csrf" value="{{_csrf.token}}">
-        <div class="form-group">
-            <label for="username">Username</label>
-            <input type="text" id="username" name="username" class="form-control" required>
-        </div>
-        <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" name="email" class="form-control" required>
-        </div>
-        <div class="form-group">
-            <label for="encodedPassword">Password</label>
-            <input type="password" id="encodedPassword" name="encodedPassword" class="form-control" required>
-        </div>
-        <button type="submit" class="btn btn-primary">Register</button>
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" value="{{user.username}}" required>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" value="{{user.email}}" required>
+
+        <label for="rawPassword">Password:</label>
+        <input type="password" id="rawPassword" name="rawPassword" required>
+
+        <button type="submit">Register</button>
     </form>
 </div>
 <!-- END Form User Register -->

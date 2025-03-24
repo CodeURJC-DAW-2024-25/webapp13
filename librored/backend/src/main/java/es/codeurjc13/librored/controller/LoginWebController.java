@@ -1,5 +1,6 @@
 package es.codeurjc13.librored.controller;
 
+import es.codeurjc13.librored.dto.UserCreateDTO;
 import es.codeurjc13.librored.model.User;
 import es.codeurjc13.librored.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,7 @@ public class LoginWebController {
             Model model) {
 
         if (error != null) {
-            model.addAttribute("loginError", "Invalid username or password.");
+            model.addAttribute("loginError", "Invalid username or rawPassword.");
         }
 
         if (successMessage != null) {
@@ -35,17 +36,16 @@ public class LoginWebController {
     }
 
 
-    // Muestra el formulario de registro
     @GetMapping("/register")
     public String register(Model model) {
-        model.addAttribute("user", new User());
-        return "register"; // Correspondiente a register.html
+        model.addAttribute("user", new UserCreateDTO("", "", ""));
+        return "register";
     }
 
-    // Procesa el registro de un nuevo usuario
     @PostMapping("/register")
-    public String registerUser(@ModelAttribute("user") User user) {
-        userService.registerUser(user);
+    public String registerUser(@ModelAttribute("user") UserCreateDTO userDTO) {
+        userService.registerUser(userDTO);
         return "redirect:/login?registered";
     }
+
 }

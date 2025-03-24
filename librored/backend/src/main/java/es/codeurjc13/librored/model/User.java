@@ -1,5 +1,6 @@
 package es.codeurjc13.librored.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.util.List;
@@ -66,10 +67,7 @@ public class User {
         this.encodedPassword = password;
     }
 
-    public CharSequence getPassword() {
-        return this.encodedPassword;
-    }
-
+    @JsonIgnore
     public String getEncodedPassword() {
         return encodedPassword;
     }

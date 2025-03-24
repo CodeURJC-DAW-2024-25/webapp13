@@ -65,14 +65,14 @@ public class UserRestController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @Operation(summary = "Create a new user", description = "Register a new user with a username, email and password.")
+    @Operation(summary = "Create a new user", description = "Register a new user with a username, email and rawPassword.")
     @ApiResponse(responseCode = "201", description = "User created successfully",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class)))
     @ApiResponse(responseCode = "400", description = "Invalid user data or email already in use")
     @PostMapping
     public ResponseEntity<UserDTO> createUser(@RequestBody UserCreateDTO dto) {
         User user = userMapper.toDomain(dto);
-        user.setEncodedPassword(passwordEncoder.encode(dto.password()));
+        user.setEncodedPassword(passwordEncoder.encode(dto.rawPassword()));
         user.setRole(User.Role.ROLE_USER); // Seguridad: nunca se asigna el rol desde el exterior
 
         User savedUser = userService.save(user);
@@ -143,9 +143,9 @@ public class UserRestController {
         return ResponseEntity.ok(Map.of("success", true, "message", "Username updated successfully!"));
     }
 
-    @Operation(summary = "Update password", description = "Change the password of the currently logged-in user.")
+    @Operation(summary = "Update rawPassword", description = "Change the rawPassword of the currently logged-in user.")
     @ApiResponse(responseCode = "200", description = "Password updated successfully")
-    @ApiResponse(responseCode = "400", description = "Current password is invalid")
+    @ApiResponse(responseCode = "400", description = "Current rawPassword is invalid")
     @PostMapping("/update-password")
     public ResponseEntity<Map<String, Object>> updatePassword(
             @AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails,
@@ -164,14 +164,14 @@ public class UserRestController {
         }
 
         if (!passwordEncoder.matches(currentPassword, user.get().getEncodedPassword())) {
-            return ResponseEntity.ok(Map.of("success", false, "error", "Incorrect current password."));
+            return ResponseEntity.ok(Map.of("success", false, "error", "Incorrect current rawPassword."));
         }
 
-        // Encode and update the new password
+        // Encode and update the new rawPassword
         user.get().setEncodedPassword(passwordEncoder.encode(newPassword));
         userService.saveUser(user.get());
 
-        // Invalidate session after password change
+        // Invalidate session after rawPassword change
         SecurityContextHolder.clearContext();
 
         // Redirect to login page with success message
@@ -181,7 +181,7 @@ public class UserRestController {
         ));
     }
 
-    @Operation(summary = "Verify password", description = "Verify the current password of the logged-in user.")
+    @Operation(summary = "Verify rawPassword", description = "Verify the current rawPassword of the logged-in user.")
     @ApiResponse(responseCode = "200", description = "Password verification result")
     @ApiResponse(responseCode = "401", description = "User not authenticated")
     @PostMapping("/verify-password")
@@ -201,10 +201,10 @@ public class UserRestController {
         }
 
         if (!passwordEncoder.matches(currentPassword, user.get().getEncodedPassword())) {
-            return ResponseEntity.ok(Map.of("success", false, "error", "Incorrect current password."));
+            return ResponseEntity.ok(Map.of("success", false, "error", "Incorrect current rawPassword."));
         }
 
-        return ResponseEntity.ok(Map.of("success", true, "message", "Password verified! You can now enter a new password."));
+        return ResponseEntity.ok(Map.of("success", true, "message", "Password verified! You can now enter a new rawPassword."));
     }
 
 

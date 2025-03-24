@@ -4,6 +4,7 @@ import es.codeurjc13.librored.security.jwt.JwtAuthFilter;
 import es.codeurjc13.librored.security.jwt.UnauthorizedHandlerJwt;
 
 import es.codeurjc13.librored.model.User;
+import es.codeurjc13.librored.service.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,19 +36,24 @@ public class SecurityConfig {
     @Autowired
     private UnauthorizedHandlerJwt unauthorizedHandlerJwt;
 
+    @Autowired
+    private UserDetailsServiceImpl userDetailsService;
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-/*    @Bean
+
+    @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
         authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
-    }*/
+    }
+
 
     // Used for authenticating in JwtLoginController
     @Bean
@@ -60,7 +66,7 @@ public class SecurityConfig {
     @Order(1)
     public SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
 
-        //http.authenticationProvider(authenticationProvider());
+        http.authenticationProvider(authenticationProvider());
         http
                 .securityMatcher("/api/**")
                 .exceptionHandling(e -> e.authenticationEntryPoint(unauthorizedHandlerJwt));
@@ -104,9 +110,9 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable);
 
         // Disable Basic Authentication
-        // http.httpBasic(AbstractHttpConfigurer::disable);
+        http.httpBasic(AbstractHttpConfigurer::disable);
         // Enable Basic Auth ONLY FOR TESTING PURPOSES
-        http.httpBasic(Customizer.withDefaults());
+        // http.httpBasic(Customizer.withDefaults());
 
         // Stateless session
         http.sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
@@ -119,7 +125,7 @@ public class SecurityConfig {
     @Order(2)
     public SecurityFilterChain webFilterChain(HttpSecurity http) throws Exception {
 
-        //http.authenticationProvider(authenticationProvider());
+        http.authenticationProvider(authenticationProvider());
 
         http
                 .securityMatcher("/**")
