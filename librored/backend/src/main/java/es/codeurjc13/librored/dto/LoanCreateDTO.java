@@ -8,4 +8,5 @@ public record LoanCreateDTO(
         Long borrowerId,
         LocalDate startDate,
         LocalDate endDate
-) {}
+) {
+}

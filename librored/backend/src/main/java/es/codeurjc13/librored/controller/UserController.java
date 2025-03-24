@@ -19,7 +19,6 @@ public class UserController {
 
     private final UserService userService;
     private final BookService bookService; // Inject BookService to fetch recommendations
-
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -76,7 +75,7 @@ public class UserController {
         }
 
         if (password != null && !password.isEmpty()) {
-            user.setEncodedPassword(passwordEncoder.encode(password));
+            user.setEncodedPassword(passwordEncoder.encode(user.getEncodedPassword()));
         }
 
         userService.saveUser(user);
@@ -99,7 +98,7 @@ public class UserController {
 
     @PostMapping("/users/create")
     public String createUser(@ModelAttribute User user) {
-        userService.registerUser(user);  // Ensure password encoding
+        userService.registerUser(user);  // Ensure rawPassword encoding
         return "redirect:/users";
     }
 

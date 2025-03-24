@@ -82,9 +82,13 @@ public class Book {
         this.author = author;
     }
 
-    public String getAuthorBio() { return authorBio; }
+    public String getAuthorBio() {
+        return authorBio;
+    }
 
-    public void setAuthorBio(String authorBio) { this.authorBio = authorBio; }
+    public void setAuthorBio(String authorBio) {
+        this.authorBio = authorBio;
+    }
 
     public Genre getGenre() {
         return genre;
@@ -111,7 +115,7 @@ public class Book {
     }
 
     public boolean isAvailable() {
-        return available;
+        return this.available;
     }
 
     public void setAvailable(boolean available) {

@@ -1,6 +1,9 @@
 package es.codeurjc13.librored.security;
 
 import es.codeurjc13.librored.model.User;
+import es.codeurjc13.librored.security.jwt.JwtAuthFilter;
+import es.codeurjc13.librored.security.jwt.UnauthorizedHandlerJwt;
+import es.codeurjc13.librored.service.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,40 +12,36 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.authorization.AuthorizationDecision;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
-/*import es.codeurjc13.librored.security.jwt.JwtRequestFilter;
-import es.codeurjc13.librored.security.jwt.UnauthorizedHandlerJwt;*/
 
 @Configuration
-@EnableWebSecurity
+//@EnableWebSecurity
 public class SecurityConfig {
 
-/*
     @Autowired
-    private JwtRequestFilter jwtRequestFilter;
+    private JwtAuthFilter jwtAuthFilter;
 
     @Autowired
     private UnauthorizedHandlerJwt unauthorizedHandlerJwt;
-*/
 
     @Autowired
-    RepositoryUserDetailsService userDetailsService;
+    private UserDetailsServiceImpl userDetailsService;
 
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
@@ -52,6 +51,8 @@ public class SecurityConfig {
         return authProvider;
     }
 
+
+    // Used for authenticating in JwtLoginController
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
@@ -64,9 +65,8 @@ public class SecurityConfig {
 
         http.authenticationProvider(authenticationProvider());
         http
-                .securityMatcher("/api/**");
-                //.exceptionHandling(handling -> handling.authenticationEntryPoint(unauthorizedHandlerJwt));
-
+                .securityMatcher("/api/**")
+                .exceptionHandling(e -> e.authenticationEntryPoint(unauthorizedHandlerJwt));
 
         http
                 .authorizeHttpRequests(auth -> auth
@@ -79,6 +79,7 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html"
                         ).permitAll()
+                        .requestMatchers("/api/auth/**", "/api/openlibrary/**").permitAll()
 
 
                         // Private API endpoints
@@ -88,13 +89,15 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/books/**").authenticated()
                         // USERS
                         .requestMatchers("/api/users/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         // LOANS
                         .requestMatchers("/api/loans/**").authenticated()
 
                         // Everything else under /api/** requires authentication
                         .anyRequest().authenticated()
                 )
-                .httpBasic(httpBasic -> httpBasic.realmName("LibroRed API"));
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+        //.httpBasic(httpBasic -> httpBasic.realmName("LibroRed API"));
 
         // Disable Form login Authentication
         http.formLogin(AbstractHttpConfigurer::disable);
@@ -102,16 +105,15 @@ public class SecurityConfig {
         // Disable CSRF protection (it is difficult to implement in REST APIs)
         http.csrf(AbstractHttpConfigurer::disable);
 
+        // API TESTING PURPOSES
         // Disable Basic Authentication
-        // http.httpBasic(AbstractHttpConfigurer::disable);
+        http.httpBasic(AbstractHttpConfigurer::disable);
         // Enable Basic Auth ONLY FOR TESTING PURPOSES
-        http.httpBasic(Customizer.withDefaults());
+        //http.httpBasic(Customizer.withDefaults());
 
         // Stateless session
         http.sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-        // Add JWT Token filter
-/*        http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class); */
         return http.build();
     }
 
@@ -123,14 +125,17 @@ public class SecurityConfig {
         http.authenticationProvider(authenticationProvider());
 
         http
+                .securityMatcher("/**")
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/", "/css/**", "/img/**", "/images/**", "/js/**", "/webjars/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/",
                                 "/login",
                                 "/register",
+                                "/error",
                                 "/error/**",
                                 "/perform_login",
                                 "/loginerror").permitAll()
-                        .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
                         .requestMatchers(
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
@@ -165,7 +170,7 @@ public class SecurityConfig {
 
         http
                 .csrf(csrf -> csrf
-                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()));
+                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()));
 
         return http.build();
     }

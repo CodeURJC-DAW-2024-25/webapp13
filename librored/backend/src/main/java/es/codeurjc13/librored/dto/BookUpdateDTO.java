@@ -6,4 +6,5 @@ public record BookUpdateDTO(
         String description,
         String genre,
         boolean available
-) {}
+) {
+}

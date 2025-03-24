@@ -45,7 +45,6 @@ public class DatabaseInitializer {
     private ExternalAuthorService externalAuthorService;
 
 
-
     @PostConstruct
     public void init() throws IOException, URISyntaxException {
 

@@ -5,4 +5,5 @@ public record BookCreateDTO(
         String author,
         String description,
         String genre
-) {}
+) {
+}

@@ -6,6 +6,7 @@ import es.codeurjc13.librored.dto.BookUpdateDTO;
 import es.codeurjc13.librored.mapper.BookMapper;
 import es.codeurjc13.librored.model.Book;
 import es.codeurjc13.librored.model.User;
+import es.codeurjc13.librored.security.jwt.UserDetailsImpl;
 import es.codeurjc13.librored.service.BookService;
 import es.codeurjc13.librored.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,7 +20,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -88,38 +91,41 @@ public class BookRestController {
     @ApiResponse(responseCode = "200", description = "Book updated")
     @ApiResponse(responseCode = "404", description = "Book not found")
     @PutMapping("/{id}")
-    public ResponseEntity<BookDTO> updateBook(
-            @PathVariable Long id,
-            @RequestBody BookUpdateDTO dto,
-            Authentication authentication) {
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public ResponseEntity<BookDTO> updateBook(@PathVariable Long id, @RequestBody BookUpdateDTO updatedBook) {
+        Book book = bookService.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found"));
 
-        if (!bookService.existsById(id)) {
-            return ResponseEntity.notFound().build();
-        }
+        User user = getAuthenticatedUser();
 
-        if (!bookService.isOwnerOrAdmin(id, authentication.getName(), authentication.getAuthorities())) {
+        if (book.getOwner() == null || (!book.getOwner().getId().equals(user.getId()) && !user.getRole().equals(User.Role.ROLE_ADMIN))) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        Book updatedBook = bookService.updateBook(id, dto);
-        return ResponseEntity.ok(bookMapper.toDTO(updatedBook));
+
+        Book updated = bookService.updateBook(id, updatedBook);
+        return ResponseEntity.ok(bookMapper.toDTO(updated));
     }
 
     @Operation(summary = "Delete book", description = "Deletes a book by its ID")
     @ApiResponse(responseCode = "204", description = "Book deleted")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteBook(@PathVariable Long id, Authentication authentication) {
-        if (!bookService.existsById(id)) {
-            return ResponseEntity.notFound().build();
-        }
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public ResponseEntity<?> deleteBook(@PathVariable Long id) {
+        Book book = bookService.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found"));
 
-        if (!bookService.isOwnerOrAdmin(id, authentication.getName(), authentication.getAuthorities())) {
+        User user = getAuthenticatedUser();
+
+        if (book.getOwner() == null || (!book.getOwner().getId().equals(user.getId()) && !user.getRole().equals(User.Role.ROLE_ADMIN))) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        bookService.delete(id);
+
+        bookService.deleteBook(id);
         return ResponseEntity.noContent().build();
     }
+
 
     @Operation(summary = "Books per genre", description = "Returns the number of books grouped by genre")
     @ApiResponse(responseCode = "200", description = "Genre statistics returned")
@@ -179,17 +185,52 @@ public class BookRestController {
     @ApiResponse(responseCode = "204", description = "Image replaced")
     @ApiResponse(responseCode = "404", description = "Book not found")
     @PutMapping("/{id}/cover")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<Object> replaceCover(@PathVariable long id, @RequestParam MultipartFile imageFile) throws IOException {
+        Book book = bookService.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found"));
+
+        User user = getAuthenticatedUser();
+
+        if (book.getOwner() == null || (!book.getOwner().getId().equals(user.getId()) && !user.getRole().equals(User.Role.ROLE_ADMIN))) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+
         bookService.replaceBookImage(id, imageFile.getInputStream(), imageFile.getSize());
         return ResponseEntity.noContent().build();
     }
+
 
     @Operation(summary = "Delete book cover", description = "Deletes the cover image of a book")
     @ApiResponse(responseCode = "204", description = "Image deleted")
     @ApiResponse(responseCode = "404", description = "Book not found")
     @DeleteMapping("/{id}/cover")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<Object> deleteCover(@PathVariable long id) {
+        Book book = bookService.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found"));
+
+        User user = getAuthenticatedUser();
+
+        if (book.getOwner() == null || (!book.getOwner().getId().equals(user.getId()) && !user.getRole().equals(User.Role.ROLE_ADMIN))) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+
         bookService.deleteBookImage(id);
         return ResponseEntity.noContent().build();
     }
+
+
+    private User getAuthenticatedUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return null;
+        }
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        return userService.getUserByEmail(userDetails.getEmail())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Authenticated user not found"));
+    }
+
 }

@@ -2,7 +2,10 @@ package es.codeurjc13.librored.controller;
 
 import es.codeurjc13.librored.dto.external.OpenLibraryAuthorSearchResponseDTO;
 import es.codeurjc13.librored.service.ExternalAuthorService;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
 @RestController

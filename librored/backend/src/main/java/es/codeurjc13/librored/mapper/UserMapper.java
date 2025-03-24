@@ -1,7 +1,7 @@
 package es.codeurjc13.librored.mapper;
 
-import es.codeurjc13.librored.dto.UserDTO;
 import es.codeurjc13.librored.dto.UserCreateDTO;
+import es.codeurjc13.librored.dto.UserDTO;
 import es.codeurjc13.librored.dto.UserUpdateDTO;
 import es.codeurjc13.librored.model.User;
 import org.mapstruct.*;

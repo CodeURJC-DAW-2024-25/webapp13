@@ -163,7 +163,7 @@ Inside the MySQL shell, run:
 
 ```sql
 CREATE DATABASE librored;
-CREATE USER 'librored_user'@'localhost' IDENTIFIED BY 'password';
+CREATE USER 'librored_user'@'localhost' IDENTIFIED BY 'rawPassword';
 GRANT ALL PRIVILEGES ON librored.* TO 'librored_user'@'localhost';
 FLUSH PRIVILEGES;
 EXIT;

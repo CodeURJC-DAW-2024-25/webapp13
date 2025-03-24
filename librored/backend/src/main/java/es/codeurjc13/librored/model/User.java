@@ -1,5 +1,6 @@
 package es.codeurjc13.librored.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.util.List;
@@ -9,30 +10,24 @@ import java.util.Set;
 @Entity
 public class User {
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     private String username;
-
     private String email;
-
     private String encodedPassword;
 
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    public enum Role {
-        ROLE_USER, ROLE_ADMIN
-    }
+    public enum Role {ROLE_USER, ROLE_ADMIN}
 
     @OneToMany(mappedBy = "lender", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Loan> loans;
 
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Book> books;
-
 
     public User() {
     }
@@ -73,10 +68,7 @@ public class User {
         this.encodedPassword = password;
     }
 
-    public CharSequence getPassword() {
-        return this.encodedPassword;
-    }
-
+    @JsonIgnore
     public String getEncodedPassword() {
         return encodedPassword;
     }
@@ -94,14 +86,17 @@ public class User {
     }
 
     public Set<String> getRoles() {
-        return Set.of(role.name().replace("ROLE_", "")); // ✅ Ensure Spring Security does not get duplicate "ROLE_"
+        return Set.of(role.name().replace("ROLE_", "")); // Ensure Spring Security does not get duplicate "ROLE_"
+    }
+
+    public List<Book> getBooks() {
+        return this.books;
     }
 
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-        User user = (User) obj;
+        if (!(obj instanceof User user)) return false;
         return Objects.equals(id, user.id);
     }
 
@@ -109,5 +104,4 @@ public class User {
     public int hashCode() {
         return Objects.hash(id);
     }
-
 }
