@@ -16,17 +16,13 @@ public class Book {
     private String title;
     private String author;
 
-    @Column(length = 2000)
-    private String authorBio;
-
     @Column(columnDefinition = "TEXT")
     private String description;
+    //private String coverPic;
 
     @Lob
-    @JsonIgnore // This prevents serialization issues
+    @JsonIgnore // 👈 This prevents serialization issues
     private Blob coverPic;
-
-    private boolean available = true;
 
     @ManyToOne
     @JoinColumn(name = "owner_id", nullable = false, foreignKey = @ForeignKey(name = "FK_book_owner"))
@@ -53,7 +49,7 @@ public class Book {
         this.author = author;
         this.genre = genre;
         this.description = description;
-        this.coverPic = null; // Will be filled in when image is uploaded
+        this.coverPic = null;
         this.owner = owner;
     }
 
@@ -82,14 +78,6 @@ public class Book {
         this.author = author;
     }
 
-    public String getAuthorBio() {
-        return authorBio;
-    }
-
-    public void setAuthorBio(String authorBio) {
-        this.authorBio = authorBio;
-    }
-
     public Genre getGenre() {
         return genre;
     }
@@ -114,13 +102,14 @@ public class Book {
         this.coverPic = coverPic;
     }
 
-    public boolean isAvailable() {
-        return this.available;
+    public String getCoverPicUrl() {
+        if (this.coverPic != null) {
+            return "/books/" + this.id + "/image";
+        } else {
+            return "/images/default_cover.jpg";
+        }
     }
 
-    public void setAvailable(boolean available) {
-        this.available = available;
-    }
 
     // OWNER (it is a user) GETTERS AND SETTERS
     public User getOwner() {
