@@ -180,18 +180,72 @@ public class LoanController {
 
 
     @PostMapping("/loans/create")
-    public String createLoan(@RequestParam Long bookId,
+    public String createLoan(@AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails,
+                             @RequestParam Long bookId,
                              @RequestParam Long lenderId,
                              @RequestParam Long borrowerId,
                              @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
                              @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-                             @RequestParam Loan.Status status) {
+                             @RequestParam Loan.Status status,
+                             RedirectAttributes redirectAttributes) {
 
-        Book book = bookService.getBookById(bookId).orElseThrow(() -> new IllegalArgumentException("Invalid book ID"));
-        User lender = userService.getUserById(lenderId).orElseThrow(() -> new IllegalArgumentException("Invalid lender ID"));
-        User borrower = userService.getUserById(borrowerId).orElseThrow(() -> new IllegalArgumentException("Invalid borrower ID"));
+        try {
+            // Get current user
+            User currentUser = userService.getUserByEmail(userDetails.getUsername())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            
+            boolean isAdmin = currentUser.getRole() == User.Role.ROLE_ADMIN;
+            
+            // For regular users, force them to be the lender
+            if (!isAdmin) {
+                lenderId = currentUser.getId();
+            }
 
-        loanService.createLoan(book, lender, borrower, startDate, endDate, status);
+            Book book = bookService.getBookById(bookId).orElseThrow(() -> new IllegalArgumentException("Invalid book ID"));
+            User lender = userService.getUserById(lenderId).orElseThrow(() -> new IllegalArgumentException("Invalid lender ID"));
+            User borrower = userService.getUserById(borrowerId).orElseThrow(() -> new IllegalArgumentException("Invalid borrower ID"));
+
+            // Validation 1: Lender and borrower cannot be the same person
+            if (lender.getId().equals(borrower.getId())) {
+                redirectAttributes.addFlashAttribute("error", "Lender and borrower cannot be the same person.");
+                return "redirect:/loans/create";
+            }
+
+            // Validation 2: Start date must be today or future
+            LocalDate today = LocalDate.now();
+            if (startDate.isBefore(today)) {
+                redirectAttributes.addFlashAttribute("error", "Start date must be today or in the future.");
+                return "redirect:/loans/create";
+            }
+
+            // Validation 3: End date (if provided) must be after today
+            if (endDate != null && !endDate.isAfter(today)) {
+                redirectAttributes.addFlashAttribute("error", "End date must be in the future.");
+                return "redirect:/loans/create";
+            }
+
+            // Validation 4: End date must be after start date
+            if (endDate != null && !endDate.isAfter(startDate)) {
+                redirectAttributes.addFlashAttribute("error", "End date must be after start date.");
+                return "redirect:/loans/create";
+            }
+
+            // Validation 5: Book must be owned by the lender
+            if (!book.getOwner().getId().equals(lender.getId())) {
+                redirectAttributes.addFlashAttribute("error", "The selected book is not owned by the lender.");
+                return "redirect:/loans/create";
+            }
+
+            loanService.createLoan(book, lender, borrower, startDate, endDate, status);
+            redirectAttributes.addFlashAttribute("message", "Loan created successfully!");
+
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/loans/create";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "An error occurred while creating the loan.");
+            return "redirect:/loans/create";
+        }
 
         return "redirect:/loans";
     }
