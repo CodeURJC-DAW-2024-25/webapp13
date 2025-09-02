@@ -41,11 +41,11 @@ public class LoanController {
 
         boolean isAdmin = user.getRole() == User.Role.ROLE_ADMIN; // Correct way to check admin role
 
-
         List<Loan> loans = isAdmin ? loanService.getAllLoans() : loanService.getLoansByLender(user);
 
         model.addAttribute("loans", loans);
         model.addAttribute("isAdmin", isAdmin);
+        model.addAttribute("currentUserId", user.getId()); // Add current user ID for template logic
 
         return "loans";  // Reuses loans.html for both users and admins
     }
@@ -149,7 +149,7 @@ public class LoanController {
                 currentEndDate = null;
             }
 
-            // ✅ COMPREHENSIVE VALIDATIONS AFTER ALL UPDATES
+            // COMPREHENSIVE VALIDATIONS AFTER ALL UPDATES
             
             // Validation: Check if book is available during the loan period (no overlapping loans)
             if (newBookId != null) {
@@ -321,9 +321,37 @@ public class LoanController {
 
 
     @PostMapping("/loans/delete/{id}")
-    public String deleteLoan(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        loanService.deleteLoan(id);
-        redirectAttributes.addFlashAttribute("message", "Loan successfully deleted.");
+    public String deleteLoan(@AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails,
+                             @PathVariable Long id, 
+                             RedirectAttributes redirectAttributes) {
+        
+        try {
+            // Get current user
+            User currentUser = userService.getUserByEmail(userDetails.getUsername())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            
+            // Get the loan to be deleted
+            Loan loan = loanService.getLoanById(id)
+                    .orElseThrow(() -> new RuntimeException("Loan not found"));
+            
+            boolean isAdmin = currentUser.getRole() == User.Role.ROLE_ADMIN;
+            
+            // Authorization check: Admin can delete any loan, User can only delete loans where they are the lender
+            if (!isAdmin && !loan.getLender().getId().equals(currentUser.getId())) {
+                redirectAttributes.addFlashAttribute("error", 
+                        "You can only delete loans where you are the lender.");
+                return "redirect:/loans";
+            }
+            
+            loanService.deleteLoan(id);
+            redirectAttributes.addFlashAttribute("message", "Loan successfully deleted.");
+            
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("error", "Error deleting loan: " + e.getMessage());
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "An unexpected error occurred while deleting the loan.");
+        }
+        
         return "redirect:/loans";
     }
 
@@ -331,11 +359,7 @@ public class LoanController {
     @GetMapping("/loans/books/{lenderId}")
     @ResponseBody
     public List<Book> getAvailableBooksByLender(@PathVariable Long lenderId) {
-        //System.out.println("📚 DEBUG: Available books size = " + availableBooks.size());
-        System.out.println("\uD83D\uDCDA DEBUG: available books for lender " + lenderId);
-        List<Book> books = bookService.getAvailableBooksByOwnerId(lenderId);
-        System.out.println("🔍 DEBUG: Found " + books.size() + " available books for lender " + lenderId);
-        return books;
+        return bookService.getAvailableBooksByOwnerId(lenderId);
     }
 
 }
