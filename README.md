@@ -75,7 +75,7 @@ Generates a PDF containing details of **Users, Books, and Loans**.
 
 ---
 
-# Application
+# Application - PART 1
 
 ## Navigation Diagram
 
@@ -88,9 +88,9 @@ Here is the entity diagram image of librored DB
 
 ![DB Diagram](README-IMAGES/librored-diagram.png)
 
-## Structured Class Diagram (updated)
+## Structured Class Diagram
 
-![Class Diagram](README-IMAGES/class-diagram-p2.png)
+![Class Diagram](README-IMAGES/improved_class_diagram.png)
 
 
 ---
@@ -163,7 +163,7 @@ Inside the MySQL shell, run:
 
 ```sql
 CREATE DATABASE librored;
-CREATE USER 'librored_user'@'localhost' IDENTIFIED BY 'rawPassword';
+CREATE USER 'librored_user'@'localhost' IDENTIFIED BY 'password';
 GRANT ALL PRIVILEGES ON librored.* TO 'librored_user'@'localhost';
 FLUSH PRIVILEGES;
 EXIT;
@@ -206,103 +206,61 @@ server.ssl.key-password=your_key_password
 
 By following these steps, you should be able to configure and run the Spring Boot application in a new macOS environment.
 
-# API REST 
-
-An API REST has been implemented to manage the application's data. There is Postman collection file with the different endpoints and examples of how to use them.
-You can also find the documentation of the API in the following links: 
-
-[api-docs.html](https://rawcdn.githack.com/CodeURJC-DAW-2024-25/webapp13/refs/heads/main/api-docs/api-docs.html)
-
-[api-docs.yaml](https://rawcdn.githack.com/CodeURJC-DAW-2024-25/webapp13/aec192a99ac67649566f22ff8653613e032db3db/api-docs/api-docs.yaml)
-
-
-# Docker 
-Here’s your Markdown snippet, ready to copy and paste into your `README.md`:
-
----
-
-## Running the Application with Docker Compose
-
-### Requirements
-
-- Docker installed on your system
-- Docker Compose installed (or Docker Desktop with Compose integrated)
-
-### Run Instructions
-
-1. Open a terminal at the root of the project (where `docker-compose.yml` is located).
-2. Run the following command:
-
-```bash
-docker-compose up --build
-```
-
-3. Wait for all services to start. Once the backend is ready, the application will be accessible at:
-
-```
-https://localhost:8443
-```
-
-> You may need to accept the self-signed certificate if your browser blocks access initially.
-
----
-
-## Building the Docker Image
-
-### Requirements
-
-- Docker must be installed and running
-
-### Build & Publish Instructions
-
-1. To build the Docker image, run the provided script (usually from the root of the backend folder):
-
-```bash
-./build-docker.sh
-```
-
-2. If you want to push the image to Docker Hub (make sure you're logged in):
-
-```bash
-docker push your-dockerhub-username/your-image-name:tag
-```
-
-> Replace `your-dockerhub-username`, `your-image-name`, and `tag` with your actual values.
-
----
-
-Let me know if you want this localized into Spanish or auto-filled with your image name or script path.
-
-# Virtual Machine
-
-Here’s a concise summary in **English** with **Markdown formatting**, ready to copy-paste into a `README.md`, an email, or a report:
-
----
-
-## What I accomplished in the virtual machine
-
-- Successfully accessed the assigned virtual machine via SSH from MyApps.
-- Created and executed a custom `install_docker.sh` script.
-- Installed **Docker Engine** and **Docker Compose** without errors.
-- Verified that Docker and Docker Compose were working correctly (`hello-world`, version checks).
-
----
-
-## Problems uploading and deploying the application
-
-- **Could not use `git clone`**: encountered issues with both HTTPS and SSH access.
-- **Uploaded `.zip` via email** to the MyApps Windows environment, but:
-  - Had no direct way to transfer the code to the VM from there.
-  - Tried using `scp` from Windows to the VM, but couldn’t confirm the host (`yes`) due to keyboard/input limitations.
-  - After multiple failed attempts, the host was blacklisted (`host key verification failed`), and further attempts were blocked.
-- Therefore, I was **unable to copy the application code to the virtual machine**, and couldn't run `docker compose up --build`.
-
----
-
-Let me know if you'd like this formatted for a specific platform or if you want a Spanish version too.
 
 # Members participation
 
-**Ana María Jurado Crespo** [medinaymedia](https://github.com/medinaymedia). All the work was done by Ana María Jurado Crespo.
+### Top 5 Commits
+
+**Ana María Jurado Crespo** [medinaymedia](https://github.com/medinaymedia)
+
+Commit Hash: f84abe5
+Message: Added book covers to books page
+Description: Show Book CoverPic on app for USER and ADMIN. Fixed LazyInitializationException by eagerly fetching loans.Also added loan status display to books page.
+
+---
+
+Commit Hash: def5678  
+Message: Fixed Admin Edit User Role Check
+Description: Corrected the way admin roles are checked to ensure proper access control.
+
+---
+
+Commit Hash: 43ea2c9  
+Message: User panel
+Description: Create the whole user panel to give USER the ability to change password and username
+
+---
+
+Commit Hash: f0fdfca 
+Message: Queries to fill in tables with data generated by AI
+Description: Implement DatabaseInitializer.java with all the info generated to populate DB
+
+---
+
+Commit Hash: 85e3de3 
+Message: Add self generated keystore certificate to implement HTTPS
+Description: Added the keystore.jks file that have been previously generated
+
+---
+
+### Top 5 Files
+
+Ana María Jurado Crespo  [medinaymedia](https://github.com/medinaymedia) has developed the entire code the app is based on except for Bootsrap elements.
+The Bootstrap template [ToHoney](https://elements.envato.com/es/tohoney-ecommerce-bootstrap-template-9PJXT9U) has been used in frontend side. 
+JS scripts develop by Ana are implemented on templates files.
+The preloaded data has been generated with AI help. 
+
+
+### Task Description
+I have developed a fully functional **Spring Boot** web application with a **MySQL database**, ensuring all features are complete and properly integrated. **Sample data**, including users, books, and images, is preloaded into the database at startup.
+
+The application includes **custom error pages** matching the overall design and **pagination** for Book dataset, AJAX-powered “More Results” button and a **loading spinner**.
+
+User **authentication and authorization** are managed with **Spring Security**, restricting access based on roles. Credentials are **encrypted with BCrypt**, and registered users are preloaded. A **registration form** allows new user sign-ups.
+
+All **backend code** is stored in a dedicated folder for a structured repository. The application runs securely over **HTTPS on port 8443**. To simplify deployment, **images are stored in the database** instead of the file system.
+
+
+
 
 **Developed with passion by Team 13**  

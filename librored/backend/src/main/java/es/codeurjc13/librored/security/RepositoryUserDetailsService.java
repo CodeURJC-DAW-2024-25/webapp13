@@ -27,7 +27,7 @@ public class RepositoryUserDetailsService implements UserDetailsService {
 
         return org.springframework.security.core.userdetails.User
                 .withUsername(user.getEmail()) // Use email for authentication
-                .rawPassword(user.getEncodedPassword()) // Use encoded rawPassword
+                .password(user.getEncodedPassword()) // Use encoded password
                 .roles(user.getRole().name().replace("ROLE_", "")) // Remove "ROLE_" prefix
                 .build();
     }*/
