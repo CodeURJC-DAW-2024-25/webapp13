@@ -8,6 +8,11 @@ import es.codeurjc13.librored.repository.LoanRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -20,6 +25,12 @@ public class LoanService {
     private LoanRepository loanRepository;
     @Autowired
     private BookRepository bookRepository;
+    
+    @PersistenceContext
+    private EntityManager entityManager;
+    
+    @Autowired
+    private PlatformTransactionManager transactionManager;
 
     public List<Loan> getAllLoans() {
         return loanRepository.findAll();
@@ -86,9 +97,39 @@ public class LoanService {
         loanRepository.save(loan);
     }
 
-    @Transactional
     public void deleteLoan(Long id) {
-        loanRepository.deleteById(id);
+        // Use manual transaction management for reliable deletion
+        TransactionStatus transaction = transactionManager.getTransaction(new DefaultTransactionDefinition());
+        
+        try {
+            Optional<Loan> loan = loanRepository.findById(id);
+            if (loan.isPresent()) {
+                // Use native SQL for direct deletion to bypass JPA/Hibernate issues
+                int rowsAffected = entityManager.createNativeQuery("DELETE FROM loan WHERE id = ?1")
+                    .setParameter(1, id)
+                    .executeUpdate();
+                
+                entityManager.flush();
+                
+                if (rowsAffected == 0) {
+                    transactionManager.rollback(transaction);
+                    throw new RuntimeException("Database constraint preventing deletion");
+                }
+                
+                // Commit the transaction immediately
+                transactionManager.commit(transaction);
+                
+            } else {
+                transactionManager.rollback(transaction);
+                throw new RuntimeException("Loan not found");
+            }
+            
+        } catch (Exception e) {
+            if (!transaction.isCompleted()) {
+                transactionManager.rollback(transaction);
+            }
+            throw new RuntimeException("Failed to delete loan: " + e.getMessage());
+        }
     }
 
     public void saveLoan(Loan loan) {
