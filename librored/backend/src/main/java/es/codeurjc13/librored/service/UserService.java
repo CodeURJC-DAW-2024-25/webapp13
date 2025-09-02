@@ -1,5 +1,8 @@
 package es.codeurjc13.librored.service;
 
+import es.codeurjc13.librored.dto.UserDTO;
+import es.codeurjc13.librored.dto.UserBasicDTO;
+import es.codeurjc13.librored.dto.UserMapper;
 import es.codeurjc13.librored.model.User;
 import es.codeurjc13.librored.repository.LoanRepository;
 import es.codeurjc13.librored.repository.UserRepository;
@@ -21,6 +24,9 @@ public class UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private UserMapper userMapper;
 
 
     public void registerUser(User user) {
@@ -97,5 +103,76 @@ public class UserService {
 
     public List<User> getValidBorrowers(User lender) {
         return userRepository.findAllValidBorrowers(lender);
+    }
+
+    // ==================== DTO-BASED METHODS FOR REST API ====================
+
+    public List<UserDTO> getAllUsersDTO() {
+        List<User> users = userRepository.findAll();
+        return userMapper.toDTOs(users);
+    }
+
+    public Optional<UserDTO> getUserByIdDTO(Long id) {
+        Optional<User> user = userRepository.findById(id);
+        return user.map(userMapper::toDTO);
+    }
+
+    public UserDTO createUserDTO(UserDTO userDTO) {
+        User user = userMapper.toDomain(userDTO);
+        if (user.getUsername() == null || user.getUsername().isEmpty()) {
+            throw new IllegalArgumentException("Username cannot be null or empty");
+        }
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setRole(User.Role.ROLE_USER);
+        User savedUser = userRepository.save(user);
+        return userMapper.toDTO(savedUser);
+    }
+
+    public Optional<UserDTO> updateUserDTO(Long id, UserDTO userDTO) {
+        Optional<User> existingUserOpt = userRepository.findById(id);
+        if (existingUserOpt.isPresent()) {
+            User user = existingUserOpt.get();
+            user.setUsername(userDTO.username());
+            user.setEmail(userDTO.email());
+            user.setRole(userDTO.role());
+            User savedUser = userRepository.save(user);
+            return Optional.of(userMapper.toDTO(savedUser));
+        }
+        return Optional.empty();
+    }
+
+    public boolean deleteUserDTO(Long id) {
+        if (userRepository.existsById(id)) {
+            userRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
+
+    public Optional<UserDTO> getUserByUsernameDTO(String username) {
+        Optional<User> user = userRepository.findByUsername(username);
+        return user.map(userMapper::toDTO);
+    }
+
+    public Optional<UserDTO> getUserByEmailDTO(String email) {
+        Optional<User> user = userRepository.findByEmail(email);
+        return user.map(userMapper::toDTO);
+    }
+
+    public List<UserBasicDTO> getAllUsersExceptDTO(Long userId) {
+        List<User> users = userRepository.findAll();
+        return users.stream()
+                .filter(user -> !user.getId().equals(userId))
+                .map(userMapper::toBasicDTO)
+                .toList();
+    }
+
+    public List<UserBasicDTO> getValidBorrowersDTO(Long lenderId) {
+        Optional<User> lenderOpt = userRepository.findById(lenderId);
+        if (lenderOpt.isPresent()) {
+            List<User> borrowers = userRepository.findAllValidBorrowers(lenderOpt.get());
+            return userMapper.toBasicDTOs(borrowers);
+        }
+        return List.of();
     }
 }
