@@ -99,5 +99,26 @@ public class LoanService {
         return loanRepository.findByLender(lender);
     }
 
+    /**
+     * Check if a book is available during a specific date range (excluding current loan being edited)
+     * @param bookId The book to check
+     * @param startDate Start date of the period
+     * @param endDate End date of the period (can be null for open-ended loans)
+     * @param excludeLoanId Loan ID to exclude from the check (when editing existing loan)
+     * @return true if book is available, false if there's a conflict
+     */
+    public boolean isBookAvailableForDateRange(Long bookId, LocalDate startDate, LocalDate endDate, Long excludeLoanId) {
+        List<Loan> overlappingLoans = loanRepository.findOverlappingLoans(bookId, startDate, endDate, excludeLoanId);
+        return overlappingLoans.isEmpty();
+    }
+
+    /**
+     * Check if a borrower already has an active loan from the same lender during the date range
+     */
+    public boolean isBorrowerAvailableForDateRange(Long borrowerId, Long lenderId, LocalDate startDate, LocalDate endDate, Long excludeLoanId) {
+        List<Loan> overlappingBorrowerLoans = loanRepository.findOverlappingBorrowerLoans(borrowerId, lenderId, startDate, endDate, excludeLoanId);
+        return overlappingBorrowerLoans.isEmpty();
+    }
+
 }
 

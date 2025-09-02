@@ -93,9 +93,26 @@ public class LoanController {
                 .orElseThrow(() -> new RuntimeException("Loan not found"));
 
         try {
+            // Validation for lender and borrower being different
+            Long currentLenderId = loan.getLender().getId();
+            Long currentBorrowerId = (newBorrowerId != null) ? newBorrowerId : loan.getBorrower().getId();
+            
+            if (currentLenderId.equals(currentBorrowerId)) {
+                redirectAttributes.addFlashAttribute("error", 
+                        "Lender and borrower cannot be the same person.");
+                return "redirect:/loans/edit/" + id;
+            }
+
             if (newBookId != null) {
                 Book newBook = bookService.getBookById(newBookId)
                         .orElseThrow(() -> new IllegalArgumentException("Invalid book ID"));
+                
+                // Validate that the book is owned by the lender
+                if (!newBook.getOwner().getId().equals(loan.getLender().getId())) {
+                    redirectAttributes.addFlashAttribute("error", 
+                            "The selected book is not owned by the lender.");
+                    return "redirect:/loans/edit/" + id;
+                }
                 loan.setBook(newBook);
             }
 
@@ -105,20 +122,58 @@ public class LoanController {
                 loan.setBorrower(newBorrower);
             }
 
+            // Date validation logic
+            LocalDate currentStartDate = loan.getStartDate();
+            LocalDate currentEndDate = loan.getEndDate();
+            
             if (newStartDate != null) {
-                loan.setStartDate(LocalDate.parse(newStartDate));
+                LocalDate parsedStartDate = LocalDate.parse(newStartDate);
+                currentStartDate = parsedStartDate;
+                loan.setStartDate(parsedStartDate);
             }
 
-            if (newEndDate != null && !newEndDate.isEmpty()) {  // Prevents parsing errors
+            if (newEndDate != null && !newEndDate.isEmpty()) {
                 LocalDate parsedEndDate = LocalDate.parse(newEndDate);
-                if (parsedEndDate.isBefore(loan.getStartDate())) {
+                
+                // Validation: End date cannot be before or equal to start date
+                if (!parsedEndDate.isAfter(currentStartDate)) {
                     redirectAttributes.addFlashAttribute("error",
-                            "End date cannot be before the start date.");
+                            "End date must be after the start date.");
                     return "redirect:/loans/edit/" + id;
                 }
+                
                 loan.setEndDate(parsedEndDate);
+                currentEndDate = parsedEndDate;
             } else {
-                loan.setEndDate(null);  // Ensures null values are correctly stored
+                loan.setEndDate(null);
+                currentEndDate = null;
+            }
+
+            // ✅ COMPREHENSIVE VALIDATIONS AFTER ALL UPDATES
+            
+            // Validation: Check if book is available during the loan period (no overlapping loans)
+            if (newBookId != null) {
+                Book bookToValidate = bookService.getBookById(newBookId).orElseThrow(() -> new IllegalArgumentException("Invalid book ID"));
+                if (!loanService.isBookAvailableForDateRange(bookToValidate.getId(), currentStartDate, currentEndDate, id)) {
+                    redirectAttributes.addFlashAttribute("error", 
+                            "This book is already loaned to someone else during the specified date range. Please choose different dates or a different book.");
+                    return "redirect:/loans/edit/" + id;
+                }
+            } else if (newStartDate != null || newEndDate != null) {
+                // If dates changed but book didn't, check current book availability
+                if (!loanService.isBookAvailableForDateRange(loan.getBook().getId(), currentStartDate, currentEndDate, id)) {
+                    redirectAttributes.addFlashAttribute("error", 
+                            "The current book is already loaned to someone else during the new date range. Please choose different dates.");
+                    return "redirect:/loans/edit/" + id;
+                }
+            }
+
+            // Validation: Check if borrower already has an active loan from this lender during the same period
+            Long finalBorrowerId = (newBorrowerId != null) ? newBorrowerId : loan.getBorrower().getId();
+            if (!loanService.isBorrowerAvailableForDateRange(finalBorrowerId, loan.getLender().getId(), currentStartDate, currentEndDate, id)) {
+                redirectAttributes.addFlashAttribute("error", 
+                        "This borrower already has an active loan from the same lender during the specified date range.");
+                return "redirect:/loans/edit/" + id;
             }
 
             if (newStatus != null) {
@@ -233,6 +288,20 @@ public class LoanController {
             // Validation 5: Book must be owned by the lender
             if (!book.getOwner().getId().equals(lender.getId())) {
                 redirectAttributes.addFlashAttribute("error", "The selected book is not owned by the lender.");
+                return "redirect:/loans/create";
+            }
+
+            // Validation 6: Check if book is available during the loan period (no overlapping loans)
+            if (!loanService.isBookAvailableForDateRange(book.getId(), startDate, endDate, null)) {
+                redirectAttributes.addFlashAttribute("error", 
+                        "This book is already loaned to someone else during the specified date range. Please choose different dates or a different book.");
+                return "redirect:/loans/create";
+            }
+
+            // Validation 7: Check if borrower already has an active loan from this lender during the same period
+            if (!loanService.isBorrowerAvailableForDateRange(borrower.getId(), lender.getId(), startDate, endDate, null)) {
+                redirectAttributes.addFlashAttribute("error", 
+                        "This borrower already has an active loan from the same lender during the specified date range.");
                 return "redirect:/loans/create";
             }
 
