@@ -4,11 +4,11 @@
     <h2 class="text-center">Create Loan</h2>
     <form action="/loans/create" method="post">
         <input type="hidden" name="_csrf" value="{{_csrf.token}}">
-        <!-- ✅ Lender Selection (Only for Admins) -->
+        <!-- Lender Selection (Only for Admins) -->
         {{#isAdmin}}
         <div class="form-group">
             <label>Lender</label>
-            <select name="lenderId" class="form-control">
+            <select name="lenderId" id="lenderSelect" class="form-control">
                 <option value="" disabled selected>-- Select a Lender --</option>
                 {{#users}}
                 <option value="{{id}}">{{username}}</option>
@@ -17,15 +17,15 @@
         </div>
         {{/isAdmin}}
 
-        <!-- ✅ Hidden Lender Field (For Users) -->
+        <!-- Hidden Lender Field (For Users) -->
         {{^isAdmin}}
         <input type="hidden" name="lenderId" value="{{userId}}">
         {{/isAdmin}}
 
-        <!-- ✅ Book Selection -->
+        <!-- Book Selection -->
         <div class="form-group">
             <label>Book</label>
-            <select name="bookId" class="form-control" required>
+            <select name="bookId" id="bookSelect" class="form-control" required>
                 <option value="" disabled selected>-- Select a Book --</option>
                 {{#books}}
                 <option value="{{id}}">{{title}}</option>
@@ -42,12 +42,12 @@
 
         <div class="form-group">
             <label>Start Date</label>
-            <input type="date" name="startDate" class="form-control" required>
+            <input type="date" name="startDate" id="startDate" class="form-control" required>
         </div>
 
         <div class="form-group">
             <label>End Date</label>
-            <input type="date" name="endDate" class="form-control">
+            <input type="date" name="endDate" id="endDate" class="form-control">
         </div>
 
         <div class="form-group">
@@ -60,6 +60,10 @@
         {{#error}}
         <div class="alert alert-danger">{{error}}</div>
         {{/error}}
+        
+        {{#message}}
+        <div class="alert alert-success">{{message}}</div>
+        {{/message}}
 
         <button type="submit" class="btn btn-success">Create Loan</button>
     </form>
@@ -91,7 +95,7 @@
                         bookSelect.disabled = false;
                     }
                 })
-                .catch(error => console.error("❌ Error loading books:", error));
+                .catch(error => console.error("Error loading books:", error));
         } else {
             bookSelect.innerHTML = "<option value=''>-- Select a Lender First --</option>";
             bookSelect.disabled = true;
@@ -123,6 +127,94 @@
                 }
             })
             .catch(error => console.error("Error loading borrowers:", error));
+    });
+
+    // Date validation and form validation
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.querySelector("form");
+        const startDateInput = document.getElementById("startDate");
+        const endDateInput = document.getElementById("endDate");
+        const borrowerSelect = document.getElementById("borrowerSelect");
+        
+        // Set minimum date to today
+        const today = new Date().toISOString().split('T')[0];
+        startDateInput.min = today;
+        endDateInput.min = today;
+
+        // Validate dates on change
+        startDateInput.addEventListener("change", function() {
+            const startDate = new Date(this.value);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            if (startDate < today) {
+                alert("Start date must be today or in the future.");
+                this.value = "";
+            } else {
+                // Update end date minimum
+                endDateInput.min = this.value;
+                
+                // Check if end date needs to be updated
+                if (endDateInput.value && new Date(endDateInput.value) <= startDate) {
+                    alert("End date must be after start date.");
+                    endDateInput.value = "";
+                }
+            }
+        });
+
+        endDateInput.addEventListener("change", function() {
+            const endDate = new Date(this.value);
+            const startDate = new Date(startDateInput.value);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            if (endDate <= today) {
+                alert("End date must be in the future.");
+                this.value = "";
+            } else if (startDateInput.value && endDate <= startDate) {
+                alert("End date must be after start date.");
+                this.value = "";
+            }
+        });
+
+        // Form submission validation
+        form.addEventListener("submit", function(event) {
+            const lenderSelect = document.getElementById("lenderSelect");
+            const bookSelect = document.getElementById("bookSelect");
+            
+            // Check if lender and borrower are the same (for admin)
+            if (lenderSelect && lenderSelect.value === borrowerSelect.value) {
+                event.preventDefault();
+                alert("Lender and borrower cannot be the same person.");
+                return false;
+            }
+
+            // Date validations
+            const startDate = new Date(startDateInput.value);
+            const endDate = endDateInput.value ? new Date(endDateInput.value) : null;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            if (startDate < today) {
+                event.preventDefault();
+                alert("Start date must be today or in the future.");
+                return false;
+            }
+
+            if (endDate && endDate <= today) {
+                event.preventDefault();
+                alert("End date must be in the future.");
+                return false;
+            }
+
+            if (endDate && endDate <= startDate) {
+                event.preventDefault();
+                alert("End date must be after start date.");
+                return false;
+            }
+
+            return true;
+        });
     });
 </script>
 

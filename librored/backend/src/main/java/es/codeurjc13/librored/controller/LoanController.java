@@ -47,7 +47,7 @@ public class LoanController {
         model.addAttribute("loans", loans);
         model.addAttribute("isAdmin", isAdmin);
 
-        return "loans";  // ✅ Reuses loans.html for both users and admins
+        return "loans";  // Reuses loans.html for both users and admins
     }
 
     @GetMapping("/loans/edit/{id}")
@@ -55,30 +55,26 @@ public class LoanController {
         Loan loan = loanService.getLoanById(id)
                 .orElseThrow(() -> new RuntimeException("Loan not found"));
 
-        // ✅ Get available books owned by the lender (not currently loaned)
+        // Get available books owned by the lender (not currently loaned)
         List<Book> availableBooks = bookService.getAvailableBooksByOwnerId(loan.getLender().getId());
 
-        // ✅ Get valid borrowers (excluding the lender)
+        // Get valid borrowers (excluding the lender)
         List<User> possibleBorrowers = userService.getAllUsersExcept(loan.getLender());
 
-        // ✅ Convert loan status to string format
+        // Convert loan status to string format
         String formattedStatus = loan.getStatus().name();
 
-        // ✅ Ensure endDate is formatted properly for Mustache
+        // Ensure endDate is formatted properly for Mustache
         String formattedEndDate = (loan.getEndDate() != null) ? loan.getEndDate().toString() : "";
 
-        // 🔥 Pass necessary attributes to Mustache
+        // Pass necessary attributes to Mustache
         model.addAttribute("loan", loan);
-        model.addAttribute("books", availableBooks);  // ✅ Pass books list
-        model.addAttribute("users", possibleBorrowers);  // ✅ Pass users list
+        model.addAttribute("books", availableBooks);  // Pass books list
+        model.addAttribute("users", possibleBorrowers);  // Pass users list
         model.addAttribute("formattedStatus", formattedStatus);
         model.addAttribute("isStatusActive", "Active".equals(formattedStatus));
         model.addAttribute("isStatusCompleted", "Completed".equals(formattedStatus));
         model.addAttribute("loanEndDate", formattedEndDate);
-
-        System.out.println("📌 DEBUG: Available Books: " + availableBooks.size());
-        System.out.println("📌 DEBUG: Possible Borrowers: " + possibleBorrowers.size());
-
 
         return "edit-loan";
     }
@@ -97,9 +93,26 @@ public class LoanController {
                 .orElseThrow(() -> new RuntimeException("Loan not found"));
 
         try {
+            // Validation for lender and borrower being different
+            Long currentLenderId = loan.getLender().getId();
+            Long currentBorrowerId = (newBorrowerId != null) ? newBorrowerId : loan.getBorrower().getId();
+            
+            if (currentLenderId.equals(currentBorrowerId)) {
+                redirectAttributes.addFlashAttribute("error", 
+                        "Lender and borrower cannot be the same person.");
+                return "redirect:/loans/edit/" + id;
+            }
+
             if (newBookId != null) {
                 Book newBook = bookService.getBookById(newBookId)
                         .orElseThrow(() -> new IllegalArgumentException("Invalid book ID"));
+                
+                // Validate that the book is owned by the lender
+                if (!newBook.getOwner().getId().equals(loan.getLender().getId())) {
+                    redirectAttributes.addFlashAttribute("error", 
+                            "The selected book is not owned by the lender.");
+                    return "redirect:/loans/edit/" + id;
+                }
                 loan.setBook(newBook);
             }
 
@@ -109,20 +122,58 @@ public class LoanController {
                 loan.setBorrower(newBorrower);
             }
 
+            // Date validation logic
+            LocalDate currentStartDate = loan.getStartDate();
+            LocalDate currentEndDate = loan.getEndDate();
+            
             if (newStartDate != null) {
-                loan.setStartDate(LocalDate.parse(newStartDate));
+                LocalDate parsedStartDate = LocalDate.parse(newStartDate);
+                currentStartDate = parsedStartDate;
+                loan.setStartDate(parsedStartDate);
             }
 
-            if (newEndDate != null && !newEndDate.isEmpty()) {  // Prevents parsing errors
+            if (newEndDate != null && !newEndDate.isEmpty()) {
                 LocalDate parsedEndDate = LocalDate.parse(newEndDate);
-                if (parsedEndDate.isBefore(loan.getStartDate())) {
+                
+                // Validation: End date cannot be before or equal to start date
+                if (!parsedEndDate.isAfter(currentStartDate)) {
                     redirectAttributes.addFlashAttribute("error",
-                            "End date cannot be before the start date.");
+                            "End date must be after the start date.");
                     return "redirect:/loans/edit/" + id;
                 }
+                
                 loan.setEndDate(parsedEndDate);
+                currentEndDate = parsedEndDate;
             } else {
-                loan.setEndDate(null);  // Ensures null values are correctly stored
+                loan.setEndDate(null);
+                currentEndDate = null;
+            }
+
+            // ✅ COMPREHENSIVE VALIDATIONS AFTER ALL UPDATES
+            
+            // Validation: Check if book is available during the loan period (no overlapping loans)
+            if (newBookId != null) {
+                Book bookToValidate = bookService.getBookById(newBookId).orElseThrow(() -> new IllegalArgumentException("Invalid book ID"));
+                if (!loanService.isBookAvailableForDateRange(bookToValidate.getId(), currentStartDate, currentEndDate, id)) {
+                    redirectAttributes.addFlashAttribute("error", 
+                            "This book is already loaned to someone else during the specified date range. Please choose different dates or a different book.");
+                    return "redirect:/loans/edit/" + id;
+                }
+            } else if (newStartDate != null || newEndDate != null) {
+                // If dates changed but book didn't, check current book availability
+                if (!loanService.isBookAvailableForDateRange(loan.getBook().getId(), currentStartDate, currentEndDate, id)) {
+                    redirectAttributes.addFlashAttribute("error", 
+                            "The current book is already loaned to someone else during the new date range. Please choose different dates.");
+                    return "redirect:/loans/edit/" + id;
+                }
+            }
+
+            // Validation: Check if borrower already has an active loan from this lender during the same period
+            Long finalBorrowerId = (newBorrowerId != null) ? newBorrowerId : loan.getBorrower().getId();
+            if (!loanService.isBorrowerAvailableForDateRange(finalBorrowerId, loan.getLender().getId(), currentStartDate, currentEndDate, id)) {
+                redirectAttributes.addFlashAttribute("error", 
+                        "This borrower already has an active loan from the same lender during the specified date range.");
+                return "redirect:/loans/edit/" + id;
             }
 
             if (newStatus != null) {
@@ -167,12 +218,16 @@ public class LoanController {
 
 
         model.addAttribute("isAdmin", isAdmin);
-        model.addAttribute("userId", lender.getId()); // ✅ Pass the logged-in user's ID
+        model.addAttribute("userId", lender.getId()); // Pass the logged-in user's ID
         model.addAttribute("loan", new Loan());
-        model.addAttribute("books", bookService.getAvailableBooksByOwnerId(lender.getId())); // ✅ Fetch only user's available books
-
+        
         if (isAdmin) {
-            model.addAttribute("users", userService.getAllUsersExcept(lender)); // Load all users except lender for admin selection
+            // For admin, don't preload books - they will be loaded via AJAX when lender is selected
+            model.addAttribute("books", List.of()); // Empty list for admin
+            model.addAttribute("users", userService.getAllUsers()); // Load all users for admin selection
+        } else {
+            // For regular users, load their own books
+            model.addAttribute("books", bookService.getAvailableBooksByOwnerId(lender.getId()));
         }
 
         return "create-loan";
@@ -180,18 +235,86 @@ public class LoanController {
 
 
     @PostMapping("/loans/create")
-    public String createLoan(@RequestParam Long bookId,
+    public String createLoan(@AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails,
+                             @RequestParam Long bookId,
                              @RequestParam Long lenderId,
                              @RequestParam Long borrowerId,
                              @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
                              @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-                             @RequestParam Loan.Status status) {
+                             @RequestParam Loan.Status status,
+                             RedirectAttributes redirectAttributes) {
 
-        Book book = bookService.getBookById(bookId).orElseThrow(() -> new IllegalArgumentException("Invalid book ID"));
-        User lender = userService.getUserById(lenderId).orElseThrow(() -> new IllegalArgumentException("Invalid lender ID"));
-        User borrower = userService.getUserById(borrowerId).orElseThrow(() -> new IllegalArgumentException("Invalid borrower ID"));
+        try {
+            // Get current user
+            User currentUser = userService.getUserByEmail(userDetails.getUsername())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            
+            boolean isAdmin = currentUser.getRole() == User.Role.ROLE_ADMIN;
+            
+            // For regular users, force them to be the lender
+            if (!isAdmin) {
+                lenderId = currentUser.getId();
+            }
 
-        loanService.createLoan(book, lender, borrower, startDate, endDate, status);
+            Book book = bookService.getBookById(bookId).orElseThrow(() -> new IllegalArgumentException("Invalid book ID"));
+            User lender = userService.getUserById(lenderId).orElseThrow(() -> new IllegalArgumentException("Invalid lender ID"));
+            User borrower = userService.getUserById(borrowerId).orElseThrow(() -> new IllegalArgumentException("Invalid borrower ID"));
+
+            // Validation 1: Lender and borrower cannot be the same person
+            if (lender.getId().equals(borrower.getId())) {
+                redirectAttributes.addFlashAttribute("error", "Lender and borrower cannot be the same person.");
+                return "redirect:/loans/create";
+            }
+
+            // Validation 2: Start date must be today or future
+            LocalDate today = LocalDate.now();
+            if (startDate.isBefore(today)) {
+                redirectAttributes.addFlashAttribute("error", "Start date must be today or in the future.");
+                return "redirect:/loans/create";
+            }
+
+            // Validation 3: End date (if provided) must be after today
+            if (endDate != null && !endDate.isAfter(today)) {
+                redirectAttributes.addFlashAttribute("error", "End date must be in the future.");
+                return "redirect:/loans/create";
+            }
+
+            // Validation 4: End date must be after start date
+            if (endDate != null && !endDate.isAfter(startDate)) {
+                redirectAttributes.addFlashAttribute("error", "End date must be after start date.");
+                return "redirect:/loans/create";
+            }
+
+            // Validation 5: Book must be owned by the lender
+            if (!book.getOwner().getId().equals(lender.getId())) {
+                redirectAttributes.addFlashAttribute("error", "The selected book is not owned by the lender.");
+                return "redirect:/loans/create";
+            }
+
+            // Validation 6: Check if book is available during the loan period (no overlapping loans)
+            if (!loanService.isBookAvailableForDateRange(book.getId(), startDate, endDate, null)) {
+                redirectAttributes.addFlashAttribute("error", 
+                        "This book is already loaned to someone else during the specified date range. Please choose different dates or a different book.");
+                return "redirect:/loans/create";
+            }
+
+            // Validation 7: Check if borrower already has an active loan from this lender during the same period
+            if (!loanService.isBorrowerAvailableForDateRange(borrower.getId(), lender.getId(), startDate, endDate, null)) {
+                redirectAttributes.addFlashAttribute("error", 
+                        "This borrower already has an active loan from the same lender during the specified date range.");
+                return "redirect:/loans/create";
+            }
+
+            loanService.createLoan(book, lender, borrower, startDate, endDate, status);
+            redirectAttributes.addFlashAttribute("message", "Loan created successfully!");
+
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/loans/create";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "An error occurred while creating the loan.");
+            return "redirect:/loans/create";
+        }
 
         return "redirect:/loans";
     }

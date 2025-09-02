@@ -88,9 +88,10 @@ public class SecurityConfig {
                         // Any other request requires authentication
                         .anyRequest().authenticated())
                 .formLogin(formLogin -> formLogin
-                        .loginPage("/perform_login")
+                        .loginPage("/login")
+                        .loginProcessingUrl("/perform_login")
                         .failureUrl("/login?error=true")
-                        .defaultSuccessUrl("/")
+                        .defaultSuccessUrl("/", true)
                         .permitAll())
                 .logout(logout -> logout
                         .logoutUrl("/logout")
