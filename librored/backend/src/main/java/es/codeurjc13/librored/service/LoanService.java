@@ -1,10 +1,13 @@
 package es.codeurjc13.librored.service;
 
+import es.codeurjc13.librored.dto.LoanDTO;
+import es.codeurjc13.librored.dto.LoanMapper;
 import es.codeurjc13.librored.model.Book;
 import es.codeurjc13.librored.model.Loan;
 import es.codeurjc13.librored.model.User;
 import es.codeurjc13.librored.repository.BookRepository;
 import es.codeurjc13.librored.repository.LoanRepository;
+import es.codeurjc13.librored.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +28,11 @@ public class LoanService {
     private LoanRepository loanRepository;
     @Autowired
     private BookRepository bookRepository;
+    @Autowired
+    private UserRepository userRepository;
+    
+    @Autowired
+    private LoanMapper loanMapper;
     
     @PersistenceContext
     private EntityManager entityManager;
@@ -159,6 +167,183 @@ public class LoanService {
     public boolean isBorrowerAvailableForDateRange(Long borrowerId, Long lenderId, LocalDate startDate, LocalDate endDate, Long excludeLoanId) {
         List<Loan> overlappingBorrowerLoans = loanRepository.findOverlappingBorrowerLoans(borrowerId, lenderId, startDate, endDate, excludeLoanId);
         return overlappingBorrowerLoans.isEmpty();
+    }
+
+    // ==================== DTO-BASED METHODS FOR REST API ====================
+
+    public List<LoanDTO> getAllLoansDTO() {
+        List<Loan> loans = loanRepository.findAll();
+        return loanMapper.toDTOs(loans);
+    }
+
+    public Optional<LoanDTO> getLoanByIdDTO(Long id) {
+        Optional<Loan> loan = loanRepository.findById(id);
+        return loan.map(loanMapper::toDTO);
+    }
+
+    public LoanDTO createLoanDTO(LoanDTO loanDTO) {
+        Loan loan = loanMapper.toDomain(loanDTO);
+        
+        // Set book, lender, and borrower from DTO references
+        if (loanDTO.book() != null) {
+            Optional<Book> book = bookRepository.findById(loanDTO.book().id());
+            if (book.isPresent()) {
+                loan.setBook(book.get());
+            } else {
+                throw new IllegalArgumentException("Book not found with id: " + loanDTO.book().id());
+            }
+        }
+        
+        if (loanDTO.lender() != null) {
+            Optional<User> lender = userRepository.findById(loanDTO.lender().id());
+            if (lender.isPresent()) {
+                loan.setLender(lender.get());
+            } else {
+                throw new IllegalArgumentException("Lender not found with id: " + loanDTO.lender().id());
+            }
+        }
+        
+        if (loanDTO.borrower() != null) {
+            Optional<User> borrower = userRepository.findById(loanDTO.borrower().id());
+            if (borrower.isPresent()) {
+                loan.setBorrower(borrower.get());
+            } else {
+                throw new IllegalArgumentException("Borrower not found with id: " + loanDTO.borrower().id());
+            }
+        }
+        
+        // Validate business rules
+        validateLoanBusinessRules(loan, null);
+        
+        Loan savedLoan = loanRepository.save(loan);
+        return loanMapper.toDTO(savedLoan);
+    }
+
+    public Optional<LoanDTO> updateLoanDTO(Long id, LoanDTO loanDTO) {
+        Optional<Loan> existingLoanOpt = loanRepository.findById(id);
+        if (existingLoanOpt.isPresent()) {
+            Loan loan = existingLoanOpt.get();
+
+            // ✅ Prevent lender change (Fixed Lender Rule)
+            if (loanDTO.lender() != null && !loan.getLender().getId().equals(loanDTO.lender().id())) {
+                throw new IllegalArgumentException(
+                        "Lender cannot be changed. The loan must remain under " + loan.getLender().getUsername() + ".");
+            }
+
+            // Update book if provided
+            if (loanDTO.book() != null) {
+                Optional<Book> book = bookRepository.findById(loanDTO.book().id());
+                if (book.isPresent()) {
+                    List<Book> availableBooks = bookRepository.findAvailableBooksByOwnerId(loan.getLender().getId());
+                    if (!availableBooks.contains(book.get())) {
+                        throw new IllegalArgumentException(
+                                "The selected book is either not owned by " + loan.getLender().getUsername() +
+                                        " or is currently loaned out. Please choose an available book.");
+                    }
+                    loan.setBook(book.get());
+                } else {
+                    throw new IllegalArgumentException("Book not found with id: " + loanDTO.book().id());
+                }
+            }
+
+            // Update borrower if provided
+            if (loanDTO.borrower() != null) {
+                Optional<User> borrower = userRepository.findById(loanDTO.borrower().id());
+                if (borrower.isPresent()) {
+                    loan.setBorrower(borrower.get());
+                } else {
+                    throw new IllegalArgumentException("Borrower not found with id: " + loanDTO.borrower().id());
+                }
+            }
+
+            // Update dates
+            if (loanDTO.startDate() != null) {
+                loan.setStartDate(loanDTO.startDate());
+            }
+            if (loanDTO.endDate() != null) {
+                if (loanDTO.endDate().isBefore(loan.getStartDate())) {
+                    throw new IllegalArgumentException(
+                            "End date cannot be before the start date. Please select a date after " + loan.getStartDate() + ".");
+                }
+                loan.setEndDate(loanDTO.endDate());
+            }
+
+            // Update status with validation
+            if (loanDTO.status() != null) {
+                if (loan.getStatus() == Loan.Status.Completed && loanDTO.status() == Loan.Status.Active) {
+                    throw new IllegalArgumentException(
+                            "A completed loan cannot be reactivated. Consider creating a new loan instead.");
+                }
+                loan.setStatus(loanDTO.status());
+            }
+
+            Loan savedLoan = loanRepository.save(loan);
+            return Optional.of(loanMapper.toDTO(savedLoan));
+        }
+        return Optional.empty();
+    }
+
+    public boolean deleteLoanDTO(Long id) {
+        // Use the same reliable deletion method as the entity version
+        try {
+            deleteLoan(id);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public List<LoanDTO> getLoansByLenderIdDTO(Long lenderId) {
+        Optional<User> lender = userRepository.findById(lenderId);
+        if (lender.isPresent()) {
+            List<Loan> loans = loanRepository.findByLender(lender.get());
+            return loanMapper.toDTOs(loans);
+        }
+        return List.of();
+    }
+
+    public List<LoanDTO> getLoansByBorrowerIdDTO(Long borrowerId) {
+        Optional<User> borrower = userRepository.findById(borrowerId);
+        if (borrower.isPresent()) {
+            List<Loan> loans = loanRepository.findByBorrower(borrower.get());
+            return loanMapper.toDTOs(loans);
+        }
+        return List.of();
+    }
+
+    public List<LoanDTO> getLoansByBookIdDTO(Long bookId) {
+        Optional<Book> book = bookRepository.findById(bookId);
+        if (book.isPresent()) {
+            List<Loan> loans = loanRepository.findByBook(book.get());
+            return loanMapper.toDTOs(loans);
+        }
+        return List.of();
+    }
+
+    /**
+     * Validate business rules for loan creation/update
+     */
+    private void validateLoanBusinessRules(Loan loan, Long excludeLoanId) {
+        // Check book availability for the date range
+        if (!isBookAvailableForDateRange(loan.getBook().getId(), loan.getStartDate(), loan.getEndDate(), excludeLoanId)) {
+            throw new IllegalArgumentException("Book is not available for the selected date range.");
+        }
+
+        // Check borrower availability for the date range
+        if (!isBorrowerAvailableForDateRange(loan.getBorrower().getId(), loan.getLender().getId(), 
+                loan.getStartDate(), loan.getEndDate(), excludeLoanId)) {
+            throw new IllegalArgumentException("Borrower already has an active loan from this lender during the selected date range.");
+        }
+
+        // Ensure lender owns the book
+        if (!loan.getBook().getOwner().equals(loan.getLender())) {
+            throw new IllegalArgumentException("Lender must be the owner of the book.");
+        }
+
+        // Ensure lender and borrower are different
+        if (loan.getLender().equals(loan.getBorrower())) {
+            throw new IllegalArgumentException("Lender and borrower cannot be the same person.");
+        }
     }
 
 }
