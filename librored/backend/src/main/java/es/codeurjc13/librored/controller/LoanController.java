@@ -47,7 +47,7 @@ public class LoanController {
         model.addAttribute("loans", loans);
         model.addAttribute("isAdmin", isAdmin);
 
-        return "loans";  // ✅ Reuses loans.html for both users and admins
+        return "loans";  // Reuses loans.html for both users and admins
     }
 
     @GetMapping("/loans/edit/{id}")
@@ -55,30 +55,26 @@ public class LoanController {
         Loan loan = loanService.getLoanById(id)
                 .orElseThrow(() -> new RuntimeException("Loan not found"));
 
-        // ✅ Get available books owned by the lender (not currently loaned)
+        // Get available books owned by the lender (not currently loaned)
         List<Book> availableBooks = bookService.getAvailableBooksByOwnerId(loan.getLender().getId());
 
-        // ✅ Get valid borrowers (excluding the lender)
+        // Get valid borrowers (excluding the lender)
         List<User> possibleBorrowers = userService.getAllUsersExcept(loan.getLender());
 
-        // ✅ Convert loan status to string format
+        // Convert loan status to string format
         String formattedStatus = loan.getStatus().name();
 
-        // ✅ Ensure endDate is formatted properly for Mustache
+        // Ensure endDate is formatted properly for Mustache
         String formattedEndDate = (loan.getEndDate() != null) ? loan.getEndDate().toString() : "";
 
-        // 🔥 Pass necessary attributes to Mustache
+        // Pass necessary attributes to Mustache
         model.addAttribute("loan", loan);
-        model.addAttribute("books", availableBooks);  // ✅ Pass books list
-        model.addAttribute("users", possibleBorrowers);  // ✅ Pass users list
+        model.addAttribute("books", availableBooks);  // Pass books list
+        model.addAttribute("users", possibleBorrowers);  // Pass users list
         model.addAttribute("formattedStatus", formattedStatus);
         model.addAttribute("isStatusActive", "Active".equals(formattedStatus));
         model.addAttribute("isStatusCompleted", "Completed".equals(formattedStatus));
         model.addAttribute("loanEndDate", formattedEndDate);
-
-        System.out.println("📌 DEBUG: Available Books: " + availableBooks.size());
-        System.out.println("📌 DEBUG: Possible Borrowers: " + possibleBorrowers.size());
-
 
         return "edit-loan";
     }
