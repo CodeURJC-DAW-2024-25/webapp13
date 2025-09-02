@@ -167,12 +167,16 @@ public class LoanController {
 
 
         model.addAttribute("isAdmin", isAdmin);
-        model.addAttribute("userId", lender.getId()); // ✅ Pass the logged-in user's ID
+        model.addAttribute("userId", lender.getId()); // Pass the logged-in user's ID
         model.addAttribute("loan", new Loan());
-        model.addAttribute("books", bookService.getAvailableBooksByOwnerId(lender.getId())); // ✅ Fetch only user's available books
-
+        
         if (isAdmin) {
-            model.addAttribute("users", userService.getAllUsersExcept(lender)); // Load all users except lender for admin selection
+            // For admin, don't preload books - they will be loaded via AJAX when lender is selected
+            model.addAttribute("books", List.of()); // Empty list for admin
+            model.addAttribute("users", userService.getAllUsers()); // Load all users for admin selection
+        } else {
+            // For regular users, load their own books
+            model.addAttribute("books", bookService.getAvailableBooksByOwnerId(lender.getId()));
         }
 
         return "create-loan";
