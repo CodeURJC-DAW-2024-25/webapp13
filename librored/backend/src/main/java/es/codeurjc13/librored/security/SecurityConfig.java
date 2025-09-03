@@ -49,7 +49,12 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         // Public resources (CSS, JS, Images)
-                        .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
+                        .requestMatchers("/css/**",
+                                "/js/**",
+                                "/images/**",
+                                "/v3/api-docs/**",
+                                "/swagger-ui.html",
+                                "/swagger-ui/**").permitAll()
 
                         // Public pages
                         .requestMatchers("/", "/login", "/register", "/error/**", "/perform_login", "/loginerror").permitAll()
