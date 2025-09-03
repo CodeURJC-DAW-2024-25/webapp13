@@ -1,5 +1,7 @@
-package es.codeurjc13.librored.dto;
+package es.codeurjc13.librored.mapper;
 
+import es.codeurjc13.librored.dto.UserBasicDTO;
+import es.codeurjc13.librored.dto.UserDTO;
 import es.codeurjc13.librored.model.User;
 import org.springframework.stereotype.Component;
 import java.util.Collection;
