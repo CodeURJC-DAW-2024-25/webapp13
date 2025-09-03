@@ -122,8 +122,19 @@ public class UserService {
         if (user.getUsername() == null || user.getUsername().isEmpty()) {
             throw new IllegalArgumentException("Username cannot be null or empty");
         }
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setRole(User.Role.ROLE_USER);
+        if (user.getEmail() == null || user.getEmail().isEmpty()) {
+            throw new IllegalArgumentException("Email cannot be null or empty");
+        }
+        
+        // Set a default password for REST API created users
+        String defaultPassword = "defaultPassword123";
+        user.setEncodedPassword(passwordEncoder.encode(defaultPassword));
+        
+        // Use role from DTO or default to ROLE_USER
+        if (user.getRole() == null) {
+            user.setRole(User.Role.ROLE_USER);
+        }
+        
         User savedUser = userRepository.save(user);
         return userMapper.toDTO(savedUser);
     }
