@@ -10,6 +10,7 @@ import es.codeurjc13.librored.repository.LoanRepository;
 import es.codeurjc13.librored.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -170,6 +171,7 @@ public class LoanService {
 
     // ==================== DTO-BASED METHODS FOR REST API ====================
 
+    @Transactional(readOnly = true)
     public List<LoanDTO> getAllLoansDTO() {
         List<Loan> loans = loanRepository.findAll();
         return loanMapper.toDTOs(loans);
@@ -292,6 +294,7 @@ public class LoanService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<LoanDTO> getLoansByLenderIdDTO(Long lenderId) {
         Optional<User> lender = userRepository.findById(lenderId);
         if (lender.isPresent()) {
@@ -301,6 +304,7 @@ public class LoanService {
         return List.of();
     }
 
+    @Transactional(readOnly = true)
     public List<LoanDTO> getLoansByBorrowerIdDTO(Long borrowerId) {
         Optional<User> borrower = userRepository.findById(borrowerId);
         if (borrower.isPresent()) {
@@ -310,6 +314,7 @@ public class LoanService {
         return List.of();
     }
 
+    @Transactional(readOnly = true)
     public List<LoanDTO> getLoansByBookIdDTO(Long bookId) {
         Optional<Book> book = bookRepository.findById(bookId);
         if (book.isPresent()) {

@@ -31,10 +31,12 @@ public class BookService {
     @Autowired
     private BookMapper bookMapper;
 
+    @Transactional(readOnly = true)
     public List<Book> findAll() {
         return bookRepository.findAll();
     }
 
+    @Transactional(readOnly = true)
     public Page<Book> getBooks(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return bookRepository.findAll(pageable);
@@ -152,6 +154,7 @@ public class BookService {
         return false;
     }
 
+    @Transactional(readOnly = true)
     public List<BookDTO> getBooksByOwnerIdDTO(Long ownerId) {
         Optional<User> owner = userRepository.findById(ownerId);
         if (owner.isPresent()) {
@@ -161,6 +164,7 @@ public class BookService {
         return List.of();
     }
 
+    @Transactional(readOnly = true)
     public List<BookBasicDTO> getAvailableBooksByOwnerIdDTO(Long ownerId) {
         List<Book> books = bookRepository.findAvailableBooksByOwnerId(ownerId);
         return bookMapper.toBasicDTOs(books);
@@ -180,6 +184,7 @@ public class BookService {
         return booksPerGenre;
     }
 
+    @Transactional(readOnly = true)
     public List<BookDTO> getRecommendationsForUserDTO(Long userId) {
         List<Book> books = bookRepository.findRecommendedBooks(userId);
         return bookMapper.toDTOs(books);

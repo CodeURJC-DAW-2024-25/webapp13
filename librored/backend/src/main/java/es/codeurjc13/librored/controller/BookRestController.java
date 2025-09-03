@@ -48,9 +48,28 @@ public class BookRestController {
     ) {
         Page<Book> books = bookService.getBooks(page, size);
 
-        // Convert Page<Book> to a stable JSON format
+        // Convert Page<Book> to a stable JSON format with DTOs to avoid lazy loading issues
         Map<String, Object> response = new HashMap<>();
-        response.put("content", books.getContent());  // List of books
+        response.put("content", books.getContent().stream()
+                .map(book -> {
+                    Map<String, Object> bookMap = new HashMap<>();
+                    bookMap.put("id", book.getId());
+                    bookMap.put("title", book.getTitle());
+                    bookMap.put("author", book.getAuthor());
+                    bookMap.put("genre", book.getGenre());
+                    bookMap.put("description", book.getDescription());
+                    bookMap.put("hasCoverImage", book.getCoverPic() != null);
+                    if (book.getOwner() != null) {
+                        Map<String, Object> ownerMap = new HashMap<>();
+                        ownerMap.put("id", book.getOwner().getId());
+                        ownerMap.put("username", book.getOwner().getUsername());
+                        bookMap.put("owner", ownerMap);
+                    } else {
+                        bookMap.put("owner", null);
+                    }
+                    return bookMap;
+                })
+                .toList());
         response.put("currentPage", books.getNumber());
         response.put("totalPages", books.getTotalPages());
         response.put("totalItems", books.getTotalElements());
