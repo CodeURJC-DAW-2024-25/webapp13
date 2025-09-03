@@ -177,8 +177,7 @@ public class BookController {
 
         // Allow users to edit only their own books
         if (!isAdmin && !book.getOwner().getId().equals(user.getId())) {
-            System.out.println(" --->  NOT LETTING USER TO EDIT ITS BOOKS");
-            return "redirect:/books";  // ✅ Redirect to `/books` if they try to edit someone else's book
+            return "redirect:/books";  // Redirect to `/books` if they try to edit someone else's book
         }
 
 

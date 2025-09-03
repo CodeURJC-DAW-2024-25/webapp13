@@ -29,7 +29,7 @@ public class SecurityConfig {
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService);  // ✅ Now using email instead of username
+        authProvider.setUserDetailsService(userDetailsService);  // Now using email instead of username
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }
@@ -44,15 +44,23 @@ public class SecurityConfig {
         http
 
                 .csrf(csrf -> csrf
-                        // .ignoringRequestMatchers("/loans/delete/**") // ?!?! Explicitly allow DELETE
+                        .ignoringRequestMatchers("/api/v1/**") // Disable CSRF for REST API endpoints
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()) // Ensure CSRF token is accessible
                 )
                 .authorizeHttpRequests(auth -> auth
                         // Public resources (CSS, JS, Images)
-                        .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
+                        .requestMatchers("/css/**",
+                                "/js/**",
+                                "/images/**",
+                                "/v3/api-docs/**",
+                                "/swagger-ui.html",
+                                "/swagger-ui/**").permitAll()
 
                         // Public pages
                         .requestMatchers("/", "/login", "/register", "/error/**", "/perform_login", "/loginerror").permitAll()
+
+                        // REST API endpoints (P2 requirements) - MUST be before generic /api/** matcher
+                        .requestMatchers("/api/v1/**").authenticated()
 
                         // API access: Public endpoints
                         .requestMatchers("/api/books", "/api/books/books-per-genre", "/api/books/**").permitAll()
@@ -93,10 +101,36 @@ public class SecurityConfig {
                         .failureUrl("/login?error=true")
                         .defaultSuccessUrl("/", true)
                         .permitAll())
+                .httpBasic(httpBasic -> httpBasic
+                        .realmName("LibroRed API")) // Enable HTTP Basic Auth for API endpoints
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/")
-                        .permitAll());
+                        .permitAll())
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            // Return 401 for API endpoints instead of redirect
+                            String requestPath = request.getRequestURI();
+                            if (requestPath.startsWith("/api/v1/")) {
+                                response.setStatus(401);
+                                response.setContentType("application/json");
+                                response.getWriter().write("{\"error\":\"Authentication required\",\"message\":\"" + authException.getMessage() + "\"}");
+                            } else {
+                                // Redirect to login page for web endpoints
+                                response.sendRedirect("/login");
+                            }
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            // Return 403 for API endpoints instead of redirect
+                            String requestPath = request.getRequestURI();
+                            if (requestPath.startsWith("/api/v1/")) {
+                                response.setStatus(403);
+                                response.setContentType("application/json");
+                                response.getWriter().write("{\"error\":\"Access denied\",\"message\":\"" + accessDeniedException.getMessage() + "\"}");
+                            } else {
+                                response.sendRedirect("/login");
+                            }
+                        }));
 
         return http.build();
     }

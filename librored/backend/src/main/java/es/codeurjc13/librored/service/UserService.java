@@ -2,7 +2,7 @@ package es.codeurjc13.librored.service;
 
 import es.codeurjc13.librored.dto.UserDTO;
 import es.codeurjc13.librored.dto.UserBasicDTO;
-import es.codeurjc13.librored.dto.UserMapper;
+import es.codeurjc13.librored.mapper.UserMapper;
 import es.codeurjc13.librored.model.User;
 import es.codeurjc13.librored.repository.LoanRepository;
 import es.codeurjc13.librored.repository.UserRepository;
@@ -84,12 +84,10 @@ public class UserService {
     }
 
     public Optional<User> getUserByUsername(String username) {
-        System.out.println("🔍 Searching for user in DB: " + username);
         return userRepository.findByUsername(username);
     }
 
     public Optional<User> getUserByEmail(String email) {
-        System.out.println("🔍 Searching for user in DB by email: " + email);
         return userRepository.findByEmail(email);
     }
 
@@ -97,7 +95,6 @@ public class UserService {
         if (user == null) {
             throw new IllegalArgumentException("User cannot be null.");
         }
-        System.out.println("💾 Saving user: " + user.getEmail());
         userRepository.save(user);  // Save without returning anything
     }
 
@@ -122,8 +119,19 @@ public class UserService {
         if (user.getUsername() == null || user.getUsername().isEmpty()) {
             throw new IllegalArgumentException("Username cannot be null or empty");
         }
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setRole(User.Role.ROLE_USER);
+        if (user.getEmail() == null || user.getEmail().isEmpty()) {
+            throw new IllegalArgumentException("Email cannot be null or empty");
+        }
+        
+        // Set a default password for REST API created users
+        String defaultPassword = "defaultPassword123";
+        user.setEncodedPassword(passwordEncoder.encode(defaultPassword));
+        
+        // Use role from DTO or default to ROLE_USER
+        if (user.getRole() == null) {
+            user.setRole(User.Role.ROLE_USER);
+        }
+        
         User savedUser = userRepository.save(user);
         return userMapper.toDTO(savedUser);
     }

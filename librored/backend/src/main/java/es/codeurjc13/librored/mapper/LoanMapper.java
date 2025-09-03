@@ -1,5 +1,6 @@
-package es.codeurjc13.librored.dto;
+package es.codeurjc13.librored.mapper;
 
+import es.codeurjc13.librored.dto.LoanDTO;
 import es.codeurjc13.librored.model.Loan;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

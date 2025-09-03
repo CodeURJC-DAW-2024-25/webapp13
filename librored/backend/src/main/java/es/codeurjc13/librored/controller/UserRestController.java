@@ -53,7 +53,6 @@ public class UserRestController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("success", false, "error", "User not found."));
         }
 
-        System.out.println("🔍 Updating username for: " + user.get().getEmail());
         user.get().setUsername(newUsername);
         userService.saveUser(user.get());
 

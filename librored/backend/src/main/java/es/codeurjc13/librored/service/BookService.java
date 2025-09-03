@@ -2,7 +2,7 @@ package es.codeurjc13.librored.service;
 
 import es.codeurjc13.librored.dto.BookDTO;
 import es.codeurjc13.librored.dto.BookBasicDTO;
-import es.codeurjc13.librored.dto.BookMapper;
+import es.codeurjc13.librored.mapper.BookMapper;
 import es.codeurjc13.librored.model.Book;
 import es.codeurjc13.librored.model.User;
 import es.codeurjc13.librored.repository.BookRepository;
@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
@@ -30,10 +31,12 @@ public class BookService {
     @Autowired
     private BookMapper bookMapper;
 
+    @Transactional(readOnly = true)
     public List<Book> findAll() {
         return bookRepository.findAll();
     }
 
+    @Transactional(readOnly = true)
     public Page<Book> getBooks(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return bookRepository.findAll(pageable);
@@ -90,6 +93,7 @@ public class BookService {
 
     // ==================== DTO-BASED METHODS FOR REST API ====================
 
+    @Transactional(readOnly = true)
     public List<BookDTO> getAllBooksDTO() {
         List<Book> books = bookRepository.findAll();
         return bookMapper.toDTOs(books);
@@ -150,6 +154,7 @@ public class BookService {
         return false;
     }
 
+    @Transactional(readOnly = true)
     public List<BookDTO> getBooksByOwnerIdDTO(Long ownerId) {
         Optional<User> owner = userRepository.findById(ownerId);
         if (owner.isPresent()) {
@@ -159,6 +164,7 @@ public class BookService {
         return List.of();
     }
 
+    @Transactional(readOnly = true)
     public List<BookBasicDTO> getAvailableBooksByOwnerIdDTO(Long ownerId) {
         List<Book> books = bookRepository.findAvailableBooksByOwnerId(ownerId);
         return bookMapper.toBasicDTOs(books);
@@ -178,6 +184,7 @@ public class BookService {
         return booksPerGenre;
     }
 
+    @Transactional(readOnly = true)
     public List<BookDTO> getRecommendationsForUserDTO(Long userId) {
         List<Book> books = bookRepository.findRecommendedBooks(userId);
         return bookMapper.toDTOs(books);

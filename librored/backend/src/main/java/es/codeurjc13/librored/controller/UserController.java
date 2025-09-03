@@ -52,7 +52,6 @@ public class UserController {
                              @RequestParam(required = false) String password,
                              @RequestParam(required = false) String role,
                              @AuthenticationPrincipal org.springframework.security.core.userdetails.User loggedUser) {
-        System.out.println("🔍 DEBUG: Received role = " + role);
 
         User user = userService.getUserById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -106,16 +105,12 @@ public class UserController {
     @GetMapping("/myaccount")
     public String myAccount(@AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails, Model model) {
         if (userDetails == null) {
-            System.out.println("🔴 User is not authenticated!");
             return "redirect:/login";
         }
-
-        System.out.println("✅ Authenticated user: " + userDetails.getUsername());
 
         Optional<User> user = userService.getUserByEmail(userDetails.getUsername());
 
         if (user.isEmpty()) {
-            System.out.println("🔴 User not found in the database!");
             return "redirect:/login";
         }
 

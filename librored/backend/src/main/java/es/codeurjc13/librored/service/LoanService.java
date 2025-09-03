@@ -1,7 +1,7 @@
 package es.codeurjc13.librored.service;
 
 import es.codeurjc13.librored.dto.LoanDTO;
-import es.codeurjc13.librored.dto.LoanMapper;
+import es.codeurjc13.librored.mapper.LoanMapper;
 import es.codeurjc13.librored.model.Book;
 import es.codeurjc13.librored.model.Loan;
 import es.codeurjc13.librored.model.User;
@@ -171,6 +171,7 @@ public class LoanService {
 
     // ==================== DTO-BASED METHODS FOR REST API ====================
 
+    @Transactional(readOnly = true)
     public List<LoanDTO> getAllLoansDTO() {
         List<Loan> loans = loanRepository.findAll();
         return loanMapper.toDTOs(loans);
@@ -293,6 +294,7 @@ public class LoanService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<LoanDTO> getLoansByLenderIdDTO(Long lenderId) {
         Optional<User> lender = userRepository.findById(lenderId);
         if (lender.isPresent()) {
@@ -302,6 +304,7 @@ public class LoanService {
         return List.of();
     }
 
+    @Transactional(readOnly = true)
     public List<LoanDTO> getLoansByBorrowerIdDTO(Long borrowerId) {
         Optional<User> borrower = userRepository.findById(borrowerId);
         if (borrower.isPresent()) {
@@ -311,6 +314,7 @@ public class LoanService {
         return List.of();
     }
 
+    @Transactional(readOnly = true)
     public List<LoanDTO> getLoansByBookIdDTO(Long bookId) {
         Optional<Book> book = bookRepository.findById(bookId);
         if (book.isPresent()) {
