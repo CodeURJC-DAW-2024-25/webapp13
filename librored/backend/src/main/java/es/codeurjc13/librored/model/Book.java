@@ -29,7 +29,7 @@ public class Book {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private User owner;
 
-    @OneToMany(mappedBy = "book", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "book", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore // Prevent infinite recursion in JSON serialization
     private List<Loan> loans;
 
