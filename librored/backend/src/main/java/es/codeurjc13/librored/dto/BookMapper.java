@@ -29,7 +29,7 @@ public class BookMapper {
                 book.getGenre(),
                 book.getDescription(),
                 book.getCoverPic() != null,
-                userMapper.toBasicDTO(book.getOwner())
+                book.getOwner() != null ? userMapper.toBasicDTO(book.getOwner()) : null
         );
     }
 
