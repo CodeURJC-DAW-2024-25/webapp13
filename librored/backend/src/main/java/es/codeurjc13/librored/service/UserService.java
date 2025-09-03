@@ -2,7 +2,7 @@ package es.codeurjc13.librored.service;
 
 import es.codeurjc13.librored.dto.UserDTO;
 import es.codeurjc13.librored.dto.UserBasicDTO;
-import es.codeurjc13.librored.dto.UserMapper;
+import es.codeurjc13.librored.mapper.UserMapper;
 import es.codeurjc13.librored.model.User;
 import es.codeurjc13.librored.repository.LoanRepository;
 import es.codeurjc13.librored.repository.UserRepository;

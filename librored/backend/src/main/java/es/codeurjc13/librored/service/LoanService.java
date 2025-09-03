@@ -1,7 +1,7 @@
 package es.codeurjc13.librored.service;
 
 import es.codeurjc13.librored.dto.LoanDTO;
-import es.codeurjc13.librored.dto.LoanMapper;
+import es.codeurjc13.librored.mapper.LoanMapper;
 import es.codeurjc13.librored.model.Book;
 import es.codeurjc13.librored.model.Loan;
 import es.codeurjc13.librored.model.User;
@@ -10,7 +10,6 @@ import es.codeurjc13.librored.repository.LoanRepository;
 import es.codeurjc13.librored.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.transaction.PlatformTransactionManager;
