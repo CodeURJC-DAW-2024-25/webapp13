@@ -54,11 +54,11 @@ public class SecurityConfig {
                         // Public pages
                         .requestMatchers("/", "/login", "/register", "/error/**", "/perform_login", "/loginerror").permitAll()
 
+                        // REST API endpoints (P2 requirements) - MUST be before generic /api/** matcher
+                        .requestMatchers("/api/v1/**").authenticated()
+
                         // API access: Public endpoints
                         .requestMatchers("/api/books", "/api/books/books-per-genre", "/api/books/**").permitAll()
-
-                        // REST API endpoints (P2 requirements) - disable CSRF and use basic auth
-                        .requestMatchers("/api/v1/**").authenticated()
 
                         // API access: Only logged-in users
                         .requestMatchers("/api/users/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")  //  Only users with ROLE_USER or ROLE_ADMIN can access
