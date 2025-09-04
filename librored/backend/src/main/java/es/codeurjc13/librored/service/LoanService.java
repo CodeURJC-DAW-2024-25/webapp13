@@ -9,6 +9,9 @@ import es.codeurjc13.librored.repository.BookRepository;
 import es.codeurjc13.librored.repository.LoanRepository;
 import es.codeurjc13.librored.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityManager;
@@ -18,7 +21,9 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -175,6 +180,24 @@ public class LoanService {
     public List<LoanDTO> getAllLoansDTO() {
         List<Loan> loans = loanRepository.findAll();
         return loanMapper.toDTOs(loans);
+    }
+
+    @Transactional(readOnly = true)
+    public Map<String, Object> getAllLoansDTOPaginated(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Loan> loanPage = loanRepository.findAll(pageable);
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("content", loanMapper.toDTOs(loanPage.getContent()));
+        response.put("currentPage", loanPage.getNumber());
+        response.put("totalPages", loanPage.getTotalPages());
+        response.put("totalItems", loanPage.getTotalElements());
+        response.put("hasNext", loanPage.hasNext());
+        response.put("hasPrevious", loanPage.hasPrevious());
+        response.put("isFirst", loanPage.isFirst());
+        response.put("isLast", loanPage.isLast());
+        
+        return response;
     }
 
     public Optional<LoanDTO> getLoanByIdDTO(Long id) {
