@@ -126,15 +126,17 @@ public class UserRestController {
 
     // ==================== P2 REST API ENDPOINTS (/api/v1/users) ====================
 
-    @Operation(summary = "Get all users", description = "Retrieve a list of all users")
+    @Operation(summary = "Get all users", description = "Retrieve a paginated list of all users")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Users retrieved successfully"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/api/v1/users")
-    public ResponseEntity<List<UserDTO>> getAllUsers() {
-        List<UserDTO> users = userService.getAllUsersDTO();
-        return ResponseEntity.ok(users);
+    public ResponseEntity<Map<String, Object>> getAllUsers(
+            @Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size") @RequestParam(defaultValue = "10") int size) {
+        Map<String, Object> response = userService.getAllUsersDTOPaginated(page, size);
+        return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "Get user by ID", description = "Retrieve a specific user by their ID")
