@@ -18,6 +18,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
@@ -107,15 +108,17 @@ public class BookRestController {
 
     // ==================== P2 REST API ENDPOINTS (/api/v1/books) ====================
 
-    @Operation(summary = "Get all books", description = "Retrieve a list of all books")
+    @Operation(summary = "Get all books", description = "Retrieve a paginated list of all books")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Books retrieved successfully"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/api/v1/books")
-    public ResponseEntity<List<BookDTO>> getAllBooks() {
-        List<BookDTO> books = bookService.getAllBooksDTO();
-        return ResponseEntity.ok(books);
+    public ResponseEntity<Map<String, Object>> getAllBooks(
+            @Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size") @RequestParam(defaultValue = "10") int size) {
+        Map<String, Object> response = bookService.getAllBooksDTOPaginated(page, size);
+        return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "Get book by ID", description = "Retrieve a specific book by its ID")
@@ -225,6 +228,93 @@ public class BookRestController {
     public ResponseEntity<Map<String, Long>> getBooksPerGenreStats() {
         Map<String, Long> stats = bookService.getBooksPerGenreDTO();
         return ResponseEntity.ok(stats);
+    }
+
+    @Operation(summary = "Get book cover image", description = "Download the cover image for a specific book")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Cover image retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "Book or cover image not found")
+    })
+    @GetMapping("/api/v1/books/{id}/cover")
+    public ResponseEntity<Resource> getBookCoverImage(
+            @Parameter(description = "Book ID") @PathVariable Long id) {
+        try {
+            Book book = bookService.findBookById(id);
+
+            if (book.getCoverPic() == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+
+            Resource file = new InputStreamResource(book.getCoverPic().getBinaryStream());
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_TYPE, "image/jpeg")
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"book-" + id + "-cover.jpg\"")
+                    .body(file);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @Operation(summary = "Upload book cover image", description = "Upload a cover image for a specific book")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Cover image uploaded successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid file or request"),
+            @ApiResponse(responseCode = "404", description = "Book not found"),
+            @ApiResponse(responseCode = "413", description = "File too large"),
+            @ApiResponse(responseCode = "415", description = "Unsupported media type")
+    })
+    @PostMapping("/api/v1/books/{id}/cover")
+    public ResponseEntity<Map<String, String>> uploadBookCoverImage(
+            @Parameter(description = "Book ID") @PathVariable Long id,
+            @Parameter(description = "Cover image file") @RequestParam("file") MultipartFile file) {
+        
+        Map<String, String> response = new HashMap<>();
+        
+        try {
+            // Validate file
+            if (file.isEmpty()) {
+                response.put("error", "File is empty");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            // Check file size (max 5MB)
+            if (file.getSize() > 5 * 1024 * 1024) {
+                response.put("error", "File size exceeds maximum limit of 5MB");
+                return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(response);
+            }
+
+            // Check file type
+            String contentType = file.getContentType();
+            if (contentType == null || (!contentType.startsWith("image/"))) {
+                response.put("error", "File must be an image");
+                return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).body(response);
+            }
+
+            // Check if book exists
+            Optional<Book> bookOptional = bookService.getBookById(id);
+            if (bookOptional.isEmpty()) {
+                response.put("error", "Book not found");
+                return ResponseEntity.notFound().build();
+            }
+
+            // Upload the image
+            bookService.uploadBookCover(id, file);
+            
+            response.put("message", "Cover image uploaded successfully");
+            response.put("bookId", id.toString());
+            response.put("fileName", file.getOriginalFilename());
+            response.put("size", String.valueOf(file.getSize()));
+            
+            return ResponseEntity.ok(response);
+
+        } catch (IllegalArgumentException e) {
+            response.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        } catch (Exception e) {
+            response.put("error", "Failed to upload cover image: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
     }
 
 }

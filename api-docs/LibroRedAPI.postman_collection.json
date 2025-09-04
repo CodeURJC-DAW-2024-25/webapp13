@@ -3026,6 +3026,180 @@
 			]
 		},
 		{
+			"name": "Book Images",
+			"item": [
+				{
+					"name": "Upload book cover",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{password}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{username}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"description": "Book cover image file (JPEG, PNG) - Click 'Select Files' to choose an image",
+									"type": "file",
+									"src": [],
+									"disabled": false
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/books/{{bookId}}/cover",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"books",
+								"{{bookId}}",
+								"cover"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Cover uploaded successfully",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "file",
+											"description": "Book cover image file",
+											"type": "file",
+											"src": []
+										}
+									]
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/books/1/cover",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"books",
+										"1",
+										"cover"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Cover uploaded successfully\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Get book cover",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{password}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{username}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "image/*"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/books/{{bookId}}/cover",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"books",
+								"{{bookId}}",
+								"cover"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Cover retrieved successfully",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "image/*"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/books/1/cover",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"books",
+										"1",
+										"cover"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "image/jpeg"
+								}
+							],
+							"cookie": [],
+							"body": "(Binary image data)"
+						}
+					]
+				}
+			]
+		},
+		{
 			"name": "Loans API",
 			"item": [
 				{
@@ -4159,7 +4333,7 @@
 	"variable": [
 		{
 			"key": "baseUrl",
-			"value": "https://localhost:8443",
+			"value": "http://localhost:8443",
 			"type": "string"
 		}
 	]
