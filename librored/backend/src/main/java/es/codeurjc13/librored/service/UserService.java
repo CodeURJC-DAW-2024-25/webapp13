@@ -7,10 +7,15 @@ import es.codeurjc13.librored.model.User;
 import es.codeurjc13.librored.repository.LoanRepository;
 import es.codeurjc13.librored.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -107,6 +112,23 @@ public class UserService {
     public List<UserDTO> getAllUsersDTO() {
         List<User> users = userRepository.findAll();
         return userMapper.toDTOs(users);
+    }
+
+    public Map<String, Object> getAllUsersDTOPaginated(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<User> userPage = userRepository.findAll(pageable);
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("content", userMapper.toDTOs(userPage.getContent()));
+        response.put("currentPage", userPage.getNumber());
+        response.put("totalPages", userPage.getTotalPages());
+        response.put("totalItems", userPage.getTotalElements());
+        response.put("hasNext", userPage.hasNext());
+        response.put("hasPrevious", userPage.hasPrevious());
+        response.put("isFirst", userPage.isFirst());
+        response.put("isLast", userPage.isLast());
+        
+        return response;
     }
 
     public Optional<UserDTO> getUserByIdDTO(Long id) {
