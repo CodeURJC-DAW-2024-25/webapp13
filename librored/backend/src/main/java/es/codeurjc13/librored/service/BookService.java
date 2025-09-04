@@ -13,6 +13,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.sql.Blob;
+import java.sql.SQLException;
 
 import java.util.HashMap;
 import java.util.List;
@@ -97,6 +102,24 @@ public class BookService {
     public List<BookDTO> getAllBooksDTO() {
         List<Book> books = bookRepository.findAll();
         return bookMapper.toDTOs(books);
+    }
+
+    @Transactional(readOnly = true)
+    public Map<String, Object> getAllBooksDTOPaginated(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Book> bookPage = bookRepository.findAll(pageable);
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("content", bookMapper.toDTOs(bookPage.getContent()));
+        response.put("currentPage", bookPage.getNumber());
+        response.put("totalPages", bookPage.getTotalPages());
+        response.put("totalItems", bookPage.getTotalElements());
+        response.put("hasNext", bookPage.hasNext());
+        response.put("hasPrevious", bookPage.hasPrevious());
+        response.put("isFirst", bookPage.isFirst());
+        response.put("isLast", bookPage.isLast());
+        
+        return response;
     }
 
     public Optional<BookDTO> getBookByIdDTO(Long id) {
@@ -188,6 +211,31 @@ public class BookService {
     public List<BookDTO> getRecommendationsForUserDTO(Long userId) {
         List<Book> books = bookRepository.findRecommendedBooks(userId);
         return bookMapper.toDTOs(books);
+    }
+
+    /**
+     * Upload a cover image for a book
+     */
+    @Transactional
+    public void uploadBookCover(Long bookId, MultipartFile file) throws IOException {
+        Optional<Book> bookOptional = bookRepository.findById(bookId);
+        if (bookOptional.isEmpty()) {
+            throw new IllegalArgumentException("Book not found with id: " + bookId);
+        }
+
+        Book book = bookOptional.get();
+        
+        try {
+            // Convert MultipartFile to Blob
+            byte[] imageBytes = file.getBytes();
+            Blob imageBlob = new javax.sql.rowset.serial.SerialBlob(imageBytes);
+            
+            book.setCoverPic(imageBlob);
+            bookRepository.save(book);
+            
+        } catch (Exception e) {
+            throw new IOException("Failed to process image file: " + e.getMessage(), e);
+        }
     }
 
 }
