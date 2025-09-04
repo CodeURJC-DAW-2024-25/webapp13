@@ -1,0 +1,76 @@
+# .dockerignore for LibroRed
+
+# Git
+.git
+.gitignore
+.github
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Maven
+target/
+!librored/backend/target/*.jar
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+
+# Logs
+*.log
+logs/
+
+# Docker
+docker-compose*.yml
+Dockerfile*
+*.dockerfile
+
+# Documentation
+README.md
+docs/
+*.md
+
+# Node modules (if any)
+node_modules/
+npm-debug.log*
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+
+# Build artifacts (except our jar)
+build/
+dist/
+
+# Environment files
+.env
+.env.local
+.env.production
+.env.test
+
+# Coverage reports
+coverage/
+*.lcov
+
+# Other
+*.bak
+*.backup
