@@ -18,6 +18,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -50,15 +51,17 @@ public class LoanRestController {
 
     // ==================== P2 REST API ENDPOINTS (/api/v1/loans) ====================
 
-    @Operation(summary = "Get all loans", description = "Retrieve a list of all loans")
+    @Operation(summary = "Get all loans", description = "Retrieve a paginated list of all loans")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Loans retrieved successfully"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/api/v1/loans")
-    public ResponseEntity<List<LoanDTO>> getAllLoans() {
-        List<LoanDTO> loans = loanService.getAllLoansDTO();
-        return ResponseEntity.ok(loans);
+    public ResponseEntity<Map<String, Object>> getAllLoans(
+            @Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size") @RequestParam(defaultValue = "10") int size) {
+        Map<String, Object> response = loanService.getAllLoansDTOPaginated(page, size);
+        return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "Get loan by ID", description = "Retrieve a specific loan by its ID")
