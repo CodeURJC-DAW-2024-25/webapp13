@@ -1,11 +1,11 @@
 {
 	"info": {
-		"_postman_id": "6d5eda71-2471-40f2-8b43-f4b7507d0903",
+		"_postman_id": "76632a49-7c3a-4e37-b1df-0114f433e84c",
 		"name": "LibroRed API P2",
 		"description": "Complete Postman collection for LibroRed REST API - Practice 2",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "48151065",
-		"_collection_link": "https://medinaymedia-654861.postman.co/workspace/LibroRed's-Workspace~d647e41c-7a83-49c1-8e50-714e8dd96120/collection/48151065-6d5eda71-2471-40f2-8b43-f4b7507d0903?action=share&source=collection_link&creator=48151065"
+		"_collection_link": "https://medinaymedia-654861.postman.co/workspace/LibroRed's-Workspace~d647e41c-7a83-49c1-8e50-714e8dd96120/collection/48151065-76632a49-7c3a-4e37-b1df-0114f433e84c?action=share&source=collection_link&creator=48151065"
 	},
 	"item": [
 		{
@@ -37,7 +37,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/users",
+							"raw": "{{baseUrl}}/api/v1/users?page=0&size=10",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -45,6 +45,18 @@
 								"api",
 								"v1",
 								"users"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0",
+									"description": "Page number (0-based)"
+								},
+								{
+									"key": "size",
+									"value": "10",
+									"description": "Number of items per page"
+								}
 							]
 						}
 					},
@@ -73,7 +85,7 @@
 							},
 							"status": "OK",
 							"code": 200,
-							"_postman_previewlanguage": "",
+							"_postman_previewlanguage": "Text",
 							"header": [
 								{
 									"key": "X-Content-Type-Options",
@@ -193,7 +205,7 @@
 							},
 							"status": "OK",
 							"code": 200,
-							"_postman_previewlanguage": "",
+							"_postman_previewlanguage": "Text",
 							"header": [
 								{
 									"key": "X-Content-Type-Options",
@@ -278,7 +290,7 @@
 							},
 							"status": "OK",
 							"code": 200,
-							"_postman_previewlanguage": "",
+							"_postman_previewlanguage": "Text",
 							"header": [
 								{
 									"key": "X-Content-Type-Options",
@@ -357,7 +369,7 @@
 							},
 							"status": "Not Found",
 							"code": 404,
-							"_postman_previewlanguage": "",
+							"_postman_previewlanguage": "Text",
 							"header": [
 								{
 									"key": "X-Content-Type-Options",
@@ -439,7 +451,7 @@
 							"raw": "{\n  \"username\": \"newuser\",\n  \"email\": \"newuser@example.com\",\n  \"encodedPassword\": \"password123\",\n  \"roles\": [\"ROLE_USER\"]\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/users",
+							"raw": "{{baseUrl}}/api/v1/users?page=0&size=10",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -447,6 +459,18 @@
 								"api",
 								"v1",
 								"users"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0",
+									"description": "Page number (0-based)"
+								},
+								{
+									"key": "size",
+									"value": "10",
+									"description": "Number of items per page"
+								}
 							]
 						}
 					},
@@ -479,7 +503,7 @@
 							},
 							"status": "Created",
 							"code": 201,
-							"_postman_previewlanguage": "",
+							"_postman_previewlanguage": "Text",
 							"header": [
 								{
 									"key": "Location",
@@ -565,7 +589,7 @@
 							},
 							"status": "Created",
 							"code": 201,
-							"_postman_previewlanguage": "",
+							"_postman_previewlanguage": "Text",
 							"header": [
 								{
 									"key": "Location",
@@ -651,7 +675,7 @@
 							},
 							"status": "Created",
 							"code": 201,
-							"_postman_previewlanguage": "",
+							"_postman_previewlanguage": "Text",
 							"header": [
 								{
 									"key": "Location",
@@ -768,7 +792,7 @@
 							},
 							"status": "OK",
 							"code": 200,
-							"_postman_previewlanguage": "",
+							"_postman_previewlanguage": "Text",
 							"header": [
 								{
 									"key": "X-Content-Type-Options",
@@ -873,7 +897,7 @@
 							},
 							"status": "No Content",
 							"code": 204,
-							"_postman_previewlanguage": "",
+							"_postman_previewlanguage": "Text",
 							"header": [
 								{
 									"key": "X-Content-Type-Options",
@@ -972,7 +996,7 @@
 							},
 							"status": "OK",
 							"code": 200,
-							"_postman_previewlanguage": "",
+							"_postman_previewlanguage": "Text",
 							"header": [
 								{
 									"key": "X-Content-Type-Options",
@@ -1079,7 +1103,7 @@
 							},
 							"status": "OK",
 							"code": 200,
-							"_postman_previewlanguage": "",
+							"_postman_previewlanguage": "Text",
 							"header": [
 								{
 									"key": "Content-Disposition",
@@ -1190,7 +1214,7 @@
 							},
 							"status": "OK",
 							"code": 200,
-							"_postman_previewlanguage": "",
+							"_postman_previewlanguage": "Text",
 							"header": [
 								{
 									"key": "X-Content-Type-Options",
@@ -1314,7 +1338,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/books",
+							"raw": "{{baseUrl}}/api/v1/books?page=0&size=10",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1322,6 +1346,18 @@
 								"api",
 								"v1",
 								"books"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0",
+									"description": "Page number (0-based)"
+								},
+								{
+									"key": "size",
+									"value": "10",
+									"description": "Number of items per page"
+								}
 							]
 						}
 					},
@@ -1337,7 +1373,7 @@
 									}
 								],
 								"url": {
-									"raw": "{{baseUrl}}/api/v1/books",
+									"raw": "{{baseUrl}}/api/v1/books?page=0&size=10",
 									"host": [
 										"{{baseUrl}}"
 									],
@@ -1345,12 +1381,24 @@
 										"api",
 										"v1",
 										"books"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "0",
+											"description": "Page number (0-based)"
+										},
+										{
+											"key": "size",
+											"value": "10",
+											"description": "Number of items per page"
+										}
 									]
 								}
 							},
 							"status": "OK",
 							"code": 200,
-							"_postman_previewlanguage": "",
+							"_postman_previewlanguage": "Text",
 							"header": [
 								{
 									"key": "X-Content-Type-Options",
@@ -1407,6 +1455,104 @@
 					]
 				},
 				{
+					"name": "Get books - Page 2 (Pagination Example)",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{password}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{username}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/books?page=1&size=5",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"books"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number (0-based) - Second page"
+								},
+								{
+									"key": "size",
+									"value": "5",
+									"description": "Smaller page size to demonstrate pagination"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Get books - Page 2",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/books?page=1&size=5",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"books"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1",
+											"description": "Page number (0-based)"
+										},
+										{
+											"key": "size",
+											"value": "5",
+											"description": "Number of items per page"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"content\": [\n        {\n            \"id\": 6,\n            \"title\": \"The Cursed Woods\",\n            \"author\": \"Stephen King\",\n            \"genre\": \"Horror\",\n            \"description\": \"A mysterious forest where people disappear.\",\n            \"hasCoverImage\": true,\n            \"owner\": {\n                \"id\": 3,\n                \"username\": \"Bob Staples\"\n            }\n        }\n    ],\n    \"currentPage\": 1,\n    \"totalPages\": 6,\n    \"totalItems\": 28,\n    \"hasNext\": true,\n    \"hasPrevious\": true,\n    \"isFirst\": false,\n    \"isLast\": false\n}"
+						}
+					]
+				},
+				{
 					"name": "Get book by ID",
 					"request": {
 						"method": "GET",
@@ -1455,7 +1601,7 @@
 							},
 							"status": "OK",
 							"code": 200,
-							"_postman_previewlanguage": "",
+							"_postman_previewlanguage": "Text",
 							"header": [
 								{
 									"key": "X-Content-Type-Options",
@@ -1534,7 +1680,7 @@
 							},
 							"status": "OK",
 							"code": 200,
-							"_postman_previewlanguage": "",
+							"_postman_previewlanguage": "Text",
 							"header": [
 								{
 									"key": "X-Content-Type-Options",
@@ -1613,7 +1759,7 @@
 							},
 							"status": "Not Found",
 							"code": 404,
-							"_postman_previewlanguage": "",
+							"_postman_previewlanguage": "Text",
 							"header": [
 								{
 									"key": "X-Content-Type-Options",
@@ -1735,7 +1881,7 @@
 							},
 							"status": "Created",
 							"code": 201,
-							"_postman_previewlanguage": "",
+							"_postman_previewlanguage": "Text",
 							"header": [
 								{
 									"key": "Location",
@@ -1821,7 +1967,7 @@
 							},
 							"status": "Created",
 							"code": 201,
-							"_postman_previewlanguage": "",
+							"_postman_previewlanguage": "Text",
 							"header": [
 								{
 									"key": "Location",
@@ -1907,7 +2053,7 @@
 							},
 							"status": "Created",
 							"code": 201,
-							"_postman_previewlanguage": "",
+							"_postman_previewlanguage": "Text",
 							"header": [
 								{
 									"key": "Location",
@@ -2024,7 +2170,7 @@
 							},
 							"status": "OK",
 							"code": 200,
-							"_postman_previewlanguage": "",
+							"_postman_previewlanguage": "Text",
 							"header": [
 								{
 									"key": "X-Content-Type-Options",
@@ -2129,7 +2275,7 @@
 							},
 							"status": "No Content",
 							"code": 204,
-							"_postman_previewlanguage": "",
+							"_postman_previewlanguage": "Text",
 							"header": [
 								{
 									"key": "X-Content-Type-Options",
@@ -2228,7 +2374,7 @@
 							},
 							"status": "OK",
 							"code": 200,
-							"_postman_previewlanguage": "",
+							"_postman_previewlanguage": "Text",
 							"header": [
 								{
 									"key": "X-Content-Type-Options",
@@ -2308,7 +2454,7 @@
 							},
 							"status": "OK",
 							"code": 200,
-							"_postman_previewlanguage": "",
+							"_postman_previewlanguage": "Text",
 							"header": [
 								{
 									"key": "X-Content-Type-Options",
@@ -2415,7 +2561,7 @@
 							},
 							"status": "OK",
 							"code": 200,
-							"_postman_previewlanguage": "",
+							"_postman_previewlanguage": "Text",
 							"header": [
 								{
 									"key": "X-Content-Type-Options",
@@ -2495,7 +2641,7 @@
 							},
 							"status": "OK",
 							"code": 200,
-							"_postman_previewlanguage": "",
+							"_postman_previewlanguage": "Text",
 							"header": [
 								{
 									"key": "X-Content-Type-Options",
@@ -2602,7 +2748,7 @@
 							},
 							"status": "OK",
 							"code": 200,
-							"_postman_previewlanguage": "",
+							"_postman_previewlanguage": "Text",
 							"header": [
 								{
 									"key": "X-Content-Type-Options",
@@ -2682,7 +2828,7 @@
 							},
 							"status": "OK",
 							"code": 200,
-							"_postman_previewlanguage": "",
+							"_postman_previewlanguage": "Text",
 							"header": [
 								{
 									"key": "X-Content-Type-Options",
@@ -2789,7 +2935,7 @@
 							},
 							"status": "OK",
 							"code": 200,
-							"_postman_previewlanguage": "",
+							"_postman_previewlanguage": "Text",
 							"header": [
 								{
 									"key": "X-Content-Type-Options",
@@ -2910,7 +3056,7 @@
 							},
 							"status": "OK",
 							"code": 200,
-							"_postman_previewlanguage": "",
+							"_postman_previewlanguage": "Text",
 							"header": [
 								{
 									"key": "X-Content-Type-Options",
@@ -2965,26 +3111,6 @@
 							"body": "{\n    \"totalItems\": 28,\n    \"last\": false,\n    \"totalPages\": 4,\n    \"currentPage\": 0,\n    \"content\": [\n        {\n            \"owner\": {\n                \"id\": 1,\n                \"username\": \"Admin\"\n            },\n            \"hasCoverImage\": true,\n            \"author\": \"Anita Powell\",\n            \"genre\": \"Fiction\",\n            \"description\": \"Testing API UPDATE BOOK endpoint\",\n            \"id\": 1,\n            \"title\": \"UPDATE A Book by API\"\n        },\n        {\n            \"owner\": {\n                \"id\": 2,\n                \"username\": \"Alice Green\"\n            },\n            \"hasCoverImage\": true,\n            \"author\": \"Emily Carter\",\n            \"genre\": \"SciFi_Fantasy\",\n            \"description\": \"An interstellar battle for survival in a distant galaxy.\",\n            \"id\": 2,\n            \"title\": \"Galactic Wars\"\n        },\n        {\n            \"owner\": {\n                \"id\": 2,\n                \"username\": \"Alice Green\"\n            },\n            \"hasCoverImage\": true,\n            \"author\": \"Mark Johnson\",\n            \"genre\": \"Mystery_Thriller\",\n            \"description\": \"A detective investigates a series of cryptic murders.\",\n            \"id\": 3,\n            \"title\": \"The Silent Killer\"\n        },\n        {\n            \"owner\": {\n                \"id\": 2,\n                \"username\": \"Alice Green\"\n            },\n            \"hasCoverImage\": true,\n            \"author\": \"Wilbur Smith\",\n            \"genre\": \"Historical_Fiction\",\n            \"description\": \"The final days of an Egyptian dynasty.\",\n            \"id\": 4,\n            \"title\": \"The Last Pharaoh\"\n        },\n        {\n            \"owner\": {\n                \"id\": 3,\n                \"username\": \"Bob Staples\"\n            },\n            \"hasCoverImage\": true,\n            \"author\": \"Jane Smith\",\n            \"genre\": \"Non_Fiction\",\n            \"description\": \"A deep dive into the wonders of modern science.\",\n            \"id\": 5,\n            \"title\": \"The Science of Everything\"\n        },\n        {\n            \"owner\": {\n                \"id\": 3,\n                \"username\": \"Bob Staples\"\n            },\n            \"hasCoverImage\": true,\n            \"author\": \"Stephen King\",\n            \"genre\": \"Horror\",\n            \"description\": \"A mysterious forest where people disappear.\",\n            \"id\": 6,\n            \"title\": \"The Cursed Woods\"\n        },\n        {\n            \"owner\": {\n                \"id\": 3,\n                \"username\": \"Bob Staples\"\n            },\n            \"hasCoverImage\": true,\n            \"author\": \"Nicholas Sparks\",\n            \"genre\": \"Romance\",\n            \"description\": \"A series of letters change a woman’s fate.\",\n            \"id\": 7,\n            \"title\": \"Unwritten Letters\"\n        },\n        {\n            \"owner\": {\n                \"id\": 3,\n                \"username\": \"Bob Staples\"\n            },\n            \"hasCoverImage\": true,\n            \"author\": \"Brandon Sanderson\",\n            \"genre\": \"SciFi_Fantasy\",\n            \"description\": \"A young mage embarks on a heroic quest.\",\n            \"id\": 8,\n            \"title\": \"Chronicles of Eldoria\"\n        }\n    ]\n}"
 						}
 					]
-				},
-				{
-					"name": "Get book cover",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/books/1/cover",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"books",
-								"1",
-								"cover"
-							]
-						}
-					},
-					"response": []
 				}
 			],
 			"auth": {
@@ -3055,13 +3181,12 @@
 									"key": "file",
 									"description": "Book cover image file (JPEG, PNG) - Click 'Select Files' to choose an image",
 									"type": "file",
-									"src": [],
-									"disabled": false
+									"src": "postman-cloud:///1f089871-ab81-4fb0-9767-4bbec0328ace"
 								}
 							]
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/books/{{bookId}}/cover",
+							"raw": "{{baseUrl}}/api/v1/books/1/cover",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -3069,7 +3194,7 @@
 								"api",
 								"v1",
 								"books",
-								"{{bookId}}",
+								"1",
 								"cover"
 							]
 						}
@@ -3084,7 +3209,7 @@
 									"mode": "formdata",
 									"formdata": [
 										{
-											"key": "file",
+											"key": "cover",
 											"description": "Book cover image file",
 											"type": "file",
 											"src": []
@@ -3116,6 +3241,88 @@
 							],
 							"cookie": [],
 							"body": "{\n    \"message\": \"Cover uploaded successfully\"\n}"
+						},
+						{
+							"name": "Upload book cover",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "file",
+											"description": "Book cover image file (JPEG, PNG) - Click 'Select Files' to choose an image",
+											"type": "file",
+											"src": "postman-cloud:///1f089871-ab81-4fb0-9767-4bbec0328ace"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/books/1/cover",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"books",
+										"1",
+										"cover"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "",
+							"header": [
+								{
+									"key": "X-Content-Type-Options",
+									"value": "nosniff"
+								},
+								{
+									"key": "X-XSS-Protection",
+									"value": "0"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache, no-store, max-age=0, must-revalidate"
+								},
+								{
+									"key": "Pragma",
+									"value": "no-cache"
+								},
+								{
+									"key": "Expires",
+									"value": "0"
+								},
+								{
+									"key": "X-Frame-Options",
+									"value": "DENY"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json;charset=UTF-8"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 04 Sep 2025 12:10:28 GMT"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=60"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"fileName\": \"new_cover_API_pic1.jpg\",\n    \"size\": \"31108\",\n    \"message\": \"Cover image uploaded successfully\",\n    \"bookId\": \"1\"\n}"
 						}
 					]
 				},
@@ -3145,7 +3352,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/books/{{bookId}}/cover",
+							"raw": "{{baseUrl}}/api/v1/books/1/cover",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -3153,7 +3360,7 @@
 								"api",
 								"v1",
 								"books",
-								"{{bookId}}",
+								"1",
 								"cover"
 							]
 						}
@@ -3185,7 +3392,7 @@
 							},
 							"status": "OK",
 							"code": 200,
-							"_postman_previewlanguage": "",
+							"_postman_previewlanguage": "Text",
 							"header": [
 								{
 									"key": "Content-Type",
@@ -3196,6 +3403,43 @@
 							"body": "(Binary image data)"
 						}
 					]
+				}
+			],
+			"auth": {
+				"type": "basic",
+				"basic": [
+					{
+						"key": "password",
+						"value": "pass",
+						"type": "string"
+					},
+					{
+						"key": "username",
+						"value": "admin@example.com",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
 				}
 			]
 		},
@@ -3228,7 +3472,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/loans",
+							"raw": "{{baseUrl}}/api/v1/loans?page=0&size=10",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -3236,6 +3480,18 @@
 								"api",
 								"v1",
 								"loans"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0",
+									"description": "Page number (0-based)"
+								},
+								{
+									"key": "size",
+									"value": "10",
+									"description": "Number of items per page"
+								}
 							]
 						}
 					},
@@ -3264,7 +3520,7 @@
 							},
 							"status": "OK",
 							"code": 200,
-							"_postman_previewlanguage": "",
+							"_postman_previewlanguage": "Text",
 							"header": [
 								{
 									"key": "X-Content-Type-Options",
@@ -3455,7 +3711,7 @@
 							"raw": "  {\n    \"book\": {\n      \"id\": 4\n    },\n    \"lender\": {\n      \"id\": 1\n    },\n    \"borrower\": {\n      \"id\": 4\n    },\n    \"startDate\": \"2025-09-03\",\n    \"endDate\": null,\n    \"status\": \"Active\"\n  }"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/loans",
+							"raw": "{{baseUrl}}/api/v1/loans?page=0&size=10",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -3463,6 +3719,18 @@
 								"api",
 								"v1",
 								"loans"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0",
+									"description": "Page number (0-based)"
+								},
+								{
+									"key": "size",
+									"value": "10",
+									"description": "Number of items per page"
+								}
 							]
 						}
 					},
@@ -3495,7 +3763,7 @@
 							},
 							"status": "Created",
 							"code": 201,
-							"_postman_previewlanguage": "",
+							"_postman_previewlanguage": "Text",
 							"header": [
 								{
 									"key": "Location",
@@ -3581,7 +3849,7 @@
 							},
 							"status": "Created",
 							"code": 201,
-							"_postman_previewlanguage": "",
+							"_postman_previewlanguage": "Text",
 							"header": [
 								{
 									"key": "Location",
@@ -3698,7 +3966,7 @@
 							},
 							"status": "OK",
 							"code": 200,
-							"_postman_previewlanguage": "",
+							"_postman_previewlanguage": "Text",
 							"header": [
 								{
 									"key": "X-Content-Type-Options",
@@ -3803,7 +4071,7 @@
 							},
 							"status": "No Content",
 							"code": 204,
-							"_postman_previewlanguage": "",
+							"_postman_previewlanguage": "Text",
 							"header": [
 								{
 									"key": "X-Content-Type-Options",
@@ -3902,7 +4170,7 @@
 							},
 							"status": "OK",
 							"code": 200,
-							"_postman_previewlanguage": "",
+							"_postman_previewlanguage": "Text",
 							"header": [
 								{
 									"key": "X-Content-Type-Options",
@@ -4009,7 +4277,7 @@
 							},
 							"status": "OK",
 							"code": 200,
-							"_postman_previewlanguage": "",
+							"_postman_previewlanguage": "Text",
 							"header": [
 								{
 									"key": "X-Content-Type-Options",
@@ -4116,7 +4384,7 @@
 							},
 							"status": "OK",
 							"code": 200,
-							"_postman_previewlanguage": "",
+							"_postman_previewlanguage": "Text",
 							"header": [
 								{
 									"key": "X-Content-Type-Options",
@@ -4234,7 +4502,7 @@
 							},
 							"status": "OK",
 							"code": 200,
-							"_postman_previewlanguage": "",
+							"_postman_previewlanguage": "Text",
 							"header": [
 								{
 									"key": "X-Content-Type-Options",
