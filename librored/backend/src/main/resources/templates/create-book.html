@@ -33,12 +33,8 @@
         <!-- ✅ Cover Picture Upload -->
         <div class="form-group">
             <label>Cover Picture</label>
-            <input type="file" name="coverImage" id="coverImageInput" class="d-none" accept=".jpg, .jpeg, .png">
-            <button type="button" class="btn btn-info" onclick="document.getElementById('coverImageInput').click();">
-                Upload From Local
-            </button>
-            <br>
-            <img id="imagePreview" src="{{book.coverPicUrl}}" style="max-height: 150px; display: none; margin-top: 10px;">
+            <input type="file" id="coverUpload" name="coverImage" class="form-control">
+            <button type="button" id="uploadBtn" class="btn btn-secondary mt-2">Upload from Local</button>
         </div>
 
         <!-- ✅ Owner Selection (Only for Admins) -->
@@ -66,35 +62,16 @@
 </div>
 
 <script>
-    document.getElementById("coverImageInput").addEventListener("change", function (event) {
-        var file = event.target.files[0];
-        var imagePreview = document.getElementById("imagePreview");
-
-        if (file) {
-            var reader = new FileReader();
-            reader.onload = function (e) {
-                imagePreview.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        } else {
-            imagePreview.src = "/images/default_cover.jpg"; // Revert to default if no file is selected
-        }
+    document.getElementById('uploadBtn').addEventListener('click', function () {
+        document.getElementById('coverUpload').click();
     });
 
-    function validateForm() {
-        var title = document.getElementById("title").value.trim();
-        var author = document.getElementById("author").value.trim();
-        var genre = document.getElementById("genre").value;
-        var description = document.getElementById("description").value.trim();
-        var ownerId = document.getElementById("ownerId").value;
-
-        if (!title || !author || !genre || !description || !ownerId) {
-            alert("Please fill out all required fields.");
-            return false;
+    document.getElementById('coverUpload').addEventListener('change', function (event) {
+        const file = event.target.files[0];
+        if (file) {
+            alert("Selected file: " + file.name);
         }
-        return true;
-    }
-
+    });
 </script>
 
 {{>footer}}
