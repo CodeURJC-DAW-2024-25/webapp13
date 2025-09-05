@@ -37,7 +37,7 @@ public class UserRestController {
         this.passwordEncoder = passwordEncoder;
     }
 
-    @PostMapping("/update-username")
+    @PostMapping("/api/users/update-username")
     public ResponseEntity<Map<String, Object>> updateUsername(
             @AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails,
             @RequestParam String newUsername) {
@@ -65,7 +65,7 @@ public class UserRestController {
     }
 
 
-    @PostMapping("/update-password")
+    @PostMapping("/api/users/update-password")
     public ResponseEntity<Map<String, Object>> updatePassword(
             @AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails,
             @RequestParam String currentPassword,
@@ -101,7 +101,7 @@ public class UserRestController {
     }
 
 
-    @PostMapping("/verify-password")
+    @PostMapping("/api/users/verify-password")
     public ResponseEntity<Map<String, Object>> verifyPassword(
             @AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails,
             @RequestParam String currentPassword) {
