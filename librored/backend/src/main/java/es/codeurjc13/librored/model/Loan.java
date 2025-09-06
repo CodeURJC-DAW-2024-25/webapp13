@@ -1,8 +1,10 @@
 package es.codeurjc13.librored.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 @Entity
 public class Loan {
@@ -12,14 +14,17 @@ public class Loan {
 
     @ManyToOne
     @JoinColumn(name = "book_id", nullable = false, foreignKey = @ForeignKey(name = "FK_loan_book"))
+    @JsonIgnore
     private Book book;
 
     @ManyToOne
     @JoinColumn(name = "borrower_id", nullable = false, foreignKey = @ForeignKey(name = "FK_loan_borrower"))
+    @JsonIgnore
     private User borrower;
 
     @ManyToOne
     @JoinColumn(name = "lender_id", nullable = false, foreignKey = @ForeignKey(name = "FK_loan_lender"))
+    @JsonIgnore
     private User lender;
 
 
@@ -28,10 +33,6 @@ public class Loan {
 
     @Enumerated(EnumType.STRING)
     private Status status;
-
-    public enum Status {
-        Active, Completed
-    }
 
     public Loan() {
     }
@@ -100,6 +101,23 @@ public class Loan {
 
     public void setStatus(Status status) {
         this.status = status;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Loan loan = (Loan) obj;
+        return Objects.equals(id, loan.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    public enum Status {
+        Active, Completed
     }
 
 }
