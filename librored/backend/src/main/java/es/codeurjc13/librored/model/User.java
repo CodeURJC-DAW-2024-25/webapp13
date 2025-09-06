@@ -30,6 +30,9 @@ public class User {
     @OneToMany(mappedBy = "lender", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Loan> loans;
 
+    @OneToMany(mappedBy = "borrower", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Loan> borrowedLoans;
+
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Book> books;
 
