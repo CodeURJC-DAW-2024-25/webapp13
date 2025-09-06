@@ -1,4 +1,4 @@
-package es.codeurjc13.librored.config;
+package es.codeurjc13.librored.security;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
