@@ -20,7 +20,7 @@ public class Book {
     private String description;
 
     @Lob
-    @JsonIgnore // 👈 This prevents serialization issues
+    @JsonIgnore // This prevents serialization issues
     private Blob coverPic;
 
     @ManyToOne
