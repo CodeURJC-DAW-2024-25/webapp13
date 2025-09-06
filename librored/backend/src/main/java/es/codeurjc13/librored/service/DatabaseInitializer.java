@@ -10,14 +10,12 @@ import jakarta.annotation.PostConstruct;
 import org.hibernate.engine.jdbc.BlobProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.util.Arrays;
 
@@ -27,23 +25,22 @@ public class DatabaseInitializer {
 
     private static final Logger logger = LoggerFactory.getLogger(DatabaseInitializer.class);
 
-    private static final LocalDate baseDate = LocalDate.of(2025, 1, 15); // Starting date matching the SQL example
+    private final UserRepository userRepository;
+    private final BookRepository bookRepository;
+    private final LoanRepository loanRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private BookRepository bookRepository;
-
-    @Autowired
-    private LoanRepository loanRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    public DatabaseInitializer(UserRepository userRepository, BookRepository bookRepository,
+                              LoanRepository loanRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.bookRepository = bookRepository;
+        this.loanRepository = loanRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
 
     @PostConstruct
-    public void init() throws IOException, URISyntaxException {
+    public void init() throws IOException {
 
         logger.info("⚡ Running DatabaseInitializer...");
 
@@ -82,7 +79,7 @@ public class DatabaseInitializer {
             setBookImage(book5, "/static/images/covers/science_everything.png");
             Book book6 = new Book("The Cursed Woods", "Stephen King", Book.Genre.Horror, "A mysterious forest where people disappear.", bob);
             setBookImage(book6, "/static/images/covers/cursed_woods.png");
-            Book book7 = new Book("Unwritten Letters", "Nicholas Sparks", Book.Genre.Romance, "A series of letters change a woman’s fate.", bob);
+            Book book7 = new Book("Unwritten Letters", "Nicholas Sparks", Book.Genre.Romance, "A series of letters change a woman's fate.", bob);
             setBookImage(book7, "/static/images/covers/unwritten_letters.png");
             Book book8 = new Book("Chronicles of Eldoria", "Brandon Sanderson", Book.Genre.SciFi_Fantasy, "A young mage embarks on a heroic quest.", bob);
             setBookImage(book8, "/static/images/covers/chronicles_eldoria.png");
@@ -92,9 +89,9 @@ public class DatabaseInitializer {
             setBookImage(book9, "/static/images/covers/whispers_dark.png");
             Book book10 = new Book("Echoes of Tomorrow", "Robert Martin", Book.Genre.Fiction, "A mysterious journey through time.", charlie);
             setBookImage(book10, "/static/images/covers/echoes_tomorrow.png");
-            Book book11 = new Book("The Emperor’s Shadow", "Ken Follett", Book.Genre.Historical_Fiction, "A Roman general’s fight for justice.", charlie);
+            Book book11 = new Book("The Emperor's Shadow", "Ken Follett", Book.Genre.Historical_Fiction, "A Roman general's fight for justice.", charlie);
             setBookImage(book11, "/static/images/covers/emperors_shadow.png");
-            Book book12 = new Book("The Night Visitor", "Dean Koontz", Book.Genre.Horror, "A chilling presence haunts a woman’s dreams.", charlie);
+            Book book12 = new Book("The Night Visitor", "Dean Koontz", Book.Genre.Horror, "A chilling presence haunts a woman's dreams.", charlie);
             setBookImage(book12, "/static/images/covers/night_visitor.png");
 
             // Owner 4 (Mix of SciFi & Fantasy, Non-Fiction, Horror, Romance)
@@ -160,8 +157,7 @@ public class DatabaseInitializer {
 
     }
 
-    public void setBookImage(Book book, String classpathResource) throws IOException {
-        //book.setImage(true);
+    private void setBookImage(Book book, String classpathResource) throws IOException {
         Resource image = new ClassPathResource(classpathResource);
         book.setCoverPic(BlobProxy.generateProxy(image.getInputStream(), image.contentLength()));
     }
