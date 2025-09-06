@@ -1,10 +1,9 @@
 package es.codeurjc13.librored.controller;
 
-import es.codeurjc13.librored.dto.BookDTO;
 import es.codeurjc13.librored.dto.BookBasicDTO;
+import es.codeurjc13.librored.dto.BookDTO;
 import es.codeurjc13.librored.model.Book;
 import es.codeurjc13.librored.service.BookService;
-import es.codeurjc13.librored.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -32,45 +31,38 @@ import java.util.Optional;
 public class BookRestController {
 
     private final BookService bookService;
-    private final UserService userService;
 
-    public BookRestController(BookService bookService, UserService userService) {
+    public BookRestController(BookService bookService) {
         this.bookService = bookService;
-        this.userService = userService;
     }
 
-    // ==================== EXISTING WEB APP ENDPOINTS (/api/books) ====================
-    
+    // ==================== WEB APP ENDPOINTS (/api/books) ====================
+
     // Paginated books API - CRITICAL for web app functionality
     @GetMapping("/api/books")
-    public ResponseEntity<Map<String, Object>> getBooks(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "8") int size
-    ) {
+    public ResponseEntity<Map<String, Object>> getBooks(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "8") int size) {
         Page<Book> books = bookService.getBooks(page, size);
 
         // Convert Page<Book> to a stable JSON format with DTOs to avoid lazy loading issues
         Map<String, Object> response = new HashMap<>();
-        response.put("content", books.getContent().stream()
-                .map(book -> {
-                    Map<String, Object> bookMap = new HashMap<>();
-                    bookMap.put("id", book.getId());
-                    bookMap.put("title", book.getTitle());
-                    bookMap.put("author", book.getAuthor());
-                    bookMap.put("genre", book.getGenre());
-                    bookMap.put("description", book.getDescription());
-                    bookMap.put("hasCoverImage", book.getCoverPic() != null);
-                    if (book.getOwner() != null) {
-                        Map<String, Object> ownerMap = new HashMap<>();
-                        ownerMap.put("id", book.getOwner().getId());
-                        ownerMap.put("username", book.getOwner().getUsername());
-                        bookMap.put("owner", ownerMap);
-                    } else {
-                        bookMap.put("owner", null);
-                    }
-                    return bookMap;
-                })
-                .toList());
+        response.put("content", books.getContent().stream().map(book -> {
+            Map<String, Object> bookMap = new HashMap<>();
+            bookMap.put("id", book.getId());
+            bookMap.put("title", book.getTitle());
+            bookMap.put("author", book.getAuthor());
+            bookMap.put("genre", book.getGenre());
+            bookMap.put("description", book.getDescription());
+            bookMap.put("hasCoverImage", book.getCoverPic() != null);
+            if (book.getOwner() != null) {
+                Map<String, Object> ownerMap = new HashMap<>();
+                ownerMap.put("id", book.getOwner().getId());
+                ownerMap.put("username", book.getOwner().getUsername());
+                bookMap.put("owner", ownerMap);
+            } else {
+                bookMap.put("owner", null);
+            }
+            return bookMap;
+        }).toList());
         response.put("currentPage", books.getNumber());
         response.put("totalPages", books.getTotalPages());
         response.put("totalItems", books.getTotalElements());
@@ -90,9 +82,7 @@ public class BookRestController {
             }
 
             Resource file = new InputStreamResource(book.getCoverPic().getBinaryStream());
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_TYPE, "image/jpeg")
-                    .body(file);
+            return ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, "image/jpeg").body(file);
 
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -106,50 +96,31 @@ public class BookRestController {
         return ResponseEntity.ok(bookService.getBooksPerGenre());
     }
 
-    // ==================== P2 REST API ENDPOINTS (/api/v1/books) ====================
+    // ==================== REST API ENDPOINTS (/api/v1/books) ====================
 
     @Operation(summary = "Get all books", description = "Retrieve a paginated list of all books")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Books retrieved successfully"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
-    })
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Books retrieved successfully"), @ApiResponse(responseCode = "500", description = "Internal server error")})
     @GetMapping("/api/v1/books")
-    public ResponseEntity<Map<String, Object>> getAllBooks(
-            @Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Page size") @RequestParam(defaultValue = "10") int size) {
+    public ResponseEntity<Map<String, Object>> getAllBooks(@Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") int page, @Parameter(description = "Page size") @RequestParam(defaultValue = "10") int size) {
         Map<String, Object> response = bookService.getAllBooksDTOPaginated(page, size);
         return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "Get book by ID", description = "Retrieve a specific book by its ID")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Book found"),
-            @ApiResponse(responseCode = "404", description = "Book not found")
-    })
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Book found"), @ApiResponse(responseCode = "404", description = "Book not found")})
     @GetMapping("/api/v1/books/{id}")
-    public ResponseEntity<BookDTO> getBookById(
-            @Parameter(description = "Book ID") @PathVariable Long id) {
+    public ResponseEntity<BookDTO> getBookById(@Parameter(description = "Book ID") @PathVariable Long id) {
         Optional<BookDTO> book = bookService.getBookByIdDTO(id);
-        return book.map(ResponseEntity::ok)
-                   .orElse(ResponseEntity.notFound().build());
+        return book.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
     @Operation(summary = "Create a new book", description = "Create a new book entry")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Book created successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid book data"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
-    })
+    @ApiResponses(value = {@ApiResponse(responseCode = "201", description = "Book created successfully"), @ApiResponse(responseCode = "400", description = "Invalid book data"), @ApiResponse(responseCode = "500", description = "Internal server error")})
     @PostMapping("/api/v1/books")
-    public ResponseEntity<BookDTO> createBook(
-            @Parameter(description = "Book data") @Valid @RequestBody BookDTO bookDTO) {
+    public ResponseEntity<BookDTO> createBook(@Parameter(description = "Book data") @Valid @RequestBody BookDTO bookDTO) {
         try {
             BookDTO createdBook = bookService.createBookDTO(bookDTO);
-            URI location = ServletUriComponentsBuilder
-                    .fromCurrentRequest()
-                    .path("/{id}")
-                    .buildAndExpand(createdBook.id())
-                    .toUri();
+            URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(createdBook.id()).toUri();
             return ResponseEntity.created(location).body(createdBook);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
@@ -157,73 +128,47 @@ public class BookRestController {
     }
 
     @Operation(summary = "Update book", description = "Update an existing book")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Book updated successfully"),
-            @ApiResponse(responseCode = "404", description = "Book not found"),
-            @ApiResponse(responseCode = "400", description = "Invalid book data")
-    })
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Book updated successfully"), @ApiResponse(responseCode = "404", description = "Book not found"), @ApiResponse(responseCode = "400", description = "Invalid book data")})
     @PutMapping("/api/v1/books/{id}")
-    public ResponseEntity<BookDTO> updateBook(
-            @Parameter(description = "Book ID") @PathVariable Long id,
-            @Parameter(description = "Updated book data") @Valid @RequestBody BookDTO bookDTO) {
+    public ResponseEntity<BookDTO> updateBook(@Parameter(description = "Book ID") @PathVariable Long id, @Parameter(description = "Updated book data") @Valid @RequestBody BookDTO bookDTO) {
         Optional<BookDTO> updatedBook = bookService.updateBookDTO(id, bookDTO);
-        return updatedBook.map(ResponseEntity::ok)
-                          .orElse(ResponseEntity.notFound().build());
+        return updatedBook.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
     @Operation(summary = "Delete book", description = "Delete a book by ID")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Book deleted successfully"),
-            @ApiResponse(responseCode = "404", description = "Book not found")
-    })
+    @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Book deleted successfully"), @ApiResponse(responseCode = "404", description = "Book not found")})
     @DeleteMapping("/api/v1/books/{id}")
-    public ResponseEntity<Void> deleteBook(
-            @Parameter(description = "Book ID") @PathVariable Long id) {
+    public ResponseEntity<Void> deleteBook(@Parameter(description = "Book ID") @PathVariable Long id) {
         boolean deleted = bookService.deleteBookDTO(id);
-        return deleted ? ResponseEntity.noContent().build() 
-                       : ResponseEntity.notFound().build();
+        return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
 
     @Operation(summary = "Get books by owner", description = "Retrieve books owned by a specific user")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Books retrieved successfully"),
-            @ApiResponse(responseCode = "404", description = "Owner not found")
-    })
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Books retrieved successfully"), @ApiResponse(responseCode = "404", description = "Owner not found")})
     @GetMapping("/api/v1/books/owner/{ownerId}")
-    public ResponseEntity<List<BookDTO>> getBooksByOwner(
-            @Parameter(description = "Owner ID") @PathVariable Long ownerId) {
+    public ResponseEntity<List<BookDTO>> getBooksByOwner(@Parameter(description = "Owner ID") @PathVariable Long ownerId) {
         List<BookDTO> books = bookService.getBooksByOwnerIdDTO(ownerId);
         return ResponseEntity.ok(books);
     }
 
     @Operation(summary = "Get available books by owner", description = "Get available books for lending by owner")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Available books retrieved"),
-            @ApiResponse(responseCode = "404", description = "Owner not found")
-    })
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Available books retrieved"), @ApiResponse(responseCode = "404", description = "Owner not found")})
     @GetMapping("/api/v1/books/available/{ownerId}")
-    public ResponseEntity<List<BookBasicDTO>> getAvailableBooksByOwner(
-            @Parameter(description = "Owner ID") @PathVariable Long ownerId) {
+    public ResponseEntity<List<BookBasicDTO>> getAvailableBooksByOwner(@Parameter(description = "Owner ID") @PathVariable Long ownerId) {
         List<BookBasicDTO> books = bookService.getAvailableBooksByOwnerIdDTO(ownerId);
         return ResponseEntity.ok(books);
     }
 
     @Operation(summary = "Get book recommendations", description = "Get book recommendations for a user")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Recommendations retrieved"),
-            @ApiResponse(responseCode = "404", description = "User not found")
-    })
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Recommendations retrieved"), @ApiResponse(responseCode = "404", description = "User not found")})
     @GetMapping("/api/v1/books/recommendations/{userId}")
-    public ResponseEntity<List<BookDTO>> getRecommendations(
-            @Parameter(description = "User ID") @PathVariable Long userId) {
+    public ResponseEntity<List<BookDTO>> getRecommendations(@Parameter(description = "User ID") @PathVariable Long userId) {
         List<BookDTO> recommendations = bookService.getRecommendationsForUserDTO(userId);
         return ResponseEntity.ok(recommendations);
     }
 
     @Operation(summary = "Get books per genre statistics", description = "Get count of books grouped by genre")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Statistics retrieved successfully")
-    })
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Statistics retrieved successfully")})
     @GetMapping("/api/v1/books/stats/genre")
     public ResponseEntity<Map<String, Long>> getBooksPerGenreStats() {
         Map<String, Long> stats = bookService.getBooksPerGenreDTO();
@@ -231,13 +176,9 @@ public class BookRestController {
     }
 
     @Operation(summary = "Get book cover image", description = "Download the cover image for a specific book")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Cover image retrieved successfully"),
-            @ApiResponse(responseCode = "404", description = "Book or cover image not found")
-    })
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Cover image retrieved successfully"), @ApiResponse(responseCode = "404", description = "Book or cover image not found")})
     @GetMapping("/api/v1/books/{id}/cover")
-    public ResponseEntity<Resource> getBookCoverImage(
-            @Parameter(description = "Book ID") @PathVariable Long id) {
+    public ResponseEntity<Resource> getBookCoverImage(@Parameter(description = "Book ID") @PathVariable Long id) {
         try {
             Book book = bookService.findBookById(id);
 
@@ -246,10 +187,7 @@ public class BookRestController {
             }
 
             Resource file = new InputStreamResource(book.getCoverPic().getBinaryStream());
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_TYPE, "image/jpeg")
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"book-" + id + "-cover.jpg\"")
-                    .body(file);
+            return ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, "image/jpeg").header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"book-" + id + "-cover.jpg\"").body(file);
 
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -257,20 +195,12 @@ public class BookRestController {
     }
 
     @Operation(summary = "Upload book cover image", description = "Upload a cover image for a specific book")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Cover image uploaded successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid file or request"),
-            @ApiResponse(responseCode = "404", description = "Book not found"),
-            @ApiResponse(responseCode = "413", description = "File too large"),
-            @ApiResponse(responseCode = "415", description = "Unsupported media type")
-    })
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Cover image uploaded successfully"), @ApiResponse(responseCode = "400", description = "Invalid file or request"), @ApiResponse(responseCode = "404", description = "Book not found"), @ApiResponse(responseCode = "413", description = "File too large"), @ApiResponse(responseCode = "415", description = "Unsupported media type")})
     @PostMapping("/api/v1/books/{id}/cover")
-    public ResponseEntity<Map<String, String>> uploadBookCoverImage(
-            @Parameter(description = "Book ID") @PathVariable Long id,
-            @Parameter(description = "Cover image file") @RequestParam("file") MultipartFile file) {
-        
+    public ResponseEntity<Map<String, String>> uploadBookCoverImage(@Parameter(description = "Book ID") @PathVariable Long id, @Parameter(description = "Cover image file") @RequestParam("file") MultipartFile file) {
+
         Map<String, String> response = new HashMap<>();
-        
+
         try {
             // Validate file
             if (file.isEmpty()) {
@@ -300,12 +230,12 @@ public class BookRestController {
 
             // Upload the image
             bookService.uploadBookCover(id, file);
-            
+
             response.put("message", "Cover image uploaded successfully");
             response.put("bookId", id.toString());
             response.put("fileName", file.getOriginalFilename());
             response.put("size", String.valueOf(file.getSize()));
-            
+
             return ResponseEntity.ok(response);
 
         } catch (IllegalArgumentException e) {
