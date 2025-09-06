@@ -16,18 +16,13 @@ public class CustomErrorController implements ErrorController {
         if (status != null) {
             int statusCode = Integer.parseInt(status.toString());
 
-            switch (statusCode) {
-                case 404:
-                    return "error/404";
-                case 500:
-                    return "error/500";
-                case 403:
-                    return "error/403";
-                case 401:
-                    return "error/401";
-                default:
-                    return "error/default"; // Ensure this file exists
-            }
+            return switch (statusCode) {
+                case 404 -> "error/404";
+                case 500 -> "error/500";
+                case 403 -> "error/403";
+                case 401 -> "error/401";
+                default -> "error/default"; // Ensure this file exists
+            };
 
         }
         return "error/404";
@@ -35,6 +30,6 @@ public class CustomErrorController implements ErrorController {
 
     @GetMapping("/loginerror")
     public String loginError() {
-        return "loginerror";
+        return "error/loginerror";
     }
 }
