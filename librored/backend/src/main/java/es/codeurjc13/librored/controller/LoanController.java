@@ -15,6 +15,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import org.springframework.http.ResponseEntity;
 
 @Controller
 public class LoanController {
@@ -358,8 +361,17 @@ public class LoanController {
     // READ - special needed endpoint
     @GetMapping("/loans/books/{lenderId}")
     @ResponseBody
-    public List<Book> getAvailableBooksByLender(@PathVariable Long lenderId) {
-        return bookService.getAvailableBooksByOwnerId(lenderId);
+    public ResponseEntity<List<Map<String, Object>>> getAvailableBooksByLender(@PathVariable Long lenderId) {
+        List<Book> books = bookService.getAvailableBooksByOwnerId(lenderId);
+        List<Map<String, Object>> bookData = books.stream()
+            .map(book -> {
+                Map<String, Object> bookMap = new java.util.HashMap<>();
+                bookMap.put("id", book.getId());
+                bookMap.put("title", book.getTitle());
+                return bookMap;
+            })
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(bookData);
     }
 
 }

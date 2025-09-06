@@ -21,9 +21,10 @@
         <div class="form-group">
             <label>Role</label>
             <p>Current: <strong>{{user.role}}</strong></p>
-            <select name="role" class="form-control">
-                <option value="ROLE_USER" {{#user.role}}{{#ROLE_USER}}selected{{/ROLE_USER}}{{/user.role}}>User</option>
-                <option value="ROLE_ADMIN" {{#user.role}}{{#ROLE_ADMIN}}selected{{/ROLE_ADMIN}}{{/user.role}}>Admin</option>
+            <select name="role" class="form-control" required>
+                <option value="" disabled selected>-- Select Role --</option>
+                <option value="ROLE_USER" {{#isUserRole}}selected{{/isUserRole}}>User</option>
+                <option value="ROLE_ADMIN" {{#isAdminRole}}selected{{/isAdminRole}}>Admin</option>
             </select>
         </div>
 
