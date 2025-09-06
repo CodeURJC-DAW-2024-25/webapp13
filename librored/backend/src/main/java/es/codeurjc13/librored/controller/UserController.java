@@ -39,7 +39,13 @@ public class UserController {
     public String editUserForm(@PathVariable Long id, Model model) {
         Optional<User> user = userService.getUserById(id);
         if (user.isPresent()) {
-            model.addAttribute("user", user.get());
+            User currentUser = user.get();
+            model.addAttribute("user", currentUser);
+            
+            // Add role selection flags for template
+            model.addAttribute("isUserRole", currentUser.getRole() == User.Role.ROLE_USER);
+            model.addAttribute("isAdminRole", currentUser.getRole() == User.Role.ROLE_ADMIN);
+            
             return "edit-user";
         }
         return "redirect:/users";
