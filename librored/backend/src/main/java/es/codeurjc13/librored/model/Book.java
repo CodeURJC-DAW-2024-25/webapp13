@@ -18,7 +18,6 @@ public class Book {
 
     @Column(columnDefinition = "TEXT")
     private String description;
-    //private String coverPic;
 
     @Lob
     @JsonIgnore // 👈 This prevents serialization issues
@@ -35,10 +34,6 @@ public class Book {
 
     @Enumerated(EnumType.STRING)
     private Genre genre;
-
-    public enum Genre {
-        Fiction, Non_Fiction, Mystery_Thriller, SciFi_Fantasy, Romance, Historical_Fiction, Horror
-    }
 
     // CONSTRUCTORS
     public Book() {
@@ -110,7 +105,6 @@ public class Book {
         }
     }
 
-
     // OWNER (it is a user) GETTERS AND SETTERS
     public User getOwner() {
         return owner;
@@ -120,6 +114,15 @@ public class Book {
         this.owner = owner;
     }
 
+    // LOANS collection getter
+    public List<Loan> getLoans() {
+        return loans;
+    }
+
+    public void setLoans(List<Loan> loans) {
+        this.loans = loans;
+    }
+
     // LOANs relationship
     public boolean isCurrentlyOnLoan() {
         if (this.loans == null || this.loans.isEmpty()) {
@@ -127,6 +130,10 @@ public class Book {
         }
         // Check if any loan is still active
         return this.loans.stream().anyMatch(loan -> loan.getStatus() == Loan.Status.Active);
+    }
+
+    public enum Genre {
+        Fiction, Non_Fiction, Mystery_Thriller, SciFi_Fantasy, Romance, Historical_Fiction, Horror
     }
 
 }
