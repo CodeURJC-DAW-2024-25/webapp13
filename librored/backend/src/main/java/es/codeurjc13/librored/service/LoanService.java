@@ -8,7 +8,6 @@ import es.codeurjc13.librored.model.User;
 import es.codeurjc13.librored.repository.BookRepository;
 import es.codeurjc13.librored.repository.LoanRepository;
 import es.codeurjc13.librored.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,21 +28,24 @@ import java.util.Optional;
 @Service
 public class LoanService {
 
-    @Autowired
-    private LoanRepository loanRepository;
-    @Autowired
-    private BookRepository bookRepository;
-    @Autowired
-    private UserRepository userRepository;
-    
-    @Autowired
-    private LoanMapper loanMapper;
+    private final LoanRepository loanRepository;
+    private final BookRepository bookRepository;
+    private final UserRepository userRepository;
+    private final LoanMapper loanMapper;
+    private final PlatformTransactionManager transactionManager;
     
     @PersistenceContext
     private EntityManager entityManager;
     
-    @Autowired
-    private PlatformTransactionManager transactionManager;
+    public LoanService(LoanRepository loanRepository, BookRepository bookRepository, 
+                      UserRepository userRepository, LoanMapper loanMapper, 
+                      PlatformTransactionManager transactionManager) {
+        this.loanRepository = loanRepository;
+        this.bookRepository = bookRepository;
+        this.userRepository = userRepository;
+        this.loanMapper = loanMapper;
+        this.transactionManager = transactionManager;
+    }
 
     public List<Loan> getAllLoans() {
         return loanRepository.findAll();
@@ -53,57 +55,6 @@ public class LoanService {
         return loanRepository.findById(id);
     }
 
-    public void updateLoan(Long id, Loan updatedLoan) {
-        Optional<Loan> existingLoanOpt = loanRepository.findById(id);
-        if (existingLoanOpt.isPresent()) {
-            Loan loan = existingLoanOpt.get();
-
-            // ✅ Prevent lender change (Fixed Lender Rule)
-            if (!loan.getLender().equals(updatedLoan.getLender())) {
-                throw new IllegalArgumentException(
-                        "Lender cannot be changed. The loan must remain under " + loan.getLender().getUsername() + ".");
-            }
-
-            // ✅ Ensure the book belongs to the lender and is not currently loaned
-            if (updatedLoan.getBook() != null) {
-                List<Book> availableBooks = bookRepository.findAvailableBooksByOwnerId(loan.getLender().getId());
-                if (!availableBooks.contains(updatedLoan.getBook())) {
-                    throw new IllegalArgumentException(
-                            "The selected book is either not owned by " + loan.getLender().getUsername() +
-                                    " or is currently loaned out. Please choose an available book.");
-                }
-                loan.setBook(updatedLoan.getBook());
-            }
-
-            // ✅ Ensure borrower is valid
-            if (updatedLoan.getBorrower() != null) {
-                loan.setBorrower(updatedLoan.getBorrower());
-            }
-
-            // ✅ Validate start and end dates
-            if (updatedLoan.getStartDate() != null) {
-                loan.setStartDate(updatedLoan.getStartDate());
-            }
-            if (updatedLoan.getEndDate() != null) {
-                if (updatedLoan.getEndDate().isBefore(loan.getStartDate())) {
-                    throw new IllegalArgumentException(
-                            "End date cannot be before the start date. Please select a date after " + loan.getStartDate() + ".");
-                }
-                loan.setEndDate(updatedLoan.getEndDate());
-            }
-
-            // ✅ Ensure status change is logical
-            if (updatedLoan.getStatus() != null) {
-                if (loan.getStatus() == Loan.Status.Completed && updatedLoan.getStatus() == Loan.Status.Active) {
-                    throw new IllegalArgumentException(
-                            "A completed loan cannot be reactivated. Consider creating a new loan instead.");
-                }
-                loan.setStatus(updatedLoan.getStatus());
-            }
-
-            loanRepository.save(loan);
-        }
-    }
 
     public void createLoan(Book book, User lender, User borrower, LocalDate startDate, LocalDate endDate, Loan.Status status) {
         Loan loan = new Loan(book, lender, borrower, startDate, endDate, status);
@@ -117,9 +68,9 @@ public class LoanService {
         try {
             Optional<Loan> loan = loanRepository.findById(id);
             if (loan.isPresent()) {
-                // Use native SQL for direct deletion to bypass JPA/Hibernate issues
-                int rowsAffected = entityManager.createNativeQuery("DELETE FROM loan WHERE id = ?1")
-                    .setParameter(1, id)
+                // Use JPQL for reliable cross-database compatibility
+                int rowsAffected = entityManager.createQuery("DELETE FROM Loan l WHERE l.id = :id")
+                    .setParameter("id", id)
                     .executeUpdate();
                 
                 entityManager.flush();
@@ -177,12 +128,6 @@ public class LoanService {
     // ==================== DTO-BASED METHODS FOR REST API ====================
 
     @Transactional(readOnly = true)
-    public List<LoanDTO> getAllLoansDTO() {
-        List<Loan> loans = loanRepository.findAll();
-        return loanMapper.toDTOs(loans);
-    }
-
-    @Transactional(readOnly = true)
     public Map<String, Object> getAllLoansDTOPaginated(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Loan> loanPage = loanRepository.findAll(pageable);
@@ -210,34 +155,25 @@ public class LoanService {
         
         // Set book, lender, and borrower from DTO references
         if (loanDTO.book() != null) {
-            Optional<Book> book = bookRepository.findById(loanDTO.book().id());
-            if (book.isPresent()) {
-                loan.setBook(book.get());
-            } else {
-                throw new IllegalArgumentException("Book not found with id: " + loanDTO.book().id());
-            }
+            Book book = bookRepository.findById(loanDTO.book().id())
+                    .orElseThrow(() -> new IllegalArgumentException("Book not found with id: " + loanDTO.book().id()));
+            loan.setBook(book);
         }
         
         if (loanDTO.lender() != null) {
-            Optional<User> lender = userRepository.findById(loanDTO.lender().id());
-            if (lender.isPresent()) {
-                loan.setLender(lender.get());
-            } else {
-                throw new IllegalArgumentException("Lender not found with id: " + loanDTO.lender().id());
-            }
+            User lender = userRepository.findById(loanDTO.lender().id())
+                    .orElseThrow(() -> new IllegalArgumentException("Lender not found with id: " + loanDTO.lender().id()));
+            loan.setLender(lender);
         }
         
         if (loanDTO.borrower() != null) {
-            Optional<User> borrower = userRepository.findById(loanDTO.borrower().id());
-            if (borrower.isPresent()) {
-                loan.setBorrower(borrower.get());
-            } else {
-                throw new IllegalArgumentException("Borrower not found with id: " + loanDTO.borrower().id());
-            }
+            User borrower = userRepository.findById(loanDTO.borrower().id())
+                    .orElseThrow(() -> new IllegalArgumentException("Borrower not found with id: " + loanDTO.borrower().id()));
+            loan.setBorrower(borrower);
         }
         
         // Validate business rules
-        validateLoanBusinessRules(loan, null);
+        validateLoanBusinessRules(loan);
         
         Loan savedLoan = loanRepository.save(loan);
         return loanMapper.toDTO(savedLoan);
@@ -248,7 +184,7 @@ public class LoanService {
         if (existingLoanOpt.isPresent()) {
             Loan loan = existingLoanOpt.get();
 
-            // ✅ Prevent lender change (Fixed Lender Rule)
+            // Prevent lender change (Fixed Lender Rule)
             if (loanDTO.lender() != null && !loan.getLender().getId().equals(loanDTO.lender().id())) {
                 throw new IllegalArgumentException(
                         "Lender cannot be changed. The loan must remain under " + loan.getLender().getUsername() + ".");
@@ -350,15 +286,15 @@ public class LoanService {
     /**
      * Validate business rules for loan creation/update
      */
-    private void validateLoanBusinessRules(Loan loan, Long excludeLoanId) {
+    private void validateLoanBusinessRules(Loan loan) {
         // Check book availability for the date range
-        if (!isBookAvailableForDateRange(loan.getBook().getId(), loan.getStartDate(), loan.getEndDate(), excludeLoanId)) {
+        if (!isBookAvailableForDateRange(loan.getBook().getId(), loan.getStartDate(), loan.getEndDate(), null)) {
             throw new IllegalArgumentException("Book is not available for the selected date range.");
         }
 
         // Check borrower availability for the date range
         if (!isBorrowerAvailableForDateRange(loan.getBorrower().getId(), loan.getLender().getId(), 
-                loan.getStartDate(), loan.getEndDate(), excludeLoanId)) {
+                loan.getStartDate(), loan.getEndDate(), null)) {
             throw new IllegalArgumentException("Borrower already has an active loan from this lender during the selected date range.");
         }
 

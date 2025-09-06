@@ -4,9 +4,7 @@ import es.codeurjc13.librored.dto.UserDTO;
 import es.codeurjc13.librored.dto.UserBasicDTO;
 import es.codeurjc13.librored.mapper.UserMapper;
 import es.codeurjc13.librored.model.User;
-import es.codeurjc13.librored.repository.LoanRepository;
 import es.codeurjc13.librored.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,17 +19,15 @@ import java.util.Optional;
 @Service
 public class UserService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
 
-    @Autowired
-    private LoanRepository loanRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private UserMapper userMapper;
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, UserMapper userMapper) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.userMapper = userMapper;
+    }
 
 
     public void registerUser(User user) {
@@ -60,7 +56,7 @@ public class UserService {
             user.setEmail(updatedUser.getEmail());
             user.setRole(updatedUser.getRole());
 
-            // ✅ Only update the password if a new one is provided
+            // Only update the password if a new one is provided
             if (updatedUser.getEncodedPassword() != null && !updatedUser.getEncodedPassword().isEmpty()) {
                 user.setEncodedPassword(passwordEncoder.encode(updatedUser.getEncodedPassword()));
             }
@@ -73,9 +69,9 @@ public class UserService {
     }
 
     public List<User> getAllUsersExcept(User user) {
-        List<User> users = userRepository.findAll();
-        users.remove(user); // Remove the lender from the list
-        return users;
+        return userRepository.findAll().stream()
+                .filter(u -> !u.equals(user))
+                .toList();
     }
 
     public void updateUsername(User user, String newUsername) {
@@ -109,25 +105,24 @@ public class UserService {
 
     // ==================== DTO-BASED METHODS FOR REST API ====================
 
-    public List<UserDTO> getAllUsersDTO() {
-        List<User> users = userRepository.findAll();
-        return userMapper.toDTOs(users);
-    }
 
     public Map<String, Object> getAllUsersDTOPaginated(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<User> userPage = userRepository.findAll(pageable);
         
+        return createPaginationResponse(userMapper.toDTOs(userPage.getContent()), userPage);
+    }
+
+    private Map<String, Object> createPaginationResponse(List<UserDTO> content, Page<?> page) {
         Map<String, Object> response = new HashMap<>();
-        response.put("content", userMapper.toDTOs(userPage.getContent()));
-        response.put("currentPage", userPage.getNumber());
-        response.put("totalPages", userPage.getTotalPages());
-        response.put("totalItems", userPage.getTotalElements());
-        response.put("hasNext", userPage.hasNext());
-        response.put("hasPrevious", userPage.hasPrevious());
-        response.put("isFirst", userPage.isFirst());
-        response.put("isLast", userPage.isLast());
-        
+        response.put("content", content);
+        response.put("currentPage", page.getNumber());
+        response.put("totalPages", page.getTotalPages());
+        response.put("totalItems", page.getTotalElements());
+        response.put("hasNext", page.hasNext());
+        response.put("hasPrevious", page.hasPrevious());
+        response.put("isFirst", page.isFirst());
+        response.put("isLast", page.isLast());
         return response;
     }
 
@@ -159,16 +154,14 @@ public class UserService {
     }
 
     public Optional<UserDTO> updateUserDTO(Long id, UserDTO userDTO) {
-        Optional<User> existingUserOpt = userRepository.findById(id);
-        if (existingUserOpt.isPresent()) {
-            User user = existingUserOpt.get();
-            user.setUsername(userDTO.username());
-            user.setEmail(userDTO.email());
-            user.setRole(userDTO.role());
-            User savedUser = userRepository.save(user);
-            return Optional.of(userMapper.toDTO(savedUser));
-        }
-        return Optional.empty();
+        return userRepository.findById(id)
+                .map(user -> {
+                    user.setUsername(userDTO.username());
+                    user.setEmail(userDTO.email());
+                    user.setRole(userDTO.role());
+                    User savedUser = userRepository.save(user);
+                    return userMapper.toDTO(savedUser);
+                });
     }
 
     public boolean deleteUserDTO(Long id) {

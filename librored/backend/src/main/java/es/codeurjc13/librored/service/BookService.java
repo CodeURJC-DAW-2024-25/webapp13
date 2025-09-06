@@ -7,7 +7,6 @@ import es.codeurjc13.librored.model.Book;
 import es.codeurjc13.librored.model.User;
 import es.codeurjc13.librored.repository.BookRepository;
 import es.codeurjc13.librored.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,8 +16,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.sql.Blob;
-import java.sql.SQLException;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,14 +24,15 @@ import java.util.Optional;
 @Service
 public class BookService {
 
-    @Autowired
-    private BookRepository bookRepository;
+    private final BookRepository bookRepository;
+    private final UserRepository userRepository;
+    private final BookMapper bookMapper;
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private BookMapper bookMapper;
+    public BookService(BookRepository bookRepository, UserRepository userRepository, BookMapper bookMapper) {
+        this.bookRepository = bookRepository;
+        this.userRepository = userRepository;
+        this.bookMapper = bookMapper;
+    }
 
     @Transactional(readOnly = true)
     public List<Book> findAll() {
@@ -50,9 +48,10 @@ public class BookService {
     // for the api endpoint @GetMapping("/{id}/cover")
     public Book findBookById(Long id) {
         Optional<Book> bookOptional = bookRepository.findById(id);
-        return bookOptional.orElseThrow(() -> new RuntimeException("Book not found with id: " + id));
+        return bookOptional.orElseThrow(() -> new IllegalArgumentException("Book not found with id: " + id));
     }
 
+    @Transactional(readOnly = true)
     public List<Book> getAllBooks() {
         return bookRepository.findAll();
     }
@@ -61,7 +60,11 @@ public class BookService {
         return bookRepository.findById(id);
     }
 
+    @Transactional
     public void saveBook(Book book) {
+        if (book == null) {
+            throw new IllegalArgumentException("Book cannot be null");
+        }
         bookRepository.save(book);
     }
 
@@ -84,7 +87,11 @@ public class BookService {
         return bookRepository.findAvailableBooksByOwnerId(ownerId);
     }
 
+    @Transactional
     public void deleteBook(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("Book ID cannot be null");
+        }
         bookRepository.deleteById(id);
     }
 
@@ -99,26 +106,23 @@ public class BookService {
     // ==================== DTO-BASED METHODS FOR REST API ====================
 
     @Transactional(readOnly = true)
-    public List<BookDTO> getAllBooksDTO() {
-        List<Book> books = bookRepository.findAll();
-        return bookMapper.toDTOs(books);
-    }
-
-    @Transactional(readOnly = true)
     public Map<String, Object> getAllBooksDTOPaginated(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Book> bookPage = bookRepository.findAll(pageable);
         
+        return createPaginationResponse(bookMapper.toDTOs(bookPage.getContent()), bookPage);
+    }
+
+    private Map<String, Object> createPaginationResponse(List<BookDTO> content, Page<?> page) {
         Map<String, Object> response = new HashMap<>();
-        response.put("content", bookMapper.toDTOs(bookPage.getContent()));
-        response.put("currentPage", bookPage.getNumber());
-        response.put("totalPages", bookPage.getTotalPages());
-        response.put("totalItems", bookPage.getTotalElements());
-        response.put("hasNext", bookPage.hasNext());
-        response.put("hasPrevious", bookPage.hasPrevious());
-        response.put("isFirst", bookPage.isFirst());
-        response.put("isLast", bookPage.isLast());
-        
+        response.put("content", content);
+        response.put("currentPage", page.getNumber());
+        response.put("totalPages", page.getTotalPages());
+        response.put("totalItems", page.getTotalElements());
+        response.put("hasNext", page.hasNext());
+        response.put("hasPrevious", page.hasPrevious());
+        response.put("isFirst", page.isFirst());
+        response.put("isLast", page.isLast());
         return response;
     }
 
@@ -132,12 +136,9 @@ public class BookService {
         
         // Set the owner from the DTO
         if (bookDTO.owner() != null) {
-            Optional<User> owner = userRepository.findById(bookDTO.owner().id());
-            if (owner.isPresent()) {
-                book.setOwner(owner.get());
-            } else {
-                throw new IllegalArgumentException("Owner not found with id: " + bookDTO.owner().id());
-            }
+            User owner = userRepository.findById(bookDTO.owner().id())
+                    .orElseThrow(() -> new IllegalArgumentException("Owner not found with id: " + bookDTO.owner().id()));
+            book.setOwner(owner);
         }
         
         Book savedBook = bookRepository.save(book);
@@ -155,12 +156,9 @@ public class BookService {
             
             // Update owner if provided
             if (bookDTO.owner() != null) {
-                Optional<User> owner = userRepository.findById(bookDTO.owner().id());
-                if (owner.isPresent()) {
-                    book.setOwner(owner.get());
-                } else {
-                    throw new IllegalArgumentException("Owner not found with id: " + bookDTO.owner().id());
-                }
+                User owner = userRepository.findById(bookDTO.owner().id())
+                        .orElseThrow(() -> new IllegalArgumentException("Owner not found with id: " + bookDTO.owner().id()));
+                book.setOwner(owner);
             }
             
             Book savedBook = bookRepository.save(book);
@@ -179,12 +177,9 @@ public class BookService {
 
     @Transactional(readOnly = true)
     public List<BookDTO> getBooksByOwnerIdDTO(Long ownerId) {
-        Optional<User> owner = userRepository.findById(ownerId);
-        if (owner.isPresent()) {
-            List<Book> books = bookRepository.findByOwner(owner.get());
-            return bookMapper.toDTOs(books);
-        }
-        return List.of();
+        return userRepository.findById(ownerId)
+                .map(owner -> bookMapper.toDTOs(bookRepository.findByOwner(owner)))
+                .orElse(List.of());
     }
 
     @Transactional(readOnly = true)
@@ -193,18 +188,9 @@ public class BookService {
         return bookMapper.toBasicDTOs(books);
     }
 
+    @Transactional(readOnly = true)
     public Map<String, Long> getBooksPerGenreDTO() {
-        List<Object[]> results = bookRepository.countBooksByGenre();
-        Map<String, Long> booksPerGenre = new HashMap<>();
-
-        for (Object[] result : results) {
-            Book.Genre genreEnum = (Book.Genre) result[0];
-            String genre = genreEnum.name();
-            Long count = (Long) result[1];
-            booksPerGenre.put(genre, count);
-        }
-
-        return booksPerGenre;
+        return getBooksPerGenre(); // Reuse existing method to avoid duplication
     }
 
     @Transactional(readOnly = true)
@@ -213,9 +199,7 @@ public class BookService {
         return bookMapper.toDTOs(books);
     }
 
-    /**
-     * Upload a cover image for a book
-     */
+    // Upload a cover image for a book
     @Transactional
     public void uploadBookCover(Long bookId, MultipartFile file) throws IOException {
         Optional<Book> bookOptional = bookRepository.findById(bookId);

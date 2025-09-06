@@ -16,9 +16,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
 
-/**
- * Service for generating PDF reports
- */
+
 @Service
 public class ReportService {
 
@@ -32,9 +30,7 @@ public class ReportService {
         this.loanService = loanService;
     }
 
-    /**
-     * Generate a complete admin report with users, books, and loans
-     */
+    // Generate a complete admin report with users, books, and loans
     public byte[] generateAdminReport() throws IOException {
         try (PDDocument document = new PDDocument();
              ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
