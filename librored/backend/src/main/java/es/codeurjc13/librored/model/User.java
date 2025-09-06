@@ -1,5 +1,6 @@
 package es.codeurjc13.librored.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.util.List;
@@ -22,23 +23,19 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     private Role role;
-
-    public enum Role {
-        ROLE_USER, ROLE_ADMIN
-    }
-
     @OneToMany(mappedBy = "lender", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Loan> loans;
-
     @OneToMany(mappedBy = "borrower", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Loan> borrowedLoans;
-
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Book> books;
-
 
     public User() {
     }
+
 
     public User(String username, String email, String encodedPassword, Role role) {
         this.username = username;
@@ -72,12 +69,12 @@ public class User {
         this.email = email;
     }
 
-    public void setPassword(String password) {
-        this.encodedPassword = password;
-    }
-
     public CharSequence getPassword() {
         return this.encodedPassword;
+    }
+
+    public void setPassword(String password) {
+        this.encodedPassword = password;
     }
 
     public String getEncodedPassword() {
@@ -97,7 +94,31 @@ public class User {
     }
 
     public Set<String> getRoles() {
-        return Set.of(role.name().replace("ROLE_", "")); // ✅ Ensure Spring Security does not get duplicate "ROLE_"
+        return Set.of(role.name().replace("ROLE_", "")); // Ensure Spring Security does not get duplicate "ROLE_"
+    }
+
+    public List<Loan> getLoans() {
+        return loans;
+    }
+
+    public void setLoans(List<Loan> loans) {
+        this.loans = loans;
+    }
+
+    public List<Loan> getBorrowedLoans() {
+        return borrowedLoans;
+    }
+
+    public void setBorrowedLoans(List<Loan> borrowedLoans) {
+        this.borrowedLoans = borrowedLoans;
+    }
+
+    public List<Book> getBooks() {
+        return books;
+    }
+
+    public void setBooks(List<Book> books) {
+        this.books = books;
     }
 
     @Override
@@ -111,6 +132,10 @@ public class User {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    public enum Role {
+        ROLE_USER, ROLE_ADMIN
     }
 
 }
