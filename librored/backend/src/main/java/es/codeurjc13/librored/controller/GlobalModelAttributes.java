@@ -17,8 +17,7 @@ public class GlobalModelAttributes {
             return false;
         }
         String principalName = authentication.getName();
-        boolean logged = authentication.isAuthenticated() && !"anonymousUser".equals(principalName);
-        return logged;
+        return authentication.isAuthenticated() && !"anonymousUser".equals(principalName);
     }
 
 
