@@ -49,7 +49,7 @@ public class LoanRestController {
         return ResponseEntity.ok(borrowers);
     }
 
-    // ==================== P2 REST API ENDPOINTS (/api/v1/loans) ====================
+    // ====================  REST API ENDPOINTS (/api/v1/loans) ====================
 
     @Operation(summary = "Get all loans", description = "Retrieve a paginated list of all loans")
     @ApiResponses(value = {
