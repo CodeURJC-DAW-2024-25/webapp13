@@ -14,7 +14,7 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     @Query("SELECT b.genre, COUNT(b) FROM Book b GROUP BY b.genre")
     List<Object[]> countBooksByGenre();
 
-    @Query("SELECT b FROM Book b WHERE b.owner.id = :ownerId AND " + "b.id NOT IN (SELECT l.book.id FROM Loan l WHERE l.status = 'Active')")
+    @Query("SELECT b FROM Book b WHERE b.owner.id = :ownerId AND " + "b.id NOT IN (SELECT l.book.id FROM Loan l WHERE l.status = es.codeurjc13.librored.model.Loan.Status.Active)")
     List<Book> findAvailableBooksByOwnerId(@Param("ownerId") Long ownerId);
 
     // EntityGraph: ensures that when fetching books, Hibernate also retrieves associated loans. LazyInitializationException.
