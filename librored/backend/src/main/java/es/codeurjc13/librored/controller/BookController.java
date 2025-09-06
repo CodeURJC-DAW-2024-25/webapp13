@@ -72,7 +72,7 @@ public class BookController {
 
         User user = userService.getUserByEmail(userDetails.getUsername()).orElseThrow(() -> new RuntimeException("User not found"));
 
-        boolean isAdmin = user.getRole() == User.Role.ROLE_ADMIN; // Correct way to check admin role
+        boolean isAdmin = user.getRole() == User.Role.ROLE_ADMIN;
 
         List<Book> books = isAdmin ? bookService.getAllBooks() : bookService.getBooksByOwner(user);
 
@@ -96,7 +96,7 @@ public class BookController {
         model.addAttribute("isAdmin", isAdmin);
         model.addAttribute("userId", user.getId()); // Pass logged-in user's ID for non-admins
         model.addAttribute("book", new Book()); // Ensure book attribute is always available
-        model.addAttribute("genreList", Book.Genre.values()); // ✅ Pass list of genres
+        model.addAttribute("genreList", Book.Genre.values()); // Pass list of genres
 
         if (isAdmin) {
             model.addAttribute("users", userService.getAllUsers()); // Load users for admin dropdown
@@ -152,7 +152,7 @@ public class BookController {
         }
     }
 
-    private void setCoverPic(Book book, MultipartFile imageField) throws IOException, SQLException {
+    private void setCoverPic(Book book, MultipartFile imageField) throws IOException {
 
         if (!imageField.isEmpty()) {
             book.setCoverPic(BlobProxy.generateProxy(imageField.getInputStream(), imageField.getSize()));
@@ -193,8 +193,8 @@ public class BookController {
     }
 
     @PostMapping("/books/edit/{id}")
-    public String updateBook(@PathVariable Long id, @RequestParam String title, @RequestParam String author, @RequestParam Book.Genre genre, @RequestParam String description, @RequestParam(required = false) MultipartFile coverPic, @RequestParam("currentCover") String currentCover, // Receive the old image URL
-                             @RequestParam Long ownerId) throws SQLException, IOException {
+    public String updateBook(@PathVariable Long id, @RequestParam String title, @RequestParam String author, @RequestParam Book.Genre genre, @RequestParam String description, @RequestParam(required = false) MultipartFile coverPic, 
+                             @RequestParam Long ownerId) throws IOException {
 
         Book book = bookService.getBookById(id).orElseThrow(() -> new IllegalArgumentException("Invalid book ID"));
 

@@ -46,7 +46,7 @@ public class UserRestController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("success", false, "error", "User not authenticated."));
         }
 
-        String email = userDetails.getUsername();  // ✅ Always fetch by email
+        String email = userDetails.getUsername();  // Always fetch by email
         Optional<User> user = userService.getUserByEmail(email);
 
         if (user.isEmpty()) {
@@ -110,7 +110,7 @@ public class UserRestController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("success", false, "error", "User is not authenticated."));
         }
 
-        String email = userDetails.getUsername(); // ✅ Always fetch by email, NOT username
+        String email = userDetails.getUsername(); // Always fetch by email, NOT username
         Optional<User> user = userService.getUserByEmail(email);
 
         if (user.isEmpty()) {
@@ -124,7 +124,7 @@ public class UserRestController {
         return ResponseEntity.ok(Map.of("success", true, "message", "Password verified! You can now enter a new password."));
     }
 
-    // ==================== P2 REST API ENDPOINTS (/api/v1/users) ====================
+    // ==================== REST API ENDPOINTS (/api/v1/users) ====================
 
     @Operation(summary = "Get all users", description = "Retrieve a paginated list of all users")
     @ApiResponses(value = {

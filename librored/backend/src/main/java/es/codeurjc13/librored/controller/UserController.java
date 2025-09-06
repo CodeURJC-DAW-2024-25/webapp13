@@ -4,7 +4,6 @@ import es.codeurjc13.librored.model.Book;
 import es.codeurjc13.librored.model.User;
 import es.codeurjc13.librored.service.BookService;
 import es.codeurjc13.librored.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -18,15 +17,13 @@ import java.util.Optional;
 public class UserController {
 
     private final UserService userService;
-    private final BookService bookService; // Inject BookService to fetch recommendations
+    private final BookService bookService;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-
-    public UserController(UserService userService, BookService bookService) {
+    public UserController(UserService userService, BookService bookService, PasswordEncoder passwordEncoder) {
         this.userService = userService;
         this.bookService = bookService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @GetMapping("/users")
@@ -41,11 +38,11 @@ public class UserController {
         if (user.isPresent()) {
             User currentUser = user.get();
             model.addAttribute("user", currentUser);
-            
+
             // Add role selection flags for template
             model.addAttribute("isUserRole", currentUser.getRole() == User.Role.ROLE_USER);
             model.addAttribute("isAdminRole", currentUser.getRole() == User.Role.ROLE_ADMIN);
-            
+
             return "edit-user";
         }
         return "redirect:/users";
@@ -65,7 +62,7 @@ public class UserController {
         boolean isAdmin = loggedUser.getAuthorities().stream()
                 .anyMatch(auth -> auth.getAuthority().equals(User.Role.ROLE_ADMIN.name()));
 
-        // ✅ Users can update only their own account
+        // Users can update only their own account
         if (!isAdmin && !user.getEmail().equals(loggedUser.getUsername())) {
             return "redirect:/users"; // Redirect unauthorized users
         }
@@ -114,17 +111,19 @@ public class UserController {
             return "redirect:/login";
         }
 
-        Optional<User> user = userService.getUserByEmail(userDetails.getUsername());
+        Optional<User> userOptional = userService.getUserByEmail(userDetails.getUsername());
 
-        if (user.isEmpty()) {
+        if (userOptional.isEmpty()) {
             return "redirect:/login";
         }
 
+        User user = userOptional.get();
+        
         // Fetch recommended books for the user
-        List<Book> recommendedBooks = bookService.getRecommendationsForUser(user.get().getId());
+        List<Book> recommendedBooks = bookService.getRecommendationsForUser(user.getId());
 
         // Pass user and recommendations to the template
-        model.addAttribute("user", user.get());
+        model.addAttribute("user", user);
         model.addAttribute("recommendedBooks", recommendedBooks);
         model.addAttribute("logged", true);
 
