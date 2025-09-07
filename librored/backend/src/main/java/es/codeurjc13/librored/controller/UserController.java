@@ -5,10 +5,13 @@ import es.codeurjc13.librored.model.User;
 import es.codeurjc13.librored.service.BookService;
 import es.codeurjc13.librored.service.UserService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
 import java.util.Optional;
@@ -88,8 +91,33 @@ public class UserController {
 
 
     @PostMapping("/users/delete/{id}")
-    public String deleteUser(@PathVariable Long id) {
+    public String deleteUser(@PathVariable Long id, 
+                           @AuthenticationPrincipal org.springframework.security.core.userdetails.User loggedUser,
+                           HttpServletRequest request) {
+        
+        // Check if the admin is trying to delete their own account
+        boolean isDeletingSelf = false;
+        if (loggedUser != null) {
+            Optional<User> userToDelete = userService.getUserById(id);
+            if (userToDelete.isPresent()) {
+                // Compare logged user's email with user-to-delete's email
+                isDeletingSelf = userToDelete.get().getEmail().equals(loggedUser.getUsername());
+            }
+        }
+        
+        // Delete the user
         userService.deleteUser(id);
+        
+        // If admin deleted themselves, clear security context and redirect to login
+        if (isDeletingSelf) {
+            SecurityContextHolder.clearContext();
+            // Invalidate the session
+            if (request.getSession(false) != null) {
+                request.getSession(false).invalidate();
+            }
+            return "redirect:/login?message=Account deleted successfully";
+        }
+        
         return "redirect:/users";
     }
 
