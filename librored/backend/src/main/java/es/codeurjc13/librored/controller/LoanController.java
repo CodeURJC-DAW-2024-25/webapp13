@@ -6,9 +6,11 @@ import es.codeurjc13.librored.model.User;
 import es.codeurjc13.librored.service.BookService;
 import es.codeurjc13.librored.service.LoanService;
 import es.codeurjc13.librored.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -54,9 +56,15 @@ public class LoanController {
     }
 
     @GetMapping("/loans/edit/{id}")
-    public String editLoan(@PathVariable Long id, Model model) {
+    public String editLoan(@PathVariable Long id, Model model, HttpServletRequest request) {
         Loan loan = loanService.getLoanById(id)
                 .orElseThrow(() -> new RuntimeException("Loan not found"));
+
+        // Add CSRF token to model
+        CsrfToken csrfToken = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
+        if (csrfToken != null) {
+            model.addAttribute("_csrf", csrfToken);
+        }
 
         // Get available books owned by the lender (not currently loaned)
         List<Book> availableBooks = bookService.getAvailableBooksByOwnerId(loan.getLender().getId());
@@ -209,7 +217,8 @@ public class LoanController {
     }
 
     @GetMapping("/loans/create")
-    public String createLoanForm(@AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails, Model model) {
+    public String createLoanForm(@AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails, 
+                                Model model, HttpServletRequest request) {
         if (userDetails == null) {
             return "redirect:/login";
         }
@@ -219,6 +228,11 @@ public class LoanController {
 
         boolean isAdmin = lender.getRole() == User.Role.ROLE_ADMIN;
 
+        // Add CSRF token to model
+        CsrfToken csrfToken = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
+        if (csrfToken != null) {
+            model.addAttribute("_csrf", csrfToken);
+        }
 
         model.addAttribute("isAdmin", isAdmin);
         model.addAttribute("userId", lender.getId()); // Pass the logged-in user's ID

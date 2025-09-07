@@ -61,7 +61,9 @@ public class SecurityConfig {
         http.authenticationProvider(authenticationProvider());
         
         http
-            .securityMatcher("/api/**")
+            .securityMatcher(request -> 
+                request.getRequestURI().startsWith("/api/") && 
+                !request.getRequestURI().equals("/api/loans/valid-borrowers"))
             .exceptionHandling(handling -> handling.authenticationEntryPoint(unauthorizedHandlerJwt));
         
         http
@@ -80,7 +82,6 @@ public class SecurityConfig {
                     // API access: Only logged-in users
                     .requestMatchers("/api/users/**").hasAnyRole("USER", "ADMIN")
                     .requestMatchers("/api/users/verify-password", "/api/users/update-username", "/api/users/update-password").authenticated()
-                    .requestMatchers("/api/loans/valid-borrowers").authenticated()
                     
                     // All other API endpoints require authentication
                     .requestMatchers("/api/**").authenticated()
@@ -122,6 +123,7 @@ public class SecurityConfig {
                         // User dashboard and protected actions
                         .requestMatchers("/users/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
                         .requestMatchers("/myaccount").authenticated()
+                        .requestMatchers("/api/loans/valid-borrowers").authenticated()
                         .requestMatchers("/users/edit/{id}").access((authentication, request) -> {
                             boolean isAdmin = authentication.get().getAuthorities().stream()
                                     .anyMatch(role -> role.getAuthority().equals("ROLE_ADMIN") || role.getAuthority().equals(User.Role.ROLE_ADMIN.name()));
