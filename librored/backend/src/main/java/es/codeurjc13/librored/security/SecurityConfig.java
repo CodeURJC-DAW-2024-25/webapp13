@@ -70,7 +70,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(authorize -> authorize
                     // PUBLIC API ENDPOINTS
                     .requestMatchers("/api/books", "/api/books/books-per-genre", "/api/books/**").permitAll()
-                    .requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll()
+                    .requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**", "/swagger-ui/index.html").permitAll()
                     .requestMatchers("/actuator/health", "/actuator/info").permitAll() // Actuator health checks
                     .requestMatchers("/api/auth/**").permitAll() // JWT auth endpoints
                     
@@ -121,6 +121,7 @@ public class SecurityConfig {
                         // Public pages
                         .requestMatchers("/", "/login", "/register", "/error/**", "/perform_login", "/loginerror").permitAll()
                         .requestMatchers("/actuator/health", "/actuator/info").permitAll() // Health checks
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**", "/swagger-ui/index.html").permitAll() // Swagger UI
 
                         // User dashboard and protected actions
                         .requestMatchers("/users/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
