@@ -1,5 +1,4 @@
 # Multi-stage build for LibroRed Spring Boot Application
-
 # Stage 1: Build stage with Maven
 FROM maven:3.9.6-eclipse-temurin-21 AS build
 
@@ -19,8 +18,9 @@ FROM eclipse-temurin:21-jre-jammy
 # Set working directory
 WORKDIR /app
 
-# Create non-root user for security
-RUN addgroup --system librored && adduser --system --group librored
+# Install curl for health checks and create non-root user for security
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/* && \
+    addgroup --system librored && adduser --system --group librored
 
 # Copy the built JAR from build stage
 COPY --from=build /app/target/*.jar app.jar

@@ -26,6 +26,7 @@ public class LoginWebController {
     public String login(
             @RequestParam(value = "error", required = false) String error,
             @RequestParam(value = "successMessage", required = false) String successMessage,
+            @RequestParam(value = "message", required = false) String message,
             Model model) {
 
         if (error != null) {
@@ -34,6 +35,10 @@ public class LoginWebController {
 
         if (successMessage != null) {
             model.addAttribute("successMessage", successMessage);
+        }
+        
+        if (message != null) {
+            model.addAttribute("successMessage", message);
         }
         
         if ("registered".equals(error)) {

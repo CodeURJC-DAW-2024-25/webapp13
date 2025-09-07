@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # MySQL Database Service
   mysql:
@@ -29,7 +27,7 @@ services:
   librored-app:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: librored/docker/Dockerfile
     container_name: librored-app
     restart: unless-stopped
     depends_on:

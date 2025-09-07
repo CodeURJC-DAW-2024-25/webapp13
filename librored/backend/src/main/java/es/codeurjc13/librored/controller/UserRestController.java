@@ -17,6 +17,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -195,11 +197,47 @@ public class UserRestController {
             @ApiResponse(responseCode = "404", description = "User not found")
     })
     @DeleteMapping("/api/v1/users/{id}")
-    public ResponseEntity<Void> deleteUser(
-            @Parameter(description = "User ID") @PathVariable Long id) {
+    public ResponseEntity<Map<String, Object>> deleteUser(
+            @Parameter(description = "User ID") @PathVariable Long id,
+            @AuthenticationPrincipal org.springframework.security.core.userdetails.User loggedUser,
+            HttpServletRequest request) {
+        
+        // Check if the admin is trying to delete their own account
+        boolean isDeletingSelf = false;
+        if (loggedUser != null) {
+            Optional<User> userToDelete = userService.getUserById(id);
+            if (userToDelete.isPresent()) {
+                // Compare logged user's email with user-to-delete's email
+                isDeletingSelf = userToDelete.get().getEmail().equals(loggedUser.getUsername());
+            }
+        }
+        
+        // Delete the user
         boolean deleted = userService.deleteUserDTO(id);
-        return deleted ? ResponseEntity.noContent().build() 
-                       : ResponseEntity.notFound().build();
+        
+        if (!deleted) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        // If admin deleted themselves, clear security context and return special response
+        if (isDeletingSelf) {
+            SecurityContextHolder.clearContext();
+            // Invalidate the session
+            if (request.getSession(false) != null) {
+                request.getSession(false).invalidate();
+            }
+            return ResponseEntity.ok(Map.of(
+                "deleted", true,
+                "selfDeletion", true,
+                "message", "Account deleted successfully. You have been logged out."
+            ));
+        }
+        
+        return ResponseEntity.ok(Map.of(
+            "deleted", true,
+            "selfDeletion", false,
+            "message", "User deleted successfully."
+        ));
     }
 
     @Operation(summary = "Get user by username", description = "Retrieve a user by their username")
