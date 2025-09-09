@@ -209,7 +209,6 @@ CREATE DATABASE librored;
 CREATE USER 'librored_user'@'localhost' IDENTIFIED BY 'rawPassword';
 GRANT ALL PRIVILEGES ON librored.* TO 'librored_user'@'localhost';
 FLUSH PRIVILEGES;
-EXIT;
 ```
 
 Then update `application.properties`:
