@@ -3,12 +3,11 @@ package es.codeurjc13.librored.service;
 import es.codeurjc13.librored.model.Book;
 import es.codeurjc13.librored.model.Loan;
 import es.codeurjc13.librored.model.User;
-import es.codeurjc13.librored.util.pdf.PDFPageHelper;
-import es.codeurjc13.librored.util.pdf.PDFResult;
+import es.codeurjc13.librored.util.PDFPageHelper;
+import es.codeurjc13.librored.util.PDFResult;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
-import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.springframework.stereotype.Service;
 
