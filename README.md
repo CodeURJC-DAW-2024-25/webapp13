@@ -403,32 +403,120 @@ The Docker image is built using a multi-stage approach:
 
 ---
 
-Let me know if you want this localized into Spanish or auto-filled with your image name or script path.
-
 # Virtual Machine
 
 
-## What I accomplished in the virtual machine
+## Steps taken to deploy the application in the VM
 
-- Successfully accessed the assigned virtual machine via SSH from MyApps.
-- Created and executed a custom `install_docker.sh` script.
-- Installed **Docker Engine** and **Docker Compose** without errors.
-- Verified that Docker and Docker Compose were working correctly (`hello-world`, version checks).
+
+### Initial VM Setup
+- Successfully accessed the assigned virtual machine via SSH from MyApps using credentials provided by university
+- VM IP Address: 10.100.139.121
+- Checked system prerequisites:
+    - Docker:  Not installed - installed Docker Engine
+    - Docker Compose:  Not installed - installed Docker Compose v2
+    - Maven:  Not installed (not needed for Docker deployment)
+    - Java:  OpenJDK 11 not installed (not needed for Docker deployment)
+    - Git:  Already installed
+
+### Docker Installation & Configuration
+
+- Installed Docker Engine following official Docker installation guide for Ubuntu/Debian
+- Installed Docker Compose plugin
+- Added vmuser to the docker group to avoid using sudo with docker commands:
+sudo usermod -aG docker vmuser
+- Logged out and back in to apply group changes
+
+
+### Application Deployment
+
+- Cloned the repository using: git clone [repository-url]
+- Go to webapp13
+- Built and started the application using Docker Compose: docker-compose up --build -d
+- Verified services were running: docker-compose ps
+- Application successfully deployed and accessible at: http://10.100.139.121:8443
+
+
+## For running the application in the VM
+
+### Quick Start Commands
+
+1. Access the VM via SSH from MyApps portal
+2. Navigate to project directory:
+   cd webapp13
+3. Start the application:
+   docker-compose up --build -d
+4. Access the application: Open web browser at http://10.100.139.121:8443
+
+### Application Management
+
+#### Starting Services
+
+Start in background (detached mode)
+`docker-compose up -d`
+
+Start with rebuild (if code changes were made)
+`docker-compose up --build -d`
+
+View logs while starting
+`docker-compose up --build`
+
+#### Monitoring
+
+Check service status
+`docker-compose ps`
+
+View logs
+`docker-compose logs -f`
+
+View specific service logs
+
+`docker-compose logs -f librored-app`
+
+`docker-compose logs -f mysql`
+
+#### Stopping Services
+
+Stop containers (keeps data)
+`docker-compose stop`
+
+Stop and remove containers (keeps volumes/data)
+`docker-compose down`
+
+Stop and remove everything including volumes (deletes database data)
+`docker-compose down -v`
+
+#### Accessing Services
+
+- Main Application: http://10.100.139.121:8443
+- API Documentation: http://10.100.139.121:8443/swagger-ui.html
+- Health Check: http://10.100.139.121:8443/actuator/health
+- Database: Accessible internally via container network
+
+#### Troubleshooting
+
+Check if ports are available
+`sudo lsof -i :8443`
+`sudo lsof -i :3307`
+
+View container resource usage
+`docker stats`
+
+Clean up unused resources
+`docker system prune -f`
+
+Full reset (removes all containers and data)
+`docker-compose down -v`
+`docker system prune -af`
+
+### Notes
+
+- The application uses HTTP (not HTTPS) in the Docker environment for simplicity
+- Database data persists in Docker volumes even when containers are stopped
+- The VM has limited resources, so monitor performance if needed
+- Always use -d flag for production deployment to run in background
 
 ---
-
-## Problems uploading and deploying the application
-
-- **Could not use `git clone`**: encountered issues with both HTTPS and SSH access.
-- **Uploaded `.zip` via email** to the MyApps Windows environment, but:
-  - Had no direct way to transfer the code to the VM from there.
-  - Tried using `scp` from Windows to the VM, but couldn’t confirm the host (`yes`) due to keyboard/input limitations.
-  - After multiple failed attempts, the host was blacklisted (`host key verification failed`), and further attempts were blocked.
-- Therefore, I was **unable to copy the application code to the virtual machine**, and couldn't run `docker compose up --build`.
-
----
-
-Let me know if you'd like this formatted for a specific platform or if you want a Spanish version too.
 
 # Members participation
 

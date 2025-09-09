@@ -1,4 +1,4 @@
-package es.codeurjc13.librored.util.pdf;
+package es.codeurjc13.librored.util;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
