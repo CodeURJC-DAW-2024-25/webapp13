@@ -408,27 +408,42 @@ Let me know if you want this localized into Spanish or auto-filled with your ima
 # Virtual Machine
 
 
-## What I accomplished in the virtual machine
+## Steps taken to deploy the application in the VM
 
 - Successfully accessed the assigned virtual machine via SSH from MyApps.
-- Created and executed a custom `install_docker.sh` script.
-- Installed **Docker Engine** and **Docker Compose** without errors.
-- Verified that Docker and Docker Compose were working correctly (`hello-world`, version checks).
+- Check what was installed on the VM:
+  - Docker and Docker Compose were not installed.
+  - Maven was not installed.
+  - Java (OpenJDK 11) was not installed.
+  - Git was installed.
+- Add vmuser to the docker group to avoid using `sudo` with docker commands.
+- Clone the repository using `git clone` 
+- From webapp13 folder, run `docker compose up --build` 
+- The application was running at `http://10.100.139.121:8443` 
+
+## For running the application in the VM
+1. Access the VM via SSH from MyApps.
+2. Navigate to the project directory:
+3. Run the application using Docker Compose:
+```bash
+docker-compose up --build -d
+```
+4. Access the application in your web browser at:
+5. `http://10.100.139.121:8443`
+6. To stop the application, press `Ctrl + C` in the terminal where Docker Compose is running or run:
+```bash
+docker-compose down
+```
+Alternatively, you can stop the application and remove containers, networks, and volumes created by Docker Compose with:
+```bash
+docker-compose down -v
+```
+Or you can simply stop the containers without removing them:
+```bash
+docker-compose stop
+```
 
 ---
-
-## Problems uploading and deploying the application
-
-- **Could not use `git clone`**: encountered issues with both HTTPS and SSH access.
-- **Uploaded `.zip` via email** to the MyApps Windows environment, but:
-  - Had no direct way to transfer the code to the VM from there.
-  - Tried using `scp` from Windows to the VM, but couldn’t confirm the host (`yes`) due to keyboard/input limitations.
-  - After multiple failed attempts, the host was blacklisted (`host key verification failed`), and further attempts were blocked.
-- Therefore, I was **unable to copy the application code to the virtual machine**, and couldn't run `docker compose up --build`.
-
----
-
-Let me know if you'd like this formatted for a specific platform or if you want a Spanish version too.
 
 # Members participation
 
