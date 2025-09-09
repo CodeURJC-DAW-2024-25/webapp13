@@ -49,7 +49,7 @@ Represents the process of borrowing a book between two users.
 
 ---
 
-### 4️⃣ Graphs 
+### 4️⃣ Graphs
 
 Each user will be able to view:
 
@@ -69,13 +69,52 @@ Generates a PDF containing details of **Users, Books, and Loans**.
 ** Book Recommendation Algorithm**
 
 #### How It Works
-1. **User’s Book Preferences Analysis**: Identifies the genres of books registered by the user.
-2. **User’s Loan History Analysis**: Identifies the genres of books the user has borrowed.
+1. **User's Book Preferences Analysis**: Identifies the genres of books registered by the user.
+2. **User's Loan History Analysis**: Identifies the genres of books the user has borrowed.
 3. **Recommendation Generation**: The system suggests books aligned with the user's interests.
 
 ---
 
-# Application - PART 1
+### 7️⃣ New Features (P2)
+
+#### REST API Integration
+- **Complete REST API**: Full CRUD operations for Users, Books, and Loans
+- **JWT Authentication**: Secure API access with JSON Web Tokens
+- **OpenAPI/Swagger Documentation**: Interactive API documentation at `/swagger-ui.html`
+- **Multiple Authentication Methods**: Supports both session-based (web) and token-based (API) authentication
+
+#### Health Monitoring & Observability
+- **Spring Boot Actuator**: Health monitoring endpoints at `/actuator/health` and `/actuator/info`
+- **Database Health Checks**: Automatic database connectivity monitoring
+- **Application Status**: Real-time application health status reporting
+
+#### Enhanced Security Features
+- **Auto-logout on Account Deletion**: When an admin deletes their own account, the system automatically logs them out
+- **Email-based Authentication**: Users authenticate using their email address instead of username
+- **Role-based Access Control**: Enhanced permission system for API endpoints
+- **CSRF Protection**: Cross-site request forgery protection for web endpoints
+
+#### Docker Support
+- **Multi-stage Docker Build**: Optimized containerization with Maven and OpenJDK
+- **Docker Compose Orchestration**: Complete development environment with MySQL database
+- **Health Check Integration**: Container health monitoring with automatic restarts
+- **Port Mapping**: MySQL on port 3307 to avoid conflicts with local installations
+
+#### API Documentation
+- **Comprehensive Endpoint Coverage**: All user, book, and loan operations documented
+- **Request/Response Examples**: Detailed API usage examples and schemas
+- **Authentication Flows**: Complete JWT authentication workflow documentation
+- **Error Handling**: Standardized error responses and status codes
+
+#### Enhanced Validation
+- **Advanced Loan Validation**: Complex business rules for loan creation and editing
+- **Date Validation**: Smart date range checking for loan periods
+- **Book Availability**: Real-time availability checking to prevent conflicts
+- **User Ownership**: Strict ownership validation for book and loan operations
+
+---
+
+# Application
 
 ## Navigation Diagram
 
@@ -88,7 +127,7 @@ Here is the entity diagram image of librored DB
 
 ![DB Diagram](README-IMAGES/librored-diagram.png)
 
-## Structured Class Diagram
+## Structured Class Diagram (updated)
 
 ![Class Diagram](README-IMAGES/improved_class_diagram.png)
 
@@ -153,6 +192,10 @@ cd your-repo-name
 ```
 
 ### 6. Configure the Database
+
+You have two options for database configuration:
+
+#### Option A: Create a new MySQL user (Recommended for production)
 Create a new MySQL database and user for the application.
 
 ```sh
@@ -163,21 +206,39 @@ Inside the MySQL shell, run:
 
 ```sql
 CREATE DATABASE librored;
-CREATE USER 'librored_user'@'localhost' IDENTIFIED BY 'password';
+CREATE USER 'librored_user'@'localhost' IDENTIFIED BY 'rawPassword';
 GRANT ALL PRIVILEGES ON librored.* TO 'librored_user'@'localhost';
 FLUSH PRIVILEGES;
 EXIT;
 ```
 
-### 7. Update Application Properties
-Update the `application.properties` file with your database configuration. This file is typically located in `src/main/resources/application.properties`.
+Then update `application.properties`:
 
 ```properties
 spring.datasource.url=jdbc:mysql://localhost:3306/librored
 spring.datasource.username=librored_user
-spring.datasource.password=password
+spring.datasource.password=rawPassword
 spring.jpa.hibernate.ddl-auto=update
 ```
+
+#### Option B: Use root user (Current setup)
+If you prefer to use the root user directly (current configuration):
+
+```sql
+CREATE DATABASE librored;
+```
+
+Update `application.properties` with your root password:
+
+```properties
+spring.datasource.url=jdbc:mysql://localhost:3306/librored
+spring.datasource.username=root
+spring.datasource.password=YOUR_ROOT_PASSWORD
+spring.jpa.hibernate.ddl-auto=update
+```
+
+### 7. Update Application Properties
+Choose one of the database configuration options above and update the `application.properties` file located in `librored/backend/src/main/resources/application.properties`.
 
 ### 8. Build and Run the Application
 Use Maven to build and run the Spring Boot application.
@@ -188,7 +249,7 @@ mvn spring-boot:run
 ```
 
 ### 9. Access the Application
-Once the application is running, you can access it in your web browser at:
+Once the application is running, you can access it in your local web browser at:
 
 ```
 https://localhost:8443
@@ -206,61 +267,172 @@ server.ssl.key-password=your_key_password
 
 By following these steps, you should be able to configure and run the Spring Boot application in a new macOS environment.
 
+# API REST
+
+An API REST has been implemented to manage the application's data. There is Postman collection file with the different endpoints and examples of how to use them.
+You can also find the documentation of the API in the following links:
+
+[api-docs.html](https://rawcdn.githack.com/CodeURJC-DAW-2024-25/webapp13/refs/heads/main/api-docs/api-docs.html)
+
+[api-docs.yaml](https://rawcdn.githack.com/CodeURJC-DAW-2024-25/webapp13/aec192a99ac67649566f22ff8653613e032db3db/api-docs/api-docs.yaml)
+
+
+# Docker
+
+---
+
+## Running the Application with Docker Compose
+
+### Requirements
+
+- Docker installed on your system
+- Docker Compose installed (or Docker Desktop with Compose integrated)
+
+### Port Configuration
+
+The Docker Compose setup uses the following ports:
+- **Application**: `8443` (HTTP - SSL disabled in Docker)
+- **MySQL Database**: `3307:3306` (External port 3307 to avoid conflicts with local MySQL installations)
+
+### Run Instructions
+
+1. Open a terminal at the root of the project (where `docker-compose.yml` is located).
+2. Run the following command:
+
+```bash
+docker-compose up --build
+```
+
+3. Wait for all services to start. Once the backend is ready, the application will be accessible at:
+
+```
+http://localhost:8443
+```
+
+**Important Notes:**
+- The Dockerfile is configured to **NOT** use HTTPS, so use `http://localhost:8443`
+- If you want to run Docker with SSL certificate, please change the configuration in the Dockerfile
+- MySQL runs on external port `3307` to avoid conflicts with any local MySQL instance on port `3306`
+
+### Additional Docker Commands
+
+```bash
+# Run in background (detached mode)
+docker-compose up -d
+
+# Stop all services
+docker-compose down
+
+# View logs
+docker-compose logs
+
+# Rebuild only the application container
+docker-compose up --build librored-app
+```
+
+---
+
+## Docker Helper Scripts
+
+The project includes several helper scripts for Docker operations:
+
+### Available Scripts
+
+1. **docker-build.sh** - Builds the Docker image
+   ```bash
+   ./docker-build.sh
+   ```
+
+2. **docker-run.sh** - Runs the application container
+   ```bash
+   ./docker-run.sh
+   ```
+
+3. **docker-stop.sh** - Stops running containers
+   ```bash
+   ./docker-stop.sh
+   ```
+
+### Manual Docker Commands
+
+If you prefer manual Docker operations:
+
+```bash
+# Build the Docker image
+docker build -t librored-app ./librored
+
+# Run the application with MySQL
+docker-compose up --build
+
+# Stop all containers
+docker-compose down
+
+# Clean up Docker resources
+docker system prune -f
+```
+
+---
+
+## Building the Docker Image
+
+### Requirements
+
+- Docker must be installed and running
+
+### Build & Publish Instructions
+
+1. To build the Docker image, run the provided script:
+
+```bash
+./docker-build.sh
+```
+
+2. If you want to push the image to Docker Hub (make sure you're logged in):
+
+```bash
+docker push your-dockerhub-username/librored:latest
+```
+
+Replace `your-dockerhub-username` with your actual Docker Hub username.
+
+### Docker Image Details
+
+The Docker image is built using a multi-stage approach:
+- **Build Stage**: Uses Maven to compile and package the application
+- **Runtime Stage**: Uses OpenJDK 21 slim image for optimal size and security
+- **Health Checks**: Integrated health monitoring for container management
+
+---
+
+Let me know if you want this localized into Spanish or auto-filled with your image name or script path.
+
+# Virtual Machine
+
+
+## What I accomplished in the virtual machine
+
+- Successfully accessed the assigned virtual machine via SSH from MyApps.
+- Created and executed a custom `install_docker.sh` script.
+- Installed **Docker Engine** and **Docker Compose** without errors.
+- Verified that Docker and Docker Compose were working correctly (`hello-world`, version checks).
+
+---
+
+## Problems uploading and deploying the application
+
+- **Could not use `git clone`**: encountered issues with both HTTPS and SSH access.
+- **Uploaded `.zip` via email** to the MyApps Windows environment, but:
+  - Had no direct way to transfer the code to the VM from there.
+  - Tried using `scp` from Windows to the VM, but couldn’t confirm the host (`yes`) due to keyboard/input limitations.
+  - After multiple failed attempts, the host was blacklisted (`host key verification failed`), and further attempts were blocked.
+- Therefore, I was **unable to copy the application code to the virtual machine**, and couldn't run `docker compose up --build`.
+
+---
+
+Let me know if you'd like this formatted for a specific platform or if you want a Spanish version too.
 
 # Members participation
 
-### Top 5 Commits
-
-**Ana María Jurado Crespo** [medinaymedia](https://github.com/medinaymedia)
-
-Commit Hash: f84abe5
-Message: Added book covers to books page
-Description: Show Book CoverPic on app for USER and ADMIN. Fixed LazyInitializationException by eagerly fetching loans.Also added loan status display to books page.
-
----
-
-Commit Hash: def5678  
-Message: Fixed Admin Edit User Role Check
-Description: Corrected the way admin roles are checked to ensure proper access control.
-
----
-
-Commit Hash: 43ea2c9  
-Message: User panel
-Description: Create the whole user panel to give USER the ability to change password and username
-
----
-
-Commit Hash: f0fdfca 
-Message: Queries to fill in tables with data generated by AI
-Description: Implement DatabaseInitializer.java with all the info generated to populate DB
-
----
-
-Commit Hash: 85e3de3 
-Message: Add self generated keystore certificate to implement HTTPS
-Description: Added the keystore.jks file that have been previously generated
-
----
-
-### Top 5 Files
-
-Ana María Jurado Crespo  [medinaymedia](https://github.com/medinaymedia) has developed the entire code the app is based on except for Bootsrap elements.
-The Bootstrap template [ToHoney](https://elements.envato.com/es/tohoney-ecommerce-bootstrap-template-9PJXT9U) has been used in frontend side. 
-JS scripts develop by Ana are implemented on templates files.
-The preloaded data has been generated with AI help. 
-
-
-### Task Description
-I have developed a fully functional **Spring Boot** web application with a **MySQL database**, ensuring all features are complete and properly integrated. **Sample data**, including users, books, and images, is preloaded into the database at startup.
-
-The application includes **custom error pages** matching the overall design and **pagination** for Book dataset, AJAX-powered “More Results” button and a **loading spinner**.
-
-User **authentication and authorization** are managed with **Spring Security**, restricting access based on roles. Credentials are **encrypted with BCrypt**, and registered users are preloaded. A **registration form** allows new user sign-ups.
-
-All **backend code** is stored in a dedicated folder for a structured repository. The application runs securely over **HTTPS on port 8443**. To simplify deployment, **images are stored in the database** instead of the file system.
-
-
-
+**Ana María Jurado Crespo** [medinaymedia](https://github.com/medinaymedia). All the work was done by Ana María Jurado Crespo.
 
 **Developed with passion by Team 13**  
