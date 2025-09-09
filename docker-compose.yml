@@ -48,12 +48,12 @@ services:
       # JPA/Hibernate Configuration
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.MySQL8Dialect
-      SPRING_JPA_SHOW_SQL: false
-      SPRING_JPA_DEFER_DATASOURCE_INITIALIZATION: true
+      SPRING_JPA_SHOW_SQL: "false"
+      SPRING_JPA_DEFER_DATASOURCE_INITIALIZATION: "true"
       
       # Server Configuration
       SERVER_PORT: 8443
-      SERVER_SSL_ENABLED: false  # Disable SSL in Docker for simplicity
+      SERVER_SSL_ENABLED: "false" # Disable SSL in Docker for simplicity
       
       # Application Configuration
       SPRING_APPLICATION_NAME: LibroRed
