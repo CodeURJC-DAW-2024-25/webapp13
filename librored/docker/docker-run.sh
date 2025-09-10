@@ -33,9 +33,9 @@ docker-compose logs --tail=20 librored-app
 # Display connection information
 echo ""
 echo "LibroRed Application Started Successfully!"
-echo "Application URL: http://localhost:8443"
-echo "API Documentation: http://localhost:8443/swagger-ui.html"
-echo "API Docs JSON: http://localhost:8443/v3/api-docs"
+echo "Application URL: https://localhost:8443"
+echo "API Documentation: https://localhost:8443/swagger-ui.html"
+echo "API Docs JSON: https://localhost:8443/v3/api-docs"
 echo "MySQL Database: localhost:3306"
 echo ""
 echo "Useful commands:"
