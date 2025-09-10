@@ -162,7 +162,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <apiDocsUrl>http://localhost:8443/v3/api-docs</apiDocsUrl>
+                    <apiDocsUrl>https://localhost:8443/v3/api-docs</apiDocsUrl>
                     <outputDir>${project.basedir}/api-docs</outputDir>
                     <outputFileName>api-docs.yaml</outputFileName>
                     <skip>false</skip>

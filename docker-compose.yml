@@ -53,7 +53,7 @@ services:
       
       # Server Configuration
       SERVER_PORT: 8443
-      SERVER_SSL_ENABLED: "false" # Disable SSL in Docker for simplicity
+      SERVER_SSL_ENABLED: "true"
       
       # Application Configuration
       SPRING_APPLICATION_NAME: LibroRed
@@ -62,7 +62,7 @@ services:
     networks:
       - librored-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8443/actuator/health"]
+      test: ["CMD", "curl", "-f", "-k", "https://localhost:8443/actuator/health"]
       timeout: 10s
       retries: 5
       interval: 30s
