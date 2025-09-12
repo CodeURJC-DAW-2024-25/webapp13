@@ -2,6 +2,7 @@ import { BrowserModule } from "@angular/platform-browser";
 import { FormsModule } from "@angular/forms";
 import { NgModule } from "@angular/core";
 import { HttpClientModule } from "@angular/common/http";
+import { RouterModule } from "@angular/router";
 import { routing } from "./app.routing";
 import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
 
@@ -19,7 +20,7 @@ import { LoginComponent } from "./components/login/login.component";
     BookFormComponent,
     LoginComponent,
   ],
-  imports: [BrowserModule, FormsModule, HttpClientModule, routing, NgbModule],
+  imports: [BrowserModule, FormsModule, HttpClientModule, RouterModule, routing, NgbModule],
   bootstrap: [AppComponent],
 })
 export class AppModule {}
