@@ -67,3 +67,4 @@ mvnw.cmd
 .DS_Store
 .mvn/*
 CLAUDE.md
+/librored/frontend/node_modules/
