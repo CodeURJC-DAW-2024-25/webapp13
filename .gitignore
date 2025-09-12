@@ -69,3 +69,4 @@ mvnw.cmd
 CLAUDE.md
 /librored/frontend/node_modules/
 /librored/frontend/.angular/
+/librored/backend/src/main/resources/static/new/
