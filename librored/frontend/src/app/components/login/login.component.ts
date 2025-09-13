@@ -18,7 +18,10 @@ export class LoginComponent {
     this.authService.login(this.email, this.password).subscribe({
       next: (response) => {
         console.log('Login successful:', response);
+        // Set user as logged in with their email
         this.authService.setLoggedIn({ email: this.email });
+        // Redirect to the intended page or default page
+        this.authService.redirectAfterLogin();
       },
       error: (error) => {
         console.error('Login failed:', error);
