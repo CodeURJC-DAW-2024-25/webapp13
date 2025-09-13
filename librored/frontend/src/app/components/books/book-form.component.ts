@@ -12,7 +12,7 @@ export class BookFormComponent implements OnInit {
   book: BookDTO = {
     title: '',
     description: '',
-    image: false,
+    hasCoverImage: false,
     shops: []
   };
   
