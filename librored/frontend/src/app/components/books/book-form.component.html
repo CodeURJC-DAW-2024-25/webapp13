@@ -1,42 +1,52 @@
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Add New Book</h2>
-    <a routerLink="/books" class="btn btn-secondary">
-        <i class="fas fa-arrow-left"></i> Back to Books
-    </a>
-</div>
+<div class="container mt-5">
+    <h2 class="text-center">Create Book</h2>
+    <form>
+        <div class="form-group">
+            <label>Title</label>
+            <input type="text" name="title" class="form-control" placeholder="Enter book title" disabled>
+            <small class="text-muted">Phase 3: Form will be functional with backend integration</small>
+        </div>
 
-<div class="alert alert-info">
-    <h4>Phase 3 - Book Form</h4>
-    <p>This form will allow users to add and edit books in the catalog. Features to be implemented:</p>
-    <ul class="mb-0">
-        <li>Book title, author, ISBN fields</li>
-        <li>Genre and description</li>
-        <li>Form validation</li>
-        <li>Integration with backend API</li>
-    </ul>
-</div>
+        <div class="form-group">
+            <label>Author</label>
+            <input type="text" name="author" class="form-control" placeholder="Enter author name" disabled>
+        </div>
 
-<div class="card">
-    <div class="card-body">
-        <form>
-            <div class="mb-3">
-                <label for="title" class="form-label">Title</label>
-                <input type="text" class="form-control" id="title" placeholder="Enter book title" disabled>
-            </div>
-            <div class="mb-3">
-                <label for="author" class="form-label">Author</label>
-                <input type="text" class="form-control" id="author" placeholder="Enter author name" disabled>
-            </div>
-            <div class="mb-3">
-                <label for="isbn" class="form-label">ISBN</label>
-                <input type="text" class="form-control" id="isbn" placeholder="Enter ISBN" disabled>
-            </div>
-            <div class="mb-3">
-                <label for="description" class="form-label">Description</label>
-                <textarea class="form-control" id="description" rows="3" placeholder="Enter book description" disabled></textarea>
-            </div>
-            <button type="submit" class="btn btn-primary me-2" disabled>Save Book</button>
-            <a routerLink="/books" class="btn btn-outline-secondary">Cancel</a>
-        </form>
+        <!-- Genre Dropdown -->
+        <div class="form-group">
+            <label>Genre</label>
+            <select name="genre" class="form-control" disabled>
+                <option value="" disabled selected>-- Select a Genre --</option>
+                <option value="Fiction">Fiction</option>
+                <option value="Non-Fiction">Non-Fiction</option>
+                <option value="Science">Science</option>
+                <option value="History">History</option>
+                <option value="Biography">Biography</option>
+                <option value="Children">Children</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Description</label>
+            <textarea name="description" class="form-control" rows="3" placeholder="Enter book description" disabled></textarea>
+        </div>
+
+        <!-- Cover Picture Upload -->
+        <div class="form-group">
+            <label>Cover Picture</label>
+            <input type="file" id="coverUpload" name="coverImage" class="form-control" disabled>
+            <button type="button" id="uploadBtn" class="btn btn-secondary mt-2" disabled>Upload from Local</button>
+            <small class="text-muted d-block mt-1">Phase 3: File upload will be functional</small>
+        </div>
+
+        <!-- Action buttons -->
+        <button type="submit" class="btn btn-success" disabled>Create Book</button>
+        <a routerLink="/books" class="btn btn-secondary ms-2">Back to My Books</a>
+    </form>
+    
+    <!-- Implementation note -->
+    <div class="alert alert-warning mt-4">
+        <h5>Phase 3 Implementation</h5>
+        <p class="mb-0">This form will be fully functional in Phase 3 with backend API integration, file upload capabilities, and form validation.</p>
     </div>
 </div>
