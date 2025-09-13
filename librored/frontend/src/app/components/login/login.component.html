@@ -1,3 +1,56 @@
-<div class="navbar-nav">
-    <a class="nav-link" href="#" class="btn btn-outline-light">Login</a>
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      
+      <!-- Login Form (when NOT logged in) -->
+      <div *ngIf="!isLoggedIn()" class="card">
+        <div class="card-header">
+          <h4>Login</h4>
+        </div>
+        <div class="card-body">
+          <form (ngSubmit)="onLogin()">
+            <div class="mb-3">
+              <label for="email" class="form-label">Email</label>
+              <input 
+                type="email" 
+                id="email" 
+                class="form-control" 
+                [(ngModel)]="email" 
+                name="email" 
+                required>
+            </div>
+            
+            <div class="mb-3">
+              <label for="password" class="form-label">Password</label>
+              <input 
+                type="password" 
+                id="password" 
+                class="form-control" 
+                [(ngModel)]="password" 
+                name="password" 
+                required>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Login</button>
+            
+            <div *ngIf="errorMessage" class="alert alert-danger mt-3">
+              {{ errorMessage }}
+            </div>
+          </form>
+        </div>
+      </div>
+      
+      <!-- User Info (when logged in) -->
+      <div *ngIf="isLoggedIn()" class="card">
+        <div class="card-header">
+          <h4>Welcome!</h4>
+        </div>
+        <div class="card-body">
+          <p>Logged in as: <strong>{{ getCurrentUser()?.email }}</strong></p>
+          <button (click)="onLogout()" class="btn btn-danger">Logout</button>
+        </div>
+      </div>
+      
+    </div>
+  </div>
 </div>

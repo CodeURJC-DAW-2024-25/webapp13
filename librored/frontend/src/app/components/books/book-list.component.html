@@ -1,2 +1,56 @@
-<h2>Books List</h2>
-<p>This is the books list component - will be implemented in Phase 3</p>
+<div class="container mt-5">
+    <h2 class="text-center">My Books</h2>
+
+    <!-- Create Book Button -->
+    <a routerLink="/books/new" class="btn btn-primary mb-3">Create Book</a>
+
+    <div class="row">
+        <!-- Sample Book Card (Phase 3 placeholder) -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm">
+                <img src="/images/sample-book.jpg" class="card-img-top" alt="Sample Book" style="height: 200px; object-fit: cover; background-color: #f8f9fa;">
+                
+                <div class="card-body">
+                    <h5 class="card-title">Sample Book Title</h5>
+                    <p class="card-text"><strong>Author:</strong> Sample Author</p>
+                    <p class="card-text"><strong>Genre:</strong> Fiction</p>
+                    <p class="card-text">This is a sample book description. In Phase 3, real book data will be loaded from the backend API.</p>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-between">
+                        <a routerLink="/books/edit/1" class="btn btn-warning btn-sm">Edit</a>
+                        <button type="button" class="btn btn-danger btn-sm" disabled>Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Second sample book -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm">
+                <img src="/images/sample-book2.jpg" class="card-img-top" alt="Sample Book 2" style="height: 200px; object-fit: cover; background-color: #f8f9fa;">
+                
+                <div class="card-body">
+                    <h5 class="card-title">Another Book</h5>
+                    <p class="card-text"><strong>Author:</strong> Another Author</p>
+                    <p class="card-text"><strong>Genre:</strong> Science</p>
+                    <p class="card-text">Another sample book for demonstration purposes.</p>
+
+                    <p class="text-danger"><strong>Currently on Loan</strong></p>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-between">
+                        <a routerLink="/books/edit/2" class="btn btn-warning btn-sm">Edit</a>
+                        <button type="button" class="btn btn-danger btn-sm" disabled>Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Message for Phase 3 -->
+    <div class="alert alert-info mt-4">
+        <h5>Phase 3 Implementation Note</h5>
+        <p class="mb-0">These are sample books for demonstration. In Phase 3, real book data will be loaded from the backend API and users will be able to manage their book collection.</p>
+    </div>
+</div>

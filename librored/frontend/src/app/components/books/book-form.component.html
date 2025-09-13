@@ -1,2 +1,52 @@
-<h2>Book Form</h2>
-<p>This is the book form component - will be implemented in Phase 3</p>
+<div class="container mt-5">
+    <h2 class="text-center">Create Book</h2>
+    <form>
+        <div class="form-group">
+            <label>Title</label>
+            <input type="text" name="title" class="form-control" placeholder="Enter book title" disabled>
+            <small class="text-muted">Phase 3: Form will be functional with backend integration</small>
+        </div>
+
+        <div class="form-group">
+            <label>Author</label>
+            <input type="text" name="author" class="form-control" placeholder="Enter author name" disabled>
+        </div>
+
+        <!-- Genre Dropdown -->
+        <div class="form-group">
+            <label>Genre</label>
+            <select name="genre" class="form-control" disabled>
+                <option value="" disabled selected>-- Select a Genre --</option>
+                <option value="Fiction">Fiction</option>
+                <option value="Non-Fiction">Non-Fiction</option>
+                <option value="Science">Science</option>
+                <option value="History">History</option>
+                <option value="Biography">Biography</option>
+                <option value="Children">Children</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Description</label>
+            <textarea name="description" class="form-control" rows="3" placeholder="Enter book description" disabled></textarea>
+        </div>
+
+        <!-- Cover Picture Upload -->
+        <div class="form-group">
+            <label>Cover Picture</label>
+            <input type="file" id="coverUpload" name="coverImage" class="form-control" disabled>
+            <button type="button" id="uploadBtn" class="btn btn-secondary mt-2" disabled>Upload from Local</button>
+            <small class="text-muted d-block mt-1">Phase 3: File upload will be functional</small>
+        </div>
+
+        <!-- Action buttons -->
+        <button type="submit" class="btn btn-success" disabled>Create Book</button>
+        <a routerLink="/books" class="btn btn-secondary ms-2">Back to My Books</a>
+    </form>
+    
+    <!-- Implementation note -->
+    <div class="alert alert-warning mt-4">
+        <h5>Phase 3 Implementation</h5>
+        <p class="mb-0">This form will be fully functional in Phase 3 with backend API integration, file upload capabilities, and form validation.</p>
+    </div>
+</div>
