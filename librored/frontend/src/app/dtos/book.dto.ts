@@ -2,7 +2,13 @@ export interface BookDTO {
   id?: number;
   title: string;
   description: string;
-  image: boolean;
+  author?: string;
+  genre?: string;
+  hasCoverImage: boolean;
+  owner?: {
+    id: number;
+    username: string;
+  };
   shops?: ShopBasicDTO[];
 }
 
