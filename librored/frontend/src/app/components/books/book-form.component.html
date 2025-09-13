@@ -1,2 +1,42 @@
-<h2>Book Form</h2>
-<p>This is the book form component - will be implemented in Phase 3</p>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Add New Book</h2>
+    <a routerLink="/books" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Books
+    </a>
+</div>
+
+<div class="alert alert-info">
+    <h4>Phase 3 - Book Form</h4>
+    <p>This form will allow users to add and edit books in the catalog. Features to be implemented:</p>
+    <ul class="mb-0">
+        <li>Book title, author, ISBN fields</li>
+        <li>Genre and description</li>
+        <li>Form validation</li>
+        <li>Integration with backend API</li>
+    </ul>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form>
+            <div class="mb-3">
+                <label for="title" class="form-label">Title</label>
+                <input type="text" class="form-control" id="title" placeholder="Enter book title" disabled>
+            </div>
+            <div class="mb-3">
+                <label for="author" class="form-label">Author</label>
+                <input type="text" class="form-control" id="author" placeholder="Enter author name" disabled>
+            </div>
+            <div class="mb-3">
+                <label for="isbn" class="form-label">ISBN</label>
+                <input type="text" class="form-control" id="isbn" placeholder="Enter ISBN" disabled>
+            </div>
+            <div class="mb-3">
+                <label for="description" class="form-label">Description</label>
+                <textarea class="form-control" id="description" rows="3" placeholder="Enter book description" disabled></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary me-2" disabled>Save Book</button>
+            <a routerLink="/books" class="btn btn-outline-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
