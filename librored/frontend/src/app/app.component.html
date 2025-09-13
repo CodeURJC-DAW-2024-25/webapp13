@@ -1,28 +1,68 @@
-<nav class="navbar navbar-expand-lg bg-dark navbar-dark px-3">
+<!-- Preloader -->
+<div class="preloader-wrap" *ngIf="false">
+    <div class="spinner"></div>
+</div>
 
-    <a class="navbar-brand" routerLink="/">LibroRed</a>
-
-    <button class="navbar-toggler" type="button" (click)="isCollapsed = !isCollapsed">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-
-    <div class="collapse navbar-collapse" [ngbCollapse]="isCollapsed">
-        <ul class="navbar-nav me-auto">
-            <li class="nav-item">
-                <a class="nav-link" routerLink="/books" routerLinkActive="active">Books</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" routerLink="/books/new" routerLinkActive="active">Add Book</a>
-            </li>
-        </ul>
-        
-        <div class="navbar-nav">
-            <login></login>
+<!-- header-area start -->
+<header class="header-area">
+    <div class="header-top bg-2">
+        <div class="fluid-container">
+            <div class="row">
+                <div class="col-md-6 col-12">
+                    <ul class="d-flex header-contact">
+                        <div class="logo">
+                            <a routerLink="/">
+                                <img alt="LibroRed" src="/images/logo.png">
+                            </a>
+                        </div>
+                    </ul>
+                </div>
+                <div class="col-md-6 col-12">
+                    <ul class="d-flex account_login-area">
+                        <li><a routerLink="/books">My Books</a></li>
+                        <li><a routerLink="/books/new">Create Book</a></li>
+                        <li class="nav-item">
+                            <login></login>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </div>
-</nav>
+</header>
+<!-- header-area end -->
 
-
-<div class="container">
+<div class="big-container">
     <router-outlet></router-outlet>
+</div>
+
+<!-- Footer -->
+<div class="footer-area">
+    <div class="footer-top">
+        <div class="container">
+            <div class="footer-top-item">
+                <div class="row">
+                    <div class="col-lg-12 col-12">
+                        <div class="footer-top-text text-center">
+                            <ul class="d-flex">
+                                <li><a routerLink="/">HOME</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 col-md-8 col-sm-12">
+                    <div class="footer-content">
+                        <p>LibroRed is a student project</p>
+                        <p>2025 URJC-DAW-EQUIPO 13</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
