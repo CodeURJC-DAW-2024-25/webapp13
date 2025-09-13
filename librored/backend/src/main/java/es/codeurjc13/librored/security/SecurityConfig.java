@@ -120,6 +120,7 @@ public class SecurityConfig {
 
                         // Public pages
                         .requestMatchers("/", "/login", "/register", "/error/**", "/perform_login", "/loginerror").permitAll()
+                        .requestMatchers("/new/**").permitAll() // Angular SPA
                         .requestMatchers("/actuator/health", "/actuator/info").permitAll() // Health checks
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**", "/swagger-ui/index.html").permitAll() // Swagger UI
 
