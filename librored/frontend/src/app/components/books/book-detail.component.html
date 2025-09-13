@@ -1,69 +1,47 @@
 <div class="container mt-5">
-    <div class="row">
-        <div class="col-md-4 mb-4">
-            <div class="card shadow-sm">
-                <img src="/images/sample-book.jpg" class="card-img-top" alt="Sample Book Detail" style="height: 300px; object-fit: cover; background-color: #f8f9fa;">
-                
-                <div class="card-body">
-                    <h5 class="card-title">Sample Book Title</h5>
-                    <p class="card-text"><strong>Author:</strong> Sample Author</p>
-                    <p class="card-text"><strong>Genre:</strong> Fiction</p>
-                    <p class="card-text">This is a detailed view of the sample book. In Phase 3, actual book data will be loaded from the backend API based on the route parameter.</p>
-
-                    <!-- Loan status -->
-                    <p class="text-success"><strong>Available for Loan</strong></p>
-
-                    <!-- Action Buttons -->
-                    <div class="d-flex justify-content-between">
-                        <a routerLink="/books/edit/1" class="btn btn-warning btn-sm">Edit</a>
-                        <button type="button" class="btn btn-danger btn-sm" disabled>Delete</button>
-                    </div>
-                </div>
-            </div>
+    <!-- Loading Spinner -->
+    <div *ngIf="loading" class="text-center">
+        <div class="spinner-border" role="status">
+            <span class="sr-only">Loading...</span>
         </div>
-        
-        <div class="col-md-8">
-            <h2>Book Details</h2>
-            
-            <div class="card">
-                <div class="card-body">
-                    <h4>Sample Book Title</h4>
-                    <p class="text-muted">by Sample Author</p>
-                    
-                    <hr>
-                    
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p><strong>Genre:</strong> Fiction</p>
-                            <p><strong>Status:</strong> <span class="badge bg-success">Available</span></p>
-                            <p><strong>Owner:</strong> Current User</p>
-                        </div>
-                        <div class="col-md-6">
-                            <p><strong>Created:</strong> Phase 3</p>
-                            <p><strong>Last Updated:</strong> Phase 3</p>
-                            <p><strong>Loans:</strong> 0</p>
-                        </div>
-                    </div>
-                    
-                    <hr>
-                    
-                    <h5>Description</h5>
-                    <p>This is a comprehensive description of the sample book. In Phase 3, the actual book description will be displayed here, loaded from the backend database. The book detail page will show complete information about the selected book including its availability status, loan history, and management options.</p>
-                    
-                    <!-- Action buttons -->
-                    <div class="mt-3">
-                        <a routerLink="/books/edit/1" class="btn btn-warning me-2">Edit Book</a>
-                        <button type="button" class="btn btn-danger me-2" disabled>Delete Book</button>
-                        <a routerLink="/books" class="btn btn-secondary">Back to My Books</a>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <p>Loading book...</p>
     </div>
-    
-    <!-- Implementation note -->
-    <div class="alert alert-info mt-4">
-        <h5>Phase 3 Implementation</h5>
-        <p class="mb-0">This book detail page will be fully dynamic in Phase 3, showing real book data based on the route parameter and offering full CRUD functionality.</p>
+
+    <!-- Error Message -->
+    <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
+        {{ errorMessage }}
+        <button type="button" class="btn btn-secondary mt-2" (click)="goBack()">Back to Books</button>
+    </div>
+
+    <!-- Book Details - Simple Layout matching MVC -->
+    <div *ngIf="!loading && !errorMessage && book">
+        <h2>{{ book.title }}</h2>
+        
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <img [src]="getImageUrl()" class="img-fluid" [alt]="book.title">
+            </div>
+            <div class="col-md-8">
+                <p><strong>Description:</strong></p>
+                <p>{{ book.description }}</p>
+                
+                <!-- Shops -->
+                <div *ngIf="book.shops && book.shops.length > 0">
+                    <p><strong>Available in shops:</strong></p>
+                    <ul>
+                        <li *ngFor="let shop of book.shops">
+                            {{ shop.name }} - {{ shop.address }}
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Action buttons -->
+                <div class="mt-3">
+                    <button type="button" class="btn btn-warning me-2" (click)="editBook()">Edit</button>
+                    <button type="button" class="btn btn-danger me-2" (click)="deleteBook()">Remove</button>
+                    <button type="button" class="btn btn-secondary" (click)="goBack()">Back to all books</button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

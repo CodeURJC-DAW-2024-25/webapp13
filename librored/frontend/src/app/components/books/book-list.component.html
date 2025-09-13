@@ -4,53 +4,58 @@
     <!-- Create Book Button -->
     <a routerLink="/books/new" class="btn btn-primary mb-3">Create Book</a>
 
-    <div class="row">
-        <!-- Sample Book Card (Phase 3 placeholder) -->
-        <div class="col-md-4 mb-4">
-            <div class="card shadow-sm">
-                <img src="/images/sample-book.jpg" class="card-img-top" alt="Sample Book" style="height: 200px; object-fit: cover; background-color: #f8f9fa;">
-                
-                <div class="card-body">
-                    <h5 class="card-title">Sample Book Title</h5>
-                    <p class="card-text"><strong>Author:</strong> Sample Author</p>
-                    <p class="card-text"><strong>Genre:</strong> Fiction</p>
-                    <p class="card-text">This is a sample book description. In Phase 3, real book data will be loaded from the backend API.</p>
-
-                    <!-- Action Buttons -->
-                    <div class="d-flex justify-content-between">
-                        <a routerLink="/books/edit/1" class="btn btn-warning btn-sm">Edit</a>
-                        <button type="button" class="btn btn-danger btn-sm" disabled>Delete</button>
-                    </div>
-                </div>
-            </div>
+    <!-- Loading Spinner -->
+    <div *ngIf="loading" class="text-center">
+        <div class="spinner-border" role="status">
+            <span class="sr-only">Loading...</span>
         </div>
-        
-        <!-- Second sample book -->
-        <div class="col-md-4 mb-4">
-            <div class="card shadow-sm">
-                <img src="/images/sample-book2.jpg" class="card-img-top" alt="Sample Book 2" style="height: 200px; object-fit: cover; background-color: #f8f9fa;">
-                
-                <div class="card-body">
-                    <h5 class="card-title">Another Book</h5>
-                    <p class="card-text"><strong>Author:</strong> Another Author</p>
-                    <p class="card-text"><strong>Genre:</strong> Science</p>
-                    <p class="card-text">Another sample book for demonstration purposes.</p>
-
-                    <p class="text-danger"><strong>Currently on Loan</strong></p>
-
-                    <!-- Action Buttons -->
-                    <div class="d-flex justify-content-between">
-                        <a routerLink="/books/edit/2" class="btn btn-warning btn-sm">Edit</a>
-                        <button type="button" class="btn btn-danger btn-sm" disabled>Delete</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <p>Loading books...</p>
     </div>
 
-    <!-- Message for Phase 3 -->
-    <div class="alert alert-info mt-4">
-        <h5>Phase 3 Implementation Note</h5>
-        <p class="mb-0">These are sample books for demonstration. In Phase 3, real book data will be loaded from the backend API and users will be able to manage their book collection.</p>
+    <!-- Error Message -->
+    <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
+        {{ errorMessage }}
+        <button type="button" class="btn btn-link" (click)="loadBooks()">Try Again</button>
+    </div>
+
+    <!-- Books List -->
+    <div *ngIf="!loading && !errorMessage" class="row">
+        <div *ngFor="let book of books" class="col-md-4 mb-4">
+            <div class="card shadow-sm">
+                <img [src]="getImageUrl(book)" class="card-img-top" [alt]="book.title" 
+                     style="height: 200px; object-fit: cover; background-color: #f8f9fa;">
+                
+                <div class="card-body">
+                    <h5 class="card-title">{{ book.title }}</h5>
+                    <p class="card-text">{{ book.description }}</p>
+
+                    <!-- Shops -->
+                    <div *ngIf="book.shops && book.shops.length > 0">
+                        <p class="card-text"><strong>Available in:</strong></p>
+                        <ul class="list-unstyled">
+                            <li *ngFor="let shop of book.shops" class="small text-muted">
+                                {{ shop.name }} - {{ shop.address }}
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-between">
+                        <a [routerLink]="['/books', book.id]" class="btn btn-info btn-sm">View</a>
+                        <button type="button" class="btn btn-warning btn-sm" (click)="editBook(book)">Edit</button>
+                        <button type="button" class="btn btn-danger btn-sm" (click)="deleteBook(book)">Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- No Books Message -->
+        <div *ngIf="books.length === 0" class="col-12">
+            <div class="alert alert-info text-center">
+                <h5>No Books Found</h5>
+                <p>You haven't added any books yet.</p>
+                <a routerLink="/books/new" class="btn btn-primary">Add Your First Book</a>
+            </div>
+        </div>
     </div>
 </div>
