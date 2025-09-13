@@ -120,4 +120,18 @@ export class AuthService {
     this.currentUser = user || { email: 'user@example.com', name: 'User' };
     this.saveAuthState();
   }
+
+  /**
+   * Get current user ID
+   */
+  getCurrentUserId(): number | null {
+    return this.currentUser?.id || null;
+  }
+
+  /**
+   * Check if current user is admin
+   */
+  isAdmin(): boolean {
+    return this.currentUser?.role === 'ROLE_ADMIN' || false;
+  }
 }
