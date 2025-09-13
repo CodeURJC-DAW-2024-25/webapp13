@@ -10,6 +10,8 @@ import { AppComponent } from "./app.component";
 import { BookDetailComponent } from "./components/books/book-detail.component";
 import { BookListComponent } from "./components/books/book-list.component";
 import { BookFormComponent } from "./components/books/book-form.component";
+import { LoanListComponent } from "./components/loans/loan-list.component";
+import { LoanFormComponent } from "./components/loans/loan-form.component";
 import { LoginComponent } from "./components/login/login.component";
 
 @NgModule({
@@ -18,6 +20,8 @@ import { LoginComponent } from "./components/login/login.component";
     BookDetailComponent,
     BookListComponent,
     BookFormComponent,
+    LoanListComponent,
+    LoanFormComponent,
     LoginComponent,
   ],
   imports: [BrowserModule, FormsModule, HttpClientModule, RouterModule, routing, NgbModule],
