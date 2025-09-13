@@ -1,44 +1,69 @@
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Book Details</h2>
-    <div>
-        <a routerLink="/books" class="btn btn-secondary me-2">
-            <i class="fas fa-arrow-left"></i> Back to Books
-        </a>
-        <button class="btn btn-primary" disabled>
-            <i class="fas fa-edit"></i> Edit Book
-        </button>
-    </div>
-</div>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm">
+                <img src="/images/sample-book.jpg" class="card-img-top" alt="Sample Book Detail" style="height: 300px; object-fit: cover; background-color: #f8f9fa;">
+                
+                <div class="card-body">
+                    <h5 class="card-title">Sample Book Title</h5>
+                    <p class="card-text"><strong>Author:</strong> Sample Author</p>
+                    <p class="card-text"><strong>Genre:</strong> Fiction</p>
+                    <p class="card-text">This is a detailed view of the sample book. In Phase 3, actual book data will be loaded from the backend API based on the route parameter.</p>
 
-<div class="alert alert-info">
-    <h4>Phase 3 - Book Details</h4>
-    <p>This component will display detailed information about a specific book. Features to be implemented:</p>
-    <ul class="mb-0">
-        <li>Book information display</li>
-        <li>Availability status</li>
-        <li>Borrowing functionality</li>
-        <li>Edit and delete options</li>
-    </ul>
-</div>
+                    <!-- Loan status -->
+                    <p class="text-success"><strong>Available for Loan</strong></p>
 
-<div class="card">
-    <div class="card-body">
-        <div class="row">
-            <div class="col-md-3">
-                <div class="bg-light p-4 text-center rounded">
-                    <i class="fas fa-book fa-4x text-muted"></i>
-                    <p class="mt-2 text-muted">Book Cover</p>
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-between">
+                        <a routerLink="/books/edit/1" class="btn btn-warning btn-sm">Edit</a>
+                        <button type="button" class="btn btn-danger btn-sm" disabled>Delete</button>
+                    </div>
                 </div>
             </div>
-            <div class="col-md-9">
-                <h3 class="text-muted">Sample Book Title</h3>
-                <p class="text-muted">by Sample Author</p>
-                <hr>
-                <p><strong>ISBN:</strong> <span class="text-muted">Not available</span></p>
-                <p><strong>Status:</strong> <span class="badge bg-secondary">Coming Soon</span></p>
-                <p><strong>Description:</strong></p>
-                <p class="text-muted">Book description will be displayed here once the backend integration is complete.</p>
+        </div>
+        
+        <div class="col-md-8">
+            <h2>Book Details</h2>
+            
+            <div class="card">
+                <div class="card-body">
+                    <h4>Sample Book Title</h4>
+                    <p class="text-muted">by Sample Author</p>
+                    
+                    <hr>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Genre:</strong> Fiction</p>
+                            <p><strong>Status:</strong> <span class="badge bg-success">Available</span></p>
+                            <p><strong>Owner:</strong> Current User</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Created:</strong> Phase 3</p>
+                            <p><strong>Last Updated:</strong> Phase 3</p>
+                            <p><strong>Loans:</strong> 0</p>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <h5>Description</h5>
+                    <p>This is a comprehensive description of the sample book. In Phase 3, the actual book description will be displayed here, loaded from the backend database. The book detail page will show complete information about the selected book including its availability status, loan history, and management options.</p>
+                    
+                    <!-- Action buttons -->
+                    <div class="mt-3">
+                        <a routerLink="/books/edit/1" class="btn btn-warning me-2">Edit Book</a>
+                        <button type="button" class="btn btn-danger me-2" disabled>Delete Book</button>
+                        <a routerLink="/books" class="btn btn-secondary">Back to My Books</a>
+                    </div>
+                </div>
             </div>
         </div>
+    </div>
+    
+    <!-- Implementation note -->
+    <div class="alert alert-info mt-4">
+        <h5>Phase 3 Implementation</h5>
+        <p class="mb-0">This book detail page will be fully dynamic in Phase 3, showing real book data based on the route parameter and offering full CRUD functionality.</p>
     </div>
 </div>
