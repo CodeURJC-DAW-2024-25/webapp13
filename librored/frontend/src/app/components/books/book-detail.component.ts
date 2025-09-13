@@ -78,6 +78,6 @@ export class BookDetailComponent implements OnInit {
 
   getImageUrl(): string {
     if (!this.book) return '/images/no_image.png';
-    return this.book.image ? this.bookService.getImageUrl(this.book.id!) : '/images/no_image.png';
+    return this.book.hasCoverImage ? this.bookService.getImageUrl(this.book.id!) : '/images/no_image.png';
   }
 }
