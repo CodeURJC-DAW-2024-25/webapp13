@@ -21,8 +21,8 @@
                     <ul class="d-flex account_login-area">
                         <!-- Navigation links for authenticated users -->
                         <ng-container *ngIf="isLoggedIn()">
-                            <li><a routerLink="/books">My Books</a></li>
-                            <li><a routerLink="/books/new">Create Book</a></li>
+                            <li><a routerLink="/books">Books</a></li>
+                            <li><a routerLink="/loans">Loans</a></li>
                             <li><a href="#" (click)="onLogout()">Logout</a></li>
                         </ng-container>
                         
