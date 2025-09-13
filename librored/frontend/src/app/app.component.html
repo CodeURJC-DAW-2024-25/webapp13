@@ -19,11 +19,17 @@
                 </div>
                 <div class="col-md-6 col-12">
                     <ul class="d-flex account_login-area">
-                        <li><a routerLink="/books">My Books</a></li>
-                        <li><a routerLink="/books/new">Create Book</a></li>
-                        <li class="nav-item">
-                            <login></login>
-                        </li>
+                        <!-- Navigation links for authenticated users -->
+                        <ng-container *ngIf="isLoggedIn()">
+                            <li><a routerLink="/books">My Books</a></li>
+                            <li><a routerLink="/books/new">Create Book</a></li>
+                            <li><a href="#" (click)="onLogout()">Logout</a></li>
+                        </ng-container>
+                        
+                        <!-- Navigation links for non-authenticated users -->
+                        <ng-container *ngIf="!isLoggedIn()">
+                            <li><a routerLink="/login">Login</a></li>
+                        </ng-container>
                     </ul>
                 </div>
             </div>
