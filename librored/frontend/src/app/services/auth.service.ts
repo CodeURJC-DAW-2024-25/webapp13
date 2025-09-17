@@ -161,4 +161,29 @@ export class AuthService {
   public setUserInfo(userInfo: LoginUser): void {
     this.user = userInfo;
   }
+
+  /**
+   * Register a new user
+   * Uses the REST API endpoint /api/auth/register
+   */
+  public register(username: string, email: string, encodedPassword: string): Observable<AuthResponse> {
+    const registerData = {
+      username: username,
+      email: email,
+      encodedPassword: encodedPassword
+    };
+
+    return this.http.post<AuthResponse>(
+      BASE_URL + "/register",
+      registerData
+    ).pipe(
+      tap((response: AuthResponse) => {
+        console.log('Registration response:', response);
+      }),
+      catchError((error: HttpErrorResponse) => {
+        console.error('Registration failed:', error);
+        throw error;
+      })
+    );
+  }
 }
