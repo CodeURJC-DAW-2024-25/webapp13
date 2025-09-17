@@ -1,0 +1,89 @@
+<!-- Header with LibroRed branding and logout -->
+<header class="d-flex justify-content-between align-items-center p-3 bg-white border-bottom">
+  <div>
+    <h3 class="text-primary mb-0">
+      <span class="text-danger">Libro</span><span class="text-dark">Red</span>
+    </h3>
+  </div>
+  <div class="d-flex align-items-center gap-3">
+    <a routerLink="/admin" class="text-decoration-none text-muted">Admin Panel</a>
+    <button class="btn btn-primary" (click)="logout()">Log Out</button>
+  </div>
+</header>
+
+<!-- Main Admin Panel Content -->
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+
+      <!-- Admin Panel Title -->
+      <div class="text-center mb-5">
+        <h1 class="display-5 text-dark">Admin Panel</h1>
+      </div>
+
+      <!-- Admin Action Buttons Grid -->
+      <div class="row g-4 mb-4">
+        <!-- Manage Users -->
+        <div class="col-md-4">
+          <button
+            class="btn btn-primary btn-lg w-100 py-3"
+            (click)="navigateToUserManagement()">
+            <i class="bi bi-people-fill me-2"></i>
+            Manage Users
+          </button>
+        </div>
+
+        <!-- Manage Books -->
+        <div class="col-md-4">
+          <button
+            class="btn btn-primary btn-lg w-100 py-3"
+            (click)="navigateToBookManagement()">
+            <i class="bi bi-book-fill me-2"></i>
+            Manage Books
+          </button>
+        </div>
+
+        <!-- Manage Loans -->
+        <div class="col-md-4">
+          <button
+            class="btn btn-primary btn-lg w-100 py-3"
+            (click)="navigateToLoanManagement()">
+            <i class="bi bi-clipboard-check-fill me-2"></i>
+            Manage Loans
+          </button>
+        </div>
+      </div>
+
+      <!-- Download Report Button -->
+      <div class="row justify-content-center">
+        <div class="col-md-6">
+          <button
+            class="btn btn-info btn-lg w-100 py-3 mb-3"
+            (click)="downloadReport()">
+            <i class="bi bi-download me-2"></i>
+            Download Report (PDF)
+          </button>
+        </div>
+      </div>
+
+
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="bg-dark text-light mt-5">
+  <div class="container py-4">
+    <div class="row">
+      <div class="col-12 text-center">
+        <a routerLink="/" class="text-decoration-none text-light">HOME</a>
+      </div>
+    </div>
+    <div class="row mt-3">
+      <div class="col-md-4">
+        <p class="mb-1">LibroRed is a student project</p>
+        <p class="mb-0">2025 URJC-DAW-EQUIPO 13</p>
+      </div>
+    </div>
+  </div>
+</footer>
