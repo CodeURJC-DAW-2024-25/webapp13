@@ -126,6 +126,28 @@ public class UserRestController {
         return ResponseEntity.ok(Map.of("success", true, "message", "Password verified! You can now enter a new password."));
     }
 
+    // ==================== AUTHENTICATION ENDPOINT (/api/users/me) ====================
+
+    @Operation(summary = "Get current user", description = "Get currently authenticated user information")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User information retrieved"),
+            @ApiResponse(responseCode = "401", description = "User not authenticated")
+    })
+    @GetMapping("/api/users/me")
+    public ResponseEntity<UserDTO> getCurrentUser(
+            @AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails) {
+
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String email = userDetails.getUsername();
+        Optional<UserDTO> user = userService.getUserByEmailDTO(email);
+
+        return user.map(ResponseEntity::ok)
+                   .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
+    }
+
     // ==================== REST API ENDPOINTS (/api/v1/users) ====================
 
     @Operation(summary = "Get all users", description = "Retrieve a paginated list of all users")
