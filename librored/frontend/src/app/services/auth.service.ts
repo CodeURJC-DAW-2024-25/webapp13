@@ -1,137 +1,189 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
+import { catchError, tap } from 'rxjs/operators';
+import { of } from 'rxjs';
+
+const BASE_URL = "/api/auth";
+
+interface AuthResponse {
+  status: 'SUCCESS' | 'FAILURE';
+  message: string;
+  error?: string;
+}
+
+interface LoginUser {
+  username: string;
+  role?: string; // We'll try to get this, but might not have it initially
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly API_URL = '/api/auth';
-  private loggedIn = false;
-  private currentUser: any = null;
-  private redirectUrl: string = '/books'; // Default redirect after login
+  public logged: boolean = false;
+  public user: LoginUser | undefined;
+
+  // BehaviorSubject to notify components about auth state changes
+  private authStateSubject = new BehaviorSubject<boolean>(false);
+  public authState$ = this.authStateSubject.asObservable();
 
   constructor(
     private http: HttpClient,
     private router: Router
   ) {
-    // Check for stored authentication state on service initialization
-    this.loadAuthState();
+    // Don't try to check if logged in on startup
+    // Instead, react to API responses
   }
 
   /**
-   * Login with email and password
+   * Login with username and password
+   * Works with your existing /api/auth/login endpoint
    */
-  login(email: string, password: string): Observable<any> {
-    const loginData = { username: email, password: password };
-    return this.http.post(`${this.API_URL}/login`, loginData, { withCredentials: true });
+  public logIn(username: string, password: string): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(
+      BASE_URL + "/login",
+      { username: username, password: password },
+      { withCredentials: true }
+    ).pipe(
+      tap((response: AuthResponse) => {
+        if (response.status === 'SUCCESS') {
+          // Set user as logged in
+          this.logged = true;
+          this.user = {
+            username: username
+            // We don't know the role yet, but we can get it later if needed
+          };
+          this.authStateSubject.next(true);
+        }
+      }),
+      catchError((error: HttpErrorResponse) => {
+        this.logged = false;
+        this.user = undefined;
+        this.authStateSubject.next(false);
+        throw error;
+      })
+    );
   }
 
   /**
    * Logout current user
+   * Works with your existing /api/auth/logout endpoint
    */
-  logout(): Observable<any> {
-    return this.http.post(`${this.API_URL}/logout`, {}, { withCredentials: true });
+  public logOut(): void {
+    this.http.post<AuthResponse>(BASE_URL + "/logout", {}, { withCredentials: true })
+      .subscribe({
+        next: (response) => {
+          console.log("LOGOUT: Successfully");
+        },
+        error: (error) => {
+          console.error("Logout error:", error);
+        },
+        complete: () => {
+          // Always clear state regardless of server response
+          this.logged = false;
+          this.user = undefined;
+          this.authStateSubject.next(false);
+          this.router.navigate(['/']);
+        }
+      });
   }
 
   /**
    * Check if user is currently logged in
    */
-  isLoggedIn(): boolean {
-    return this.loggedIn;
+  public isLogged(): boolean {
+    return this.logged;
   }
 
   /**
-   * Get current user information
+   * Check if user is currently logged in (compatibility method)
    */
-  getCurrentUser(): any {
-    return this.currentUser;
+  public isLoggedIn(): boolean {
+    return this.logged;
   }
 
   /**
-   * Clear login status (called after logout)
+   * Check if current user is admin
+   * Note: This might not work initially until we get role info
    */
-  setLoggedOut(): void {
-    this.loggedIn = false;
-    this.currentUser = null;
-    this.clearAuthState();
-    this.router.navigate(['/']);
+  public isAdmin(): boolean {
+    return this.user && this.user.role === "ROLE_ADMIN";
+  }
+
+  /**
+   * Get current user
+   */
+  currentUser(): LoginUser | undefined {
+    return this.user;
+  }
+
+  /**
+   * Handle 401 errors from other services
+   * Call this when any API returns 401 to mark user as logged out
+   */
+  public handleUnauthorized(): void {
+    this.logged = false;
+    this.user = undefined;
+    this.authStateSubject.next(false);
+    this.router.navigate(['/login']);
   }
 
   /**
    * Set the URL to redirect to after successful login
    */
   setRedirectUrl(url: string): void {
-    this.redirectUrl = url;
-  }
-
-  /**
-   * Get the URL to redirect to after login
-   */
-  getRedirectUrl(): string {
-    return this.redirectUrl;
+    localStorage.setItem('redirectUrl', url);
   }
 
   /**
    * Navigate to the stored redirect URL after successful login
    */
   redirectAfterLogin(): void {
-    const url = this.redirectUrl;
-    this.redirectUrl = '/books'; // Reset to default
-    this.router.navigate([url]);
+    const redirectUrl = localStorage.getItem('redirectUrl') || '/books';
+    localStorage.removeItem('redirectUrl');
+    this.router.navigate([redirectUrl]);
   }
 
   /**
-   * Load authentication state from localStorage (for persistence across page refreshes)
-   */
-  private loadAuthState(): void {
-    const stored = localStorage.getItem('authState');
-    if (stored) {
-      const authState = JSON.parse(stored);
-      this.loggedIn = authState.loggedIn;
-      this.currentUser = authState.currentUser;
-    }
-  }
-
-  /**
-   * Save authentication state to localStorage
-   */
-  private saveAuthState(): void {
-    const authState = {
-      loggedIn: this.loggedIn,
-      currentUser: this.currentUser
-    };
-    localStorage.setItem('authState', JSON.stringify(authState));
-  }
-
-  /**
-   * Clear authentication state from localStorage
-   */
-  private clearAuthState(): void {
-    localStorage.removeItem('authState');
-  }
-
-  /**
-   * Enhanced setLoggedIn with persistence
-   */
-  setLoggedIn(user: any = null): void {
-    this.loggedIn = true;
-    this.currentUser = user || { email: 'user@example.com', name: 'User' };
-    this.saveAuthState();
-  }
-
-  /**
-   * Get current user ID
+   * Get current user ID (might not be available without additional API call)
    */
   getCurrentUserId(): number | null {
-    return this.currentUser?.id || null;
+    // We don't have user ID without calling another API
+    // This would need to be fetched when needed
+    return null;
   }
 
   /**
-   * Check if current user is admin
+   * Set user info (can be called by other services that fetch user details)
    */
-  isAdmin(): boolean {
-    return this.currentUser?.role === 'ROLE_ADMIN' || false;
+  public setUserInfo(userInfo: LoginUser): void {
+    this.user = userInfo;
+  }
+
+  /**
+   * Register a new user
+   * Uses the REST API endpoint /api/auth/register
+   */
+  public register(username: string, email: string, encodedPassword: string): Observable<AuthResponse> {
+    const registerData = {
+      username: username,
+      email: email,
+      encodedPassword: encodedPassword
+    };
+
+    return this.http.post<AuthResponse>(
+      BASE_URL + "/register",
+      registerData
+    ).pipe(
+      tap((response: AuthResponse) => {
+        console.log('Registration response:', response);
+      }),
+      catchError((error: HttpErrorResponse) => {
+        console.error('Registration failed:', error);
+        throw error;
+      })
+    );
   }
 }

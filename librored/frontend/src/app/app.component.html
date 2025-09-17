@@ -20,15 +20,21 @@
                 <div class="col-md-6 col-12">
                     <ul class="d-flex account_login-area">
                         <!-- Navigation links for authenticated users -->
-                        <ng-container *ngIf="isLoggedIn()">
+                        <ng-container *ngIf="authService.isLogged()">
                             <li><a routerLink="/books">Books</a></li>
                             <li><a routerLink="/loans">Loans</a></li>
-                            <li><a href="#" (click)="onLogout()">Logout</a></li>
+                            <!-- Show admin-only links -->
+                            <li *ngIf="authService.isAdmin()"><a routerLink="/admin">Admin</a></li>
+                            <li>
+                                <span class="text-white me-2">Welcome, {{authService.user?.username}}!</span>
+                                <a href="#" (click)="authService.logOut()">Logout</a>
+                            </li>
                         </ng-container>
-                        
+
                         <!-- Navigation links for non-authenticated users -->
-                        <ng-container *ngIf="!isLoggedIn()">
+                        <ng-container *ngIf="!authService.isLogged()">
                             <li><a routerLink="/login">Login</a></li>
+                            <li><a routerLink="/register">Register</a></li>
                         </ng-container>
                     </ul>
                 </div>

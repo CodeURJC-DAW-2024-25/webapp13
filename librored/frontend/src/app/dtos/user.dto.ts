@@ -2,5 +2,5 @@ export interface UserDTO {
   id?: number;
   username: string;
   email: string;
-  roles: string[];
+  role: string; // Single role: "ROLE_USER" or "ROLE_ADMIN"
 }
