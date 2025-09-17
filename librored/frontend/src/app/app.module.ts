@@ -15,6 +15,7 @@ import { LoanListComponent } from "./components/loans/loan-list.component";
 import { LoanFormComponent } from "./components/loans/loan-form.component";
 import { LoginComponent } from "./components/login/login.component";
 import { RegisterComponent } from "./components/register/register.component";
+import { AdminUsersComponent } from "./components/admin/admin-users.component";
 import { AuthInterceptor } from "./interceptors/auth.interceptor";
 
 @NgModule({
@@ -28,6 +29,7 @@ import { AuthInterceptor } from "./interceptors/auth.interceptor";
     LoanFormComponent,
     LoginComponent,
     RegisterComponent,
+    AdminUsersComponent,
   ],
   imports: [BrowserModule, FormsModule, HttpClientModule, RouterModule, routing, NgbModule],
   providers: [
