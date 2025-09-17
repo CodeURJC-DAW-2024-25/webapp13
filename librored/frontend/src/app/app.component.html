@@ -34,6 +34,7 @@
                         <!-- Navigation links for non-authenticated users -->
                         <ng-container *ngIf="!authService.isLogged()">
                             <li><a routerLink="/login">Login</a></li>
+                            <li><a routerLink="/register">Register</a></li>
                         </ng-container>
                     </ul>
                 </div>
