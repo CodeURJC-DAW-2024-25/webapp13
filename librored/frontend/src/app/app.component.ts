@@ -8,28 +8,26 @@ import { AuthService } from './services/auth.service';
 export class AppComponent {
   public isCollapsed = true;
 
-  constructor(private authService: AuthService) {}
+  constructor(public authService: AuthService) {}
 
   /**
    * Check if user is logged in
    */
-  isLoggedIn(): boolean {
-    return this.authService.isLoggedIn();
+  isLogged(): boolean {
+    return this.authService.isLogged();
   }
 
   /**
-   * Handle logout from main navigation
+   * Check if current user is admin
    */
-  onLogout(): void {
-    this.authService.logout().subscribe({
-      next: () => {
-        console.log('Logout successful');
-        this.authService.setLoggedOut();
-      },
-      error: (error) => {
-        console.error('Logout error:', error);
-        this.authService.setLoggedOut(); // Clear state even if server logout fails
-      }
-    });
+  isAdmin(): boolean {
+    return this.authService.isAdmin();
+  }
+
+  /**
+   * Get current user
+   */
+  getCurrentUser() {
+    return this.authService.currentUser();
   }
 }
