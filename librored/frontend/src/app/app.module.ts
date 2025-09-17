@@ -16,6 +16,7 @@ import { LoanFormComponent } from "./components/loans/loan-form.component";
 import { LoginComponent } from "./components/login/login.component";
 import { RegisterComponent } from "./components/register/register.component";
 import { AdminUsersComponent } from "./components/admin/admin-users.component";
+import { AdminDashboardComponent } from "./components/admin/admin-dashboard.component";
 import { AuthInterceptor } from "./interceptors/auth.interceptor";
 
 @NgModule({
@@ -30,14 +31,11 @@ import { AuthInterceptor } from "./interceptors/auth.interceptor";
     LoginComponent,
     RegisterComponent,
     AdminUsersComponent,
+    AdminDashboardComponent,
   ],
   imports: [BrowserModule, FormsModule, HttpClientModule, RouterModule, routing, NgbModule],
   providers: [
-    {
-      provide: HTTP_INTERCEPTORS,
-      useClass: AuthInterceptor,
-      multi: true
-    }
+    // NO INTERCEPTORS - Let backend handle everything
   ],
   bootstrap: [AppComponent],
 })

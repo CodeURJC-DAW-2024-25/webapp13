@@ -22,7 +22,7 @@ export class BookListComponent implements OnInit {
   ngOnInit(): void {
     // Check authentication
     if (!this.authService.isLoggedIn()) {
-      this.router.navigate(['/login']);
+      // NO AUTH CHECK
       return;
     }
     
