@@ -8,6 +8,8 @@ import { LoanListComponent } from "./components/loans/loan-list.component";
 import { LoanFormComponent } from "./components/loans/loan-form.component";
 import { LoginComponent } from "./components/login/login.component";
 import { RegisterComponent } from "./components/register/register.component";
+import { AdminUsersComponent } from "./components/admin/admin-users.component";
+import { AdminGuard } from "./guards/admin.guard";
 
 const appRoutes: Routes = [
   // Public routes
@@ -25,6 +27,9 @@ const appRoutes: Routes = [
   { path: "loans", component: LoanListComponent },
   { path: "loans/create", component: LoanFormComponent },
   { path: "loans/edit/:id", component: LoanFormComponent },
+
+  // Admin routes (protected by AdminGuard)
+  { path: "admin/users", component: AdminUsersComponent, canActivate: [AdminGuard] },
 
   // Catch all route
   { path: "**", redirectTo: "" }

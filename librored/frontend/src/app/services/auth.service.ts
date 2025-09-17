@@ -15,7 +15,9 @@ interface AuthResponse {
 
 interface LoginUser {
   username: string;
-  role?: string; // We'll try to get this, but might not have it initially
+  email: string;
+  role?: string;
+  id?: number;
 }
 
 @Injectable({
@@ -49,13 +51,16 @@ export class AuthService {
     ).pipe(
       tap((response: AuthResponse) => {
         if (response.status === 'SUCCESS') {
-          // Set user as logged in
+          // Set user as logged in with basic info
           this.logged = true;
           this.user = {
-            username: username
-            // We don't know the role yet, but we can get it later if needed
+            username: username,
+            email: username // Login uses email as username
           };
           this.authStateSubject.next(true);
+
+          // Fetch full user details including role
+          this.fetchUserDetails(username);
         }
       }),
       catchError((error: HttpErrorResponse) => {
@@ -160,6 +165,26 @@ export class AuthService {
    */
   public setUserInfo(userInfo: LoginUser): void {
     this.user = userInfo;
+  }
+
+  /**
+   * Fetch full user details including role from backend
+   */
+  private fetchUserDetails(email: string): void {
+    this.http.get<any>(`/api/v1/users/email/${email}`, { withCredentials: true })
+      .subscribe({
+        next: (userDetails) => {
+          if (this.user) {
+            this.user.id = userDetails.id;
+            this.user.username = userDetails.username;
+            this.user.role = userDetails.role;
+          }
+        },
+        error: (error) => {
+          console.warn('Could not fetch user details:', error);
+          // Don't fail login if we can't get details
+        }
+      });
   }
 
   /**

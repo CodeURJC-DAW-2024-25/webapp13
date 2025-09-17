@@ -24,7 +24,7 @@
                             <li><a routerLink="/books">Books</a></li>
                             <li><a routerLink="/loans">Loans</a></li>
                             <!-- Show admin-only links -->
-                            <li *ngIf="authService.isAdmin()"><a routerLink="/admin">Admin</a></li>
+                            <li *ngIf="authService.isAdmin()"><a routerLink="/admin/users">User Management</a></li>
                             <li>
                                 <span class="text-white me-2">Welcome, {{authService.user?.username}}!</span>
                                 <a href="#" (click)="authService.logOut()">Logout</a>
