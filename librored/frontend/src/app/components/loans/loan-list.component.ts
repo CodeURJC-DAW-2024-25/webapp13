@@ -17,20 +17,11 @@ export class LoanListComponent implements OnInit {
 
   constructor(
     private loanService: LoanService,
-    private authService: AuthService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
-    // Check authentication
-    if (!this.authService.isLoggedIn()) {
-      this.router.navigate(['/login']);
-      return;
-    }
-    
-    this.currentUserId = this.authService.getCurrentUserId();
-    this.isAdmin = this.authService.isAdmin();
-    
+    // NO AUTH CHECK - Let backend handle it
     this.loadLoans();
   }
 

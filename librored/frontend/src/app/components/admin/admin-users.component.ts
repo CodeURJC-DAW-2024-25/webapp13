@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AdminService, UserDTO, PaginatedUsersResponse } from '../../services/admin.service';
 import { AuthService } from '../../services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-admin-users',
@@ -30,7 +31,8 @@ export class AdminUsersComponent implements OnInit {
 
   constructor(
     private adminService: AdminService,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -140,7 +142,9 @@ export class AdminUsersComponent implements OnInit {
       next: (response) => {
         if (response.selfDeletion) {
           // Admin deleted themselves - handle logout
-          this.authService.handleUnauthorized();
+          this.authService.logged = false;
+          this.authService.user = undefined;
+          // NO AUTH CHECK
         } else {
           this.loadUsers();
           this.closeModals();

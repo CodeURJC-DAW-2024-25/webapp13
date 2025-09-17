@@ -1,6 +1,7 @@
 import { Component, TemplateRef, ViewChild } from "@angular/core";
 import { AuthService } from "../../services/auth.service";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
+import { Router } from "@angular/router";
 
 @Component({
   selector: "login",
@@ -12,7 +13,8 @@ export class LoginComponent {
 
   constructor(
     public authService: AuthService,
-    private modalService: NgbModal
+    private modalService: NgbModal,
+    private router: Router
   ) {}
 
   public logIn(user: string, pass: string) {
@@ -20,7 +22,7 @@ export class LoginComponent {
       next: (response) => {
         console.log("Login successful:", response);
         // Redirect to intended page
-        this.authService.redirectAfterLogin();
+        this.router.navigate(['/books']);
       },
       error: (error) => {
         console.error("Login failed:", error);

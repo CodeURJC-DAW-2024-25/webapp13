@@ -40,24 +40,16 @@ export class LoanFormComponent implements OnInit {
     private router: Router,
     private loanService: LoanService,
     private bookService: BookService,
-    private authService: AuthService,
     private userService: UserService
   ) {}
 
   ngOnInit(): void {
-    // Check authentication
-    if (!this.authService.isLoggedIn()) {
-      this.router.navigate(['/login']);
-      return;
-    }
+    // NO AUTH CHECK - Let backend handle it
+    this.initializeComponent();
+  }
 
-    this.currentUserId = this.authService.getCurrentUserId();
-    this.isAdmin = this.authService.isAdmin();
-    
-    // Set default lender for non-admin users
-    if (!this.isAdmin && this.currentUserId) {
-      this.loan.lenderId = this.currentUserId;
-    }
+  private initializeComponent(): void {
+    // Skip user/admin checks - let backend handle permissions
 
     // Check if editing existing loan
     const id = Number(this.route.snapshot.paramMap.get('id'));
@@ -71,10 +63,7 @@ export class LoanFormComponent implements OnInit {
 
   initializeForCreate(): void {
     this.loadUsers();
-    if (!this.isAdmin && this.currentUserId) {
-      // For regular users, load their books
-      this.loadBooksByLender(this.currentUserId);
-    }
+    // Load all books - let backend handle permissions
     
     // Set default start date to today
     const today = new Date();
