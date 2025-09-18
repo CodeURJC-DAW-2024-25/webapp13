@@ -11,6 +11,8 @@ interface AuthResponse {
   status: 'SUCCESS' | 'FAILURE';
   message: string;
   error?: string;
+  accessToken?: string;
+  refreshToken?: string;
 }
 
 interface LoginUser {
@@ -31,38 +33,70 @@ export class AuthService {
   private authStateSubject = new BehaviorSubject<boolean>(false);
   public authState$ = this.authStateSubject.asObservable();
 
+  private readonly ACCESS_TOKEN_KEY = 'access_token';
+  private readonly REFRESH_TOKEN_KEY = 'refresh_token';
+  private readonly USER_KEY = 'current_user';
+
   constructor(
     private http: HttpClient,
     private router: Router
   ) {
-    console.log('🚀 AuthService constructor - NO AUTO AUTH CHECK');
-    // NO AUTO AUTH CHECK - Call manually when needed
+    console.log('🚀 AuthService constructor - Checking JWT token');
+    this.initializeFromStorage();
   }
 
   /**
-   * Login with username and password (professor's pattern)
+   * Initialize auth state from localStorage
    */
-  public logIn(user: string, pass: string) {
-    return this.http.post(
+  private initializeFromStorage(): void {
+    const accessToken = localStorage.getItem(this.ACCESS_TOKEN_KEY);
+    const userStr = localStorage.getItem(this.USER_KEY);
+
+    if (accessToken && userStr) {
+      try {
+        this.user = JSON.parse(userStr);
+        this.logged = true;
+        this.authStateSubject.next(true);
+        console.log('🔐 User restored from localStorage:', this.user);
+      } catch (error) {
+        console.error('Error parsing user from localStorage:', error);
+        this.clearTokens();
+      }
+    }
+  }
+
+  /**
+   * Login with username and password (JWT version)
+   */
+  public logIn(user: string, pass: string): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(
       BASE_URL + "/login",
-      { username: user, password: pass },
-      { withCredentials: true }
+      { username: user, password: pass }
+    ).pipe(
+      tap((response: AuthResponse) => {
+        if (response.status === 'SUCCESS' && response.accessToken) {
+          this.storeTokens(response.accessToken, response.refreshToken || '');
+          this.setUserLoggedIn(user);
+        }
+      }),
+      catchError(this.handleError)
     );
   }
 
   /**
-   * Logout current user (professor's pattern)
+   * Logout current user (JWT version)
    */
-  public logOut() {
-    return this.http
-      .post(BASE_URL + "/logout", {}, { withCredentials: true })
-      .subscribe((_) => {
-        console.log("LOGOUT: Successfully");
-        this.logged = false;
-        this.user = undefined;
-        this.authStateSubject.next(false);
-        this.router.navigate(['/']);
-      });
+  public logOut(): void {
+    // Clear tokens and user state
+    this.clearTokens();
+
+    // Optional: Call backend logout endpoint if needed
+    this.http.post(BASE_URL + "/logout", {}).subscribe({
+      next: (_) => console.log("Backend logout successful"),
+      error: (error) => console.warn("Backend logout failed:", error)
+    });
+
+    this.router.navigate(['/']);
   }
 
   /**
@@ -91,6 +125,121 @@ export class AuthService {
    */
   currentUser(): LoginUser | undefined {
     return this.user;
+  }
+
+  /**
+   * Store JWT tokens in localStorage
+   */
+  private storeTokens(accessToken: string, refreshToken: string): void {
+    localStorage.setItem(this.ACCESS_TOKEN_KEY, accessToken);
+    if (refreshToken) {
+      localStorage.setItem(this.REFRESH_TOKEN_KEY, refreshToken);
+    }
+  }
+
+  /**
+   * Get access token from localStorage
+   */
+  public getAccessToken(): string | null {
+    return localStorage.getItem(this.ACCESS_TOKEN_KEY);
+  }
+
+  /**
+   * Get refresh token from localStorage
+   */
+  public getRefreshToken(): string | null {
+    return localStorage.getItem(this.REFRESH_TOKEN_KEY);
+  }
+
+  /**
+   * Clear all tokens and user data
+   */
+  private clearTokens(): void {
+    localStorage.removeItem(this.ACCESS_TOKEN_KEY);
+    localStorage.removeItem(this.REFRESH_TOKEN_KEY);
+    localStorage.removeItem(this.USER_KEY);
+    this.logged = false;
+    this.user = undefined;
+    this.authStateSubject.next(false);
+    console.log("🔐 Tokens and user data cleared");
+  }
+
+  /**
+   * Set user as logged in and store user data
+   */
+  private setUserLoggedIn(username: string): void {
+    // Parse JWT payload to get user info (basic implementation)
+    const token = this.getAccessToken();
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        this.user = {
+          username: payload.sub || username,
+          email: payload.email || '',
+          roles: payload.roles || []
+        };
+      } catch (error) {
+        // Fallback if token parsing fails
+        this.user = {
+          username: username,
+          email: '',
+          roles: []
+        };
+      }
+
+      localStorage.setItem(this.USER_KEY, JSON.stringify(this.user));
+      this.logged = true;
+      this.authStateSubject.next(true);
+      console.log("🔐 User logged in:", this.user);
+    }
+  }
+
+  /**
+   * Refresh access token using refresh token
+   */
+  public refreshToken(): Observable<AuthResponse> {
+    const refreshToken = this.getRefreshToken();
+    if (!refreshToken) {
+      this.clearTokens();
+      return of({ status: 'FAILURE' as const, message: 'No refresh token available' } as AuthResponse);
+    }
+
+    return this.http.post<AuthResponse>(
+      BASE_URL + "/refresh",
+      { refreshToken }
+    ).pipe(
+      tap((response: AuthResponse) => {
+        if (response.status === 'SUCCESS' && response.accessToken) {
+          localStorage.setItem(this.ACCESS_TOKEN_KEY, response.accessToken);
+          console.log("🔐 Access token refreshed");
+        }
+      }),
+      catchError((error) => {
+        console.error('Token refresh failed:', error);
+        this.clearTokens();
+        return of({ status: 'FAILURE' as const, message: 'Token refresh failed' } as AuthResponse);
+      })
+    );
+  }
+
+  /**
+   * Clear all authentication data (public method for debugging)
+   */
+  public clearAllAuthData(): void {
+    this.clearTokens();
+    console.log('🔐 All authentication data cleared');
+  }
+
+  /**
+   * Error handler for HTTP requests
+   */
+  private handleError = (error: HttpErrorResponse): Observable<AuthResponse> => {
+    console.error('Auth service error:', error);
+    return of({
+      status: 'FAILURE',
+      message: error.error?.message || 'Authentication failed',
+      error: error.message
+    });
   }
 
 }

@@ -35,7 +35,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
       throws ServletException, IOException {
 
 		try {
-			var claims = jwtTokenProvider.validateToken(request, true);
+			// Priority: Authorization header first (for Angular SPA), then cookies (for traditional web)
+			boolean fromCookie = !jwtTokenProvider.hasAuthorizationHeader(request);
+			var claims = jwtTokenProvider.validateToken(request, fromCookie);
 			var userDetails = userDetailsService.loadUserByUsername(claims.getSubject());
 
 			UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
@@ -45,7 +47,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 		} catch (Exception ex) {
 			//Avoid logging when no token is found
-			if(!ex.getMessage().equals("No access token cookie found in request")) {
+			if(!ex.getMessage().equals("No access token cookie found in request") &&
+			   !ex.getMessage().equals("Missing Authorization header")) {
 				log.error("Exception processing JWT Token: ", ex);
 			}			
 		}

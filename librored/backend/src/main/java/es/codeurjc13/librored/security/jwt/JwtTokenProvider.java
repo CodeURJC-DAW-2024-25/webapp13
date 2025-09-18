@@ -32,6 +32,11 @@ public class JwtTokenProvider {
 		return bearerToken.substring(7);
 	}
 
+	public boolean hasAuthorizationHeader(HttpServletRequest req) {
+		String bearerToken = req.getHeader(HttpHeaders.AUTHORIZATION);
+		return bearerToken != null && bearerToken.startsWith("Bearer ");
+	}
+
 	private String tokenStringFromCookies(HttpServletRequest request) {
 		var cookies = request.getCookies();
 		if (cookies == null) {

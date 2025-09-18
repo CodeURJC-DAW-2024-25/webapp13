@@ -35,7 +35,11 @@ import { AuthInterceptor } from "./interceptors/auth.interceptor";
   ],
   imports: [BrowserModule, FormsModule, HttpClientModule, RouterModule, routing, NgbModule],
   providers: [
-    // NO INTERCEPTORS - Let backend handle everything
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true
+    }
   ],
   bootstrap: [AppComponent],
 })

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AdminService } from '../../services/admin.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -10,7 +11,8 @@ export class AdminDashboardComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private adminService: AdminService
+    private adminService: AdminService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -54,7 +56,6 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   logout(): void {
-    // Redirect to MVC logout
-    window.location.href = '/logout';
+    this.authService.logOut();
   }
 }

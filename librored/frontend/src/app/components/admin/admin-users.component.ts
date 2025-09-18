@@ -46,8 +46,8 @@ export class AdminUsersComponent implements OnInit {
     this.adminService.getAllUsers(this.currentPage, this.pageSize).subscribe({
       next: (response: PaginatedUsersResponse) => {
         this.users = response.content;
-        this.totalPages = response.page.totalPages;
-        this.totalElements = response.page.totalElements;
+        this.totalPages = response.totalPages;
+        this.totalElements = response.totalItems;
         this.loading = false;
       },
       error: (error) => {

@@ -20,12 +20,7 @@ export class BookListComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Check authentication
-    if (!this.authService.isLoggedIn()) {
-      // NO AUTH CHECK
-      return;
-    }
-    
+    // Load books for all users (like MVC index page)
     this.loadBooks();
   }
 

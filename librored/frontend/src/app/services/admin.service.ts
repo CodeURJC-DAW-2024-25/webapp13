@@ -17,12 +17,13 @@ export interface UserBasicDTO {
 
 export interface PaginatedUsersResponse {
   content: UserDTO[];
-  page: {
-    size: number;
-    number: number;
-    totalElements: number;
-    totalPages: number;
-  };
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  hasNext: boolean;
+  hasPrevious: boolean;
+  isFirst: boolean;
+  isLast: boolean;
 }
 
 @Injectable({
