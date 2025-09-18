@@ -18,25 +18,27 @@
                     </ul>
                 </div>
                 <div class="col-md-6 col-12">
-                    <ul class="d-flex account_login-area">
+                    <div class="d-flex justify-content-end account_login-area pe-5">
                         <!-- Navigation links for authenticated users -->
                         <ng-container *ngIf="authService.isLogged()">
-                            <li><a routerLink="/books">Books</a></li>
-                            <li><a routerLink="/loans">Loans</a></li>
+                            <a routerLink="/books" class="btn btn-outline-danger loadmore-btn me-3">Books</a>
+                            <a routerLink="/loans" class="btn btn-outline-danger loadmore-btn me-3">Loans</a>
                             <!-- Show admin-only links -->
-                            <li *ngIf="authService.isAdmin()"><a routerLink="/admin/users">User Management</a></li>
-                            <li>
-                                <span class="text-white me-2">Welcome, {{authService.user?.username}}!</span>
-                                <a href="#" (click)="authService.logOut()">Logout</a>
-                            </li>
+                            <a *ngIf="authService.isAdmin()" routerLink="/admin/users" class="btn btn-outline-danger loadmore-btn me-3">User Management</a>
+                            <div class="d-flex align-items-center">
+                                <span class="text-white me-3">Welcome, {{authService.user?.username}}!</span>
+                                <a href="#" (click)="authService.logOut()" class="btn btn-outline-danger loadmore-btn">Logout</a>
+                            </div>
                         </ng-container>
 
                         <!-- Navigation links for non-authenticated users -->
                         <ng-container *ngIf="!authService.isLogged()">
-                            <li><a routerLink="/login">Login</a></li>
-                            <li><a routerLink="/register">Register</a></li>
+                            <div class="action-buttons mt-3">
+                                <a routerLink="/login" class="btn btn-primary me-3">Login</a>
+                                <a routerLink="/register" class="btn btn-outline-primary">Register</a>
+                            </div>
                         </ng-container>
-                    </ul>
+                    </div>
                 </div>
             </div>
         </div>
@@ -56,22 +58,20 @@
                 <div class="row">
                     <div class="col-lg-12 col-12">
                         <div class="footer-top-text text-center">
-                            <ul class="d-flex">
-                                <li><a routerLink="/">HOME</a></li>
-                            </ul>
+                            <a routerLink="/" class="btn btn-primary">HOME</a>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="footer-bottom">
+    <div class="footer-bottom bg-dark">
         <div class="container">
             <div class="row">
                 <div class="col-lg-4 col-md-8 col-sm-12">
-                    <div class="footer-content">
-                        <p>LibroRed is a student project</p>
-                        <p>2025 URJC-DAW-EQUIPO 13</p>
+                    <div class="footer-content p-4">
+                        <p class="text-white">LibroRed is a student project</p>
+                        <p class="text-white">2025 URJC-DAW-EQUIPO 13</p>
                     </div>
                 </div>
             </div>
