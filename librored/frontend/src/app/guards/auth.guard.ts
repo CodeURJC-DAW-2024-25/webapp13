@@ -17,15 +17,13 @@ export class AuthGuard implements CanActivate {
     state: RouterStateSnapshot
   ): boolean {
 
-    if (this.authService.isLogged()) {
-      return true; // Allow navigation to protected route
-    } else {
-      // Store the attempted URL for redirecting after login
-      this.authService.setRedirectUrl(state.url);
+    const accessToken = this.authService.getAccessToken();
 
-      // Redirect to login page
+    if (accessToken && this.authService.isLogged()) {
+      return true;
+    } else {
       this.router.navigate(['/login']);
-      return false; // Block navigation to protected route
+      return false;
     }
   }
 }

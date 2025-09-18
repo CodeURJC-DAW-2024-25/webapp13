@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { BookDTO } from '../dtos/book.dto';
 
 @Injectable({
@@ -9,13 +10,22 @@ import { BookDTO } from '../dtos/book.dto';
 export class BookService {
   private readonly API_URL = '/api/books';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {} // Updated for JWT
 
   /**
    * Get all books
    */
   getBooks(): Observable<BookDTO[]> {
-    return this.http.get<BookDTO[]>(this.API_URL, { withCredentials: true });
+    return this.http.get<any>(this.API_URL, { withCredentials: true }).pipe(
+      map((response: any) => {
+        // Handle paginated response - extract the content array
+        if (response && response.content && Array.isArray(response.content)) {
+          return response.content;
+        }
+        // Fallback for direct array response
+        return Array.isArray(response) ? response : [];
+      })
+    );
   }
 
   /**
