@@ -62,13 +62,13 @@ export class BookService {
   uploadImage(id: number, imageFile: File): Observable<any> {
     const formData = new FormData();
     formData.append('imageFile', imageFile);
-    return this.http.post(`${this.API_URL}/${id}/image`, formData, { withCredentials: true });
+    return this.http.post(`${this.API_URL}/${id}/cover`, formData, { withCredentials: true });
   }
 
   /**
    * Get book image URL
    */
   getImageUrl(id: number): string {
-    return `${this.API_URL}/${id}/image`;
+    return `${this.API_URL}/${id}/cover`;
   }
 }
