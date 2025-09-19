@@ -1,23 +1,33 @@
-<div *ngIf="!authService.isLogged()" class="d-flex align-items-center p-2">
-    <form (ngSubmit)="logIn(user.value, password.value)">
-        <div class="d-flex">
-            <input #user type="email" class="form-control me-3" name="email" placeholder="Email">
-            <input #password type="password" class="form-control me-3" name="password" placeholder="Password">
-            <button type="submit" class="btn btn-primary btn-nowrap w-50">
-                Log In
-            </button>
-        </div>
-    </form>
-</div>
+<!-- Full page login form -->
+<div class="login-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-4">
+                <div class="login-form">
+                    <form (ngSubmit)="logIn(user.value, password.value)">
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email:</label>
+                            <input #user id="email" type="email" class="form-control" name="email" placeholder="Email" required>
+                        </div>
 
-<ul *ngIf="authService.isLogged()" class="navbar-nav d-flex align-items-center">
-    <li class="nav-item">
-        <span class="navbar-text fs-3 text-white mx-3">{{authService.user?.username}}</span>
-    </li>
-    <li class="nav-item">
-        <button (click)="logOut()" class="btn btn-primary btn-nowrap" type="submit">Log Out</button>
-    </li>
-</ul>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password:</label>
+                            <input #password id="password" type="password" class="form-control" name="password" placeholder="Password" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-login w-100 mb-3">
+                            LOGIN
+                        </button>
+
+                        <div class="text-center">
+                            <a routerLink="/register" class="register-link">Or Creat an Account</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Login Error Modal -->
 <ng-template #loginErrorModal let-modal>

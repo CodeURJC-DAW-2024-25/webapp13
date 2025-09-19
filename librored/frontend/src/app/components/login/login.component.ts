@@ -6,6 +6,7 @@ import { Router } from "@angular/router";
 @Component({
   selector: "login",
   templateUrl: "./login.component.html",
+  styleUrls: ["./login.component.css"]
 })
 export class LoginComponent {
   @ViewChild("loginErrorModal")
@@ -21,8 +22,8 @@ export class LoginComponent {
     this.authService.logIn(user, pass).subscribe({
       next: (response) => {
         console.log("Login successful:", response);
-        // Redirect to intended page
-        this.router.navigate(['/books']);
+        // Redirect to home page
+        this.router.navigate(['/']);
       },
       error: (error) => {
         console.error("Login failed:", error);

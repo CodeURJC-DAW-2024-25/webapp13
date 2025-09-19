@@ -26,6 +26,7 @@ export class AdminUsersComponent implements OnInit {
   userForm: Omit<UserDTO, 'id'> = {
     username: '',
     email: '',
+    password: '',
     role: 'ROLE_USER'
   };
 
