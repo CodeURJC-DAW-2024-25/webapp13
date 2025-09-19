@@ -6,6 +6,7 @@ export interface UserDTO {
   id: number;
   username: string;
   email: string;
+  password?: string; // Optional for updates
   role: 'ROLE_USER' | 'ROLE_ADMIN';
 }
 
