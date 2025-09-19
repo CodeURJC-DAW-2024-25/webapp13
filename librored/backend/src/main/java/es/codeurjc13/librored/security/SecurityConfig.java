@@ -53,17 +53,35 @@ public class SecurityConfig {
         return authProvider;
     }
 
+    // Public API endpoints filter chain (Order 0 - Highest Priority)
+    @Bean
+    @Order(0)
+    public SecurityFilterChain publicApiFilterChain(HttpSecurity http) throws Exception {
+        http
+            .securityMatcher("/api/books/books-per-genre", "/api/loans/valid-borrowers")
+            .authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll())
+            .csrf(csrf -> csrf.disable())
+            .sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .httpBasic(httpBasic -> httpBasic.disable())
+            .formLogin(formLogin -> formLogin.disable());
+
+        return http.build();
+    }
+
     // REST API Security Configuration (Order 1 - Higher Priority)
     @Bean
     @Order(1)
     public SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
-        
+
         http.authenticationProvider(authenticationProvider());
-        
+
         http
-            .securityMatcher(request -> 
-                request.getRequestURI().startsWith("/api/") && 
-                !request.getRequestURI().equals("/api/loans/valid-borrowers"))
+            .securityMatcher(request -> {
+                String uri = request.getRequestURI();
+                return uri.startsWith("/api/") &&
+                       !uri.equals("/api/books/books-per-genre") &&
+                       !uri.equals("/api/loans/valid-borrowers");
+            })
             .exceptionHandling(handling -> handling.authenticationEntryPoint(unauthorizedHandlerJwt));
         
         http
