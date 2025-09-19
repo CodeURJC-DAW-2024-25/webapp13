@@ -25,7 +25,7 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   navigateToBookManagement(): void {
-    this.router.navigate(['/books']);
+    this.router.navigate(['/admin/books']);
   }
 
   navigateToLoanManagement(): void {
