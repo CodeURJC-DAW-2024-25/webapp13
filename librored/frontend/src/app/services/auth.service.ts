@@ -84,6 +84,18 @@ export class AuthService {
   }
 
   /**
+   * Register new user
+   */
+  public register(username: string, email: string, encodedPassword: string): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(
+      BASE_URL + "/register",
+      { username, email, encodedPassword }
+    ).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
    * Logout current user (JWT version)
    */
   public logOut(): void {
@@ -117,7 +129,17 @@ export class AuthService {
    * Check if current user is admin (professor's pattern)
    */
   public isAdmin(): boolean {
-    return this.user && this.user.roles && this.user.roles.indexOf("ADMIN") !== -1;
+    if (!this.user || !this.user.roles) {
+      return false;
+    }
+    // Check for different role formats: ADMIN, ROLE_ADMIN, or authority objects
+    return this.user.roles.some(role => {
+      if (typeof role === 'string') {
+        return role === "ADMIN" || role === "ROLE_ADMIN" || role.includes("ADMIN");
+      }
+      // Handle authority objects
+      return false;
+    });
   }
 
   /**
@@ -173,11 +195,20 @@ export class AuthService {
     if (token) {
       try {
         const payload = JSON.parse(atob(token.split('.')[1]));
+        // Extract roles from authorities (Spring Security format)
+        let roles: string[] = [];
+        if (payload.roles && Array.isArray(payload.roles)) {
+          roles = payload.roles.map((authority: any) =>
+            typeof authority === 'string' ? authority : authority.authority
+          );
+        }
+
         this.user = {
           username: payload.sub || username,
           email: payload.email || '',
-          roles: payload.roles || []
+          roles: roles
         };
+        console.log("🔐 Parsed user roles:", roles);
       } catch (error) {
         // Fallback if token parsing fails
         this.user = {
