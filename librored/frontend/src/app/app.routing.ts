@@ -10,6 +10,7 @@ import { LoginComponent } from "./components/login/login.component";
 import { RegisterComponent } from "./components/register/register.component";
 import { AdminUsersComponent } from "./components/admin/admin-users.component";
 import { AdminDashboardComponent } from "./components/admin/admin-dashboard.component";
+import { AdminBooksComponent } from "./components/admin/admin-books/admin-books.component";
 
 const appRoutes: Routes = [
   // Public routes
@@ -31,6 +32,7 @@ const appRoutes: Routes = [
   // Admin routes (no guard - backend will handle permissions)
   { path: "admin", component: AdminDashboardComponent },
   { path: "admin/users", component: AdminUsersComponent },
+  { path: "admin/books", component: AdminBooksComponent },
 
   // Catch all route
   { path: "**", redirectTo: "" }

@@ -107,7 +107,7 @@ export class BookFormComponent implements OnInit {
 
   uploadImage(bookId: number): void {
     if (this.selectedImageFile) {
-      this.bookService.uploadImage(bookId, this.selectedImageFile).subscribe({
+      this.bookService.uploadCoverImage(bookId, this.selectedImageFile).subscribe({
         next: () => {
           this.successMessage = 'Book and image saved successfully';
           this.submitting = false;

@@ -17,6 +17,7 @@ import { LoginComponent } from "./components/login/login.component";
 import { RegisterComponent } from "./components/register/register.component";
 import { AdminUsersComponent } from "./components/admin/admin-users.component";
 import { AdminDashboardComponent } from "./components/admin/admin-dashboard.component";
+import { AdminBooksComponent } from "./components/admin/admin-books/admin-books.component";
 import { GenreChartComponent } from "./components/genre-chart/genre-chart.component";
 import { AuthInterceptor } from "./interceptors/auth.interceptor";
 
@@ -33,6 +34,7 @@ import { AuthInterceptor } from "./interceptors/auth.interceptor";
     RegisterComponent,
     AdminUsersComponent,
     AdminDashboardComponent,
+    AdminBooksComponent,
     GenreChartComponent,
   ],
   imports: [BrowserModule, FormsModule, HttpClientModule, RouterModule, routing, NgbModule],
