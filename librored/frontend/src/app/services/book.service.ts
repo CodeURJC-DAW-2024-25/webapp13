@@ -9,9 +9,10 @@ import { PaginatedResponse } from '../interfaces/paginated-response.interface';
   providedIn: 'root'
 })
 export class BookService {
-  private readonly API_URL = '/api/books';
+  private readonly API_URL = '/api/books'; // For public books
+  private readonly ADMIN_API_URL = '/api/v1/books'; // For admin CRUD operations
 
-  constructor(private http: HttpClient) {} // Updated for JWT
+  constructor(private http: HttpClient) {}
 
   /**
    * Get all books (legacy method for backwards compatibility)
@@ -40,41 +41,63 @@ export class BookService {
    * Get book by ID
    */
   getBook(id: number): Observable<BookDTO> {
-    return this.http.get<BookDTO>(`${this.API_URL}/${id}`, { withCredentials: true });
+    return this.http.get<BookDTO>(`${this.ADMIN_API_URL}/${id}`);
   }
 
   /**
-   * Create new book
+   * ADMIN METHODS - Full CRUD operations for admin users
+   */
+
+  /**
+   * Get all books with pagination (admin)
+   */
+  getAllBooksPaginated(page: number = 0, size: number = 10): Observable<PaginatedResponse<BookDTO>> {
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString());
+
+    return this.http.get<PaginatedResponse<BookDTO>>(this.ADMIN_API_URL, { params });
+  }
+
+  /**
+   * Create new book (admin)
    */
   createBook(book: BookDTO): Observable<BookDTO> {
-    return this.http.post<BookDTO>(this.API_URL, book, { withCredentials: true });
+    return this.http.post<BookDTO>(this.ADMIN_API_URL, book);
   }
 
   /**
-   * Update existing book
+   * Update existing book (admin)
    */
   updateBook(id: number, book: BookDTO): Observable<BookDTO> {
-    return this.http.put<BookDTO>(`${this.API_URL}/${id}`, book, { withCredentials: true });
+    return this.http.put<BookDTO>(`${this.ADMIN_API_URL}/${id}`, book);
   }
 
   /**
-   * Delete book
+   * Delete book (admin)
    */
-  deleteBook(id: number): Observable<BookDTO> {
-    return this.http.delete<BookDTO>(`${this.API_URL}/${id}`, { withCredentials: true });
+  deleteBook(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.ADMIN_API_URL}/${id}`);
   }
 
   /**
-   * Upload book image
+   * Upload book cover image (admin)
    */
-  uploadImage(id: number, imageFile: File): Observable<any> {
+  uploadCoverImage(id: number, file: File): Observable<any> {
     const formData = new FormData();
-    formData.append('imageFile', imageFile);
-    return this.http.post(`${this.API_URL}/${id}/cover`, formData, { withCredentials: true });
+    formData.append('file', file);
+    return this.http.post(`${this.ADMIN_API_URL}/${id}/cover`, formData);
   }
 
   /**
-   * Get book image URL
+   * Get book cover image URL
+   */
+  getCoverImageUrl(id: number): string {
+    return `${this.ADMIN_API_URL}/${id}/cover`;
+  }
+
+  /**
+   * Get book image URL (legacy)
    */
   getImageUrl(id: number): string {
     return `${this.API_URL}/${id}/cover`;
