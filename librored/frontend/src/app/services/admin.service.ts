@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface UserDTO {
@@ -34,6 +34,22 @@ export class AdminService {
   private readonly API_URL = '/api/v1/users';
 
   constructor(private http: HttpClient) {}
+
+  /**
+   * Get HTTP headers with JWT token
+   */
+  private getAuthHeaders(): HttpHeaders {
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      return new HttpHeaders({
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      });
+    }
+    return new HttpHeaders({
+      'Content-Type': 'application/json'
+    });
+  }
 
   /**
    * Get all users with pagination
@@ -111,9 +127,21 @@ export class AdminService {
    * Download admin report (PDF)
    */
   downloadAdminReport(): Observable<Blob> {
-    return this.http.get('/admin/download-report', {
+    console.log('Starting admin report download...');
+    const token = localStorage.getItem('access_token');
+
+    if (!token) {
+      throw new Error('No access token available. Please login first.');
+    }
+
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`,
+      'Accept': 'application/pdf'
+    });
+
+    return this.http.get('https://localhost:8443/admin/download-report', {
       responseType: 'blob',
-      withCredentials: true
+      headers: headers
     });
   }
 }
