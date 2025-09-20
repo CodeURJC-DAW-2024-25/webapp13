@@ -23,7 +23,7 @@
                         <ng-container *ngIf="authService.isLogged()">
                             <!-- Show My Account for non-admin users -->
                             <div *ngIf="!authService.isAdmin()">
-                                <a href="/myaccount" class="btn btn-primary btn-nowrap">My Account</a>
+                                <a routerLink="/account" class="btn btn-primary btn-nowrap">My Account</a>
                             </div>
                             <!-- Show Admin Panel for admin users -->
                             <div *ngIf="authService.isAdmin()">
