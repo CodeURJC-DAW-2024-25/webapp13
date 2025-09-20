@@ -29,7 +29,7 @@
                     id="lender"
                     name="lender" 
                     class="form-control" 
-                    [(ngModel)]="loan.lenderId"
+                    [(ngModel)]="loanForm.lenderId"
                     (ngModelChange)="onLenderChange()"
                     required
                     #lender="ngModel">
@@ -50,7 +50,7 @@
                     id="book"
                     name="book" 
                     class="form-control" 
-                    [(ngModel)]="loan.bookId"
+                    [(ngModel)]="loanForm.bookId"
                     required
                     #book="ngModel"
                     [disabled]="availableBooks.length === 0">
@@ -62,7 +62,7 @@
                 <div *ngIf="book.invalid && book.touched" class="text-danger">
                     Book is required
                 </div>
-                <div *ngIf="availableBooks.length === 0 && loan.lenderId > 0" class="text-muted small">
+                <div *ngIf="availableBooks.length === 0 && loanForm.lenderId > 0" class="text-muted small">
                     No books available for the selected lender
                 </div>
             </div>
@@ -74,13 +74,13 @@
                     id="borrower"
                     name="borrower" 
                     class="form-control" 
-                    [(ngModel)]="loan.borrowerId"
+                    [(ngModel)]="loanForm.borrowerId"
                     required
                     #borrower="ngModel">
                     <option value="0">-- Select Borrower --</option>
                     <option *ngFor="let user of availableUsers" 
                             [value]="user.id"
-                            [disabled]="user.id === loan.lenderId">
+                            [disabled]="user.id === loanForm.lenderId">
                         {{ getUserDisplayName(user) }}
                     </option>
                 </select>
@@ -97,7 +97,7 @@
                     id="startDate"
                     name="startDate" 
                     class="form-control" 
-                    [(ngModel)]="loan.startDate"
+                    [(ngModel)]="loanForm.startDate"
                     required
                     #startDate="ngModel">
                 <div *ngIf="startDate.invalid && startDate.touched" class="text-danger">
@@ -113,7 +113,7 @@
                     id="endDate"
                     name="endDate" 
                     class="form-control" 
-                    [(ngModel)]="loan.endDate"
+                    [(ngModel)]="loanForm.endDate"
                     #endDate="ngModel">
                 <small class="text-muted">Leave empty for indefinite loan</small>
             </div>
@@ -125,7 +125,7 @@
                     id="status"
                     name="status" 
                     class="form-control" 
-                    [(ngModel)]="loan.status"
+                    [(ngModel)]="loanForm.status"
                     required
                     #status="ngModel">
                     <option *ngFor="let statusOption of loanStatuses" [value]="statusOption">

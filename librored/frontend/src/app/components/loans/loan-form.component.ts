@@ -4,7 +4,7 @@ import { LoanService } from "../../services/loan.service";
 import { BookService } from "../../services/book.service";
 import { AuthService } from "../../services/auth.service";
 import { UserService } from "../../services/user.service";
-import { LoanDTO, LoanRequest, LoanStatus } from "../../dtos/loan.dto";
+import { LoanDTO, LoanRequest, LoanStatus, BookBasicDTO, UserBasicDTO } from "../../dtos/loan.dto";
 import { BookDTO } from "../../dtos/book.dto";
 import { UserDTO } from "../../dtos/user.dto";
 
@@ -13,7 +13,15 @@ import { UserDTO } from "../../dtos/user.dto";
   templateUrl: "./loan-form.component.html",
 })
 export class LoanFormComponent implements OnInit {
-  loan: LoanRequest = {
+  // Form structure using IDs for easy form binding
+  loanForm: {
+    bookId: number;
+    lenderId: number;
+    borrowerId: number;
+    startDate: string;
+    endDate: string;
+    status: LoanStatus;
+  } = {
     bookId: 0,
     lenderId: 0,
     borrowerId: 0,
@@ -64,27 +72,27 @@ export class LoanFormComponent implements OnInit {
   initializeForCreate(): void {
     this.loadUsers();
     // Load all books - let backend handle permissions
-    
+
     // Set default start date to today
     const today = new Date();
-    this.loan.startDate = today.toISOString().split('T')[0];
+    this.loanForm.startDate = today.toISOString().split('T')[0];
   }
 
   loadLoan(id: number): void {
     this.loading = true;
     this.loanService.getLoan(id).subscribe({
       next: (loan) => {
-        this.loan = {
-          bookId: loan.bookId,
-          lenderId: loan.lenderId,
-          borrowerId: loan.borrowerId,
+        this.loanForm = {
+          bookId: loan.book.id,
+          lenderId: loan.lender.id,
+          borrowerId: loan.borrower.id,
           startDate: loan.startDate,
           endDate: loan.endDate || '',
           status: loan.status
         };
         this.loading = false;
         this.loadUsers();
-        this.loadBooksByLender(loan.lenderId);
+        this.loadBooksByLender(loan.lender.id);
       },
       error: (error) => {
         console.error('Error loading loan:', error);
@@ -126,29 +134,30 @@ export class LoanFormComponent implements OnInit {
 
   onLenderChange(): void {
     // Reset book selection when lender changes
-    this.loan.bookId = 0;
-    this.loadBooksByLender(this.loan.lenderId);
+    this.loanForm.bookId = 0;
+    this.loadBooksByLender(this.loanForm.lenderId);
   }
 
   onSubmit(): void {
     this.errorMessage = '';
     this.successMessage = '';
-    
+
     if (!this.validateForm()) {
       return;
     }
 
     this.submitting = true;
 
-    const operation = this.isEditMode 
-      ? this.loanService.updateLoan(Number(this.route.snapshot.paramMap.get('id')), this.loan)
-      : this.loanService.createLoan(this.loan);
+    const loanRequest = this.convertFormToLoanRequest();
+    const operation = this.isEditMode
+      ? this.loanService.updateLoan(Number(this.route.snapshot.paramMap.get('id')), loanRequest)
+      : this.loanService.createLoan(loanRequest);
 
     operation.subscribe({
       next: (savedLoan) => {
         this.successMessage = this.isEditMode ? 'Loan updated successfully' : 'Loan created successfully';
         this.submitting = false;
-        
+
         // Navigate back to loan list after short delay
         setTimeout(() => {
           this.router.navigate(['/loans']);
@@ -163,27 +172,27 @@ export class LoanFormComponent implements OnInit {
   }
 
   validateForm(): boolean {
-    if (!this.loan.bookId) {
+    if (!this.loanForm.bookId) {
       this.errorMessage = 'Please select a book';
       return false;
     }
 
-    if (!this.loan.lenderId) {
+    if (!this.loanForm.lenderId) {
       this.errorMessage = 'Please select a lender';
       return false;
     }
 
-    if (!this.loan.borrowerId) {
+    if (!this.loanForm.borrowerId) {
       this.errorMessage = 'Please select a borrower';
       return false;
     }
 
-    if (this.loan.lenderId === this.loan.borrowerId) {
+    if (this.loanForm.lenderId === this.loanForm.borrowerId) {
       this.errorMessage = 'Lender and borrower cannot be the same person';
       return false;
     }
 
-    if (!this.loan.startDate) {
+    if (!this.loanForm.startDate) {
       this.errorMessage = 'Start date is required';
       return false;
     }
@@ -191,16 +200,16 @@ export class LoanFormComponent implements OnInit {
     // Validate start date is not in the past
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const startDate = new Date(this.loan.startDate);
-    
+    const startDate = new Date(this.loanForm.startDate);
+
     if (startDate < today && !this.isEditMode) {
       this.errorMessage = 'Start date must be today or in the future';
       return false;
     }
 
     // Validate end date if provided
-    if (this.loan.endDate) {
-      const endDate = new Date(this.loan.endDate);
+    if (this.loanForm.endDate) {
+      const endDate = new Date(this.loanForm.endDate);
       if (endDate <= startDate) {
         this.errorMessage = 'End date must be after start date';
         return false;
@@ -208,6 +217,31 @@ export class LoanFormComponent implements OnInit {
     }
 
     return true;
+  }
+
+  convertFormToLoanRequest(): LoanRequest {
+    const selectedBook = this.availableBooks.find(book => book.id === this.loanForm.bookId);
+    const selectedLender = this.availableUsers.find(user => user.id === this.loanForm.lenderId);
+    const selectedBorrower = this.availableUsers.find(user => user.id === this.loanForm.borrowerId);
+
+    return {
+      book: {
+        id: selectedBook?.id || 0,
+        title: selectedBook?.title || '',
+        author: '' // Will be filled by backend
+      },
+      lender: {
+        id: selectedLender?.id || 0,
+        username: selectedLender?.username || ''
+      },
+      borrower: {
+        id: selectedBorrower?.id || 0,
+        username: selectedBorrower?.username || ''
+      },
+      startDate: this.loanForm.startDate,
+      endDate: this.loanForm.endDate || undefined,
+      status: this.loanForm.status
+    };
   }
 
   cancel(): void {

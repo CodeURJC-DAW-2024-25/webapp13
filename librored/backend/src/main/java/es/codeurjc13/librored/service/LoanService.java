@@ -130,7 +130,7 @@ public class LoanService {
     @Transactional(readOnly = true)
     public Map<String, Object> getAllLoansDTOPaginated(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Loan> loanPage = loanRepository.findAll(pageable);
+        Page<Loan> loanPage = loanRepository.findAllWithDetails(pageable);
         
         Map<String, Object> response = new HashMap<>();
         response.put("content", loanMapper.toDTOs(loanPage.getContent()));
@@ -180,65 +180,140 @@ public class LoanService {
     }
 
     public Optional<LoanDTO> updateLoanDTO(Long id, LoanDTO loanDTO) {
+        System.out.println("=== UPDATE LOAN DTO DEBUG ===");
+        System.out.println("Updating loan ID: " + id);
+        System.out.println("Received LoanDTO: " + loanDTO.toString());
+
         Optional<Loan> existingLoanOpt = loanRepository.findById(id);
         if (existingLoanOpt.isPresent()) {
             Loan loan = existingLoanOpt.get();
+            System.out.println("Existing loan found:");
+            System.out.println("  - Existing lender ID: " + loan.getLender().getId());
+            System.out.println("  - Existing lender username: " + loan.getLender().getUsername());
+            System.out.println("  - DTO lender ID: " + (loanDTO.lender() != null ? loanDTO.lender().id() : "null"));
+            System.out.println("  - DTO lender username: " + (loanDTO.lender() != null ? loanDTO.lender().username() : "null"));
 
             // Prevent lender change (Fixed Lender Rule)
             if (loanDTO.lender() != null && !loan.getLender().getId().equals(loanDTO.lender().id())) {
-                throw new IllegalArgumentException(
-                        "Lender cannot be changed. The loan must remain under " + loan.getLender().getUsername() + ".");
+                String errorMsg = "Lender cannot be changed. The loan must remain under " + loan.getLender().getUsername() +
+                    ". Attempted to change from ID " + loan.getLender().getId() + " to ID " + loanDTO.lender().id();
+                System.out.println("❌ LENDER CHANGE ERROR: " + errorMsg);
+                throw new IllegalArgumentException(errorMsg);
             }
+            System.out.println("✅ Lender validation passed");
 
             // Update book if provided
             if (loanDTO.book() != null) {
-                Optional<Book> book = bookRepository.findById(loanDTO.book().id());
-                if (book.isPresent()) {
-                    List<Book> availableBooks = bookRepository.findAvailableBooksByOwnerId(loan.getLender().getId());
-                    if (!availableBooks.contains(book.get())) {
-                        throw new IllegalArgumentException(
-                                "The selected book is either not owned by " + loan.getLender().getUsername() +
-                                        " or is currently loaned out. Please choose an available book.");
+                System.out.println("📖 Updating book - DTO book ID: " + loanDTO.book().id());
+                try {
+                    Optional<Book> book = bookRepository.findById(loanDTO.book().id());
+                    if (book.isPresent()) {
+                        System.out.println("📖 Book found in database: " + book.get().getTitle());
+
+                        // Check if book is owned by the lender
+                        if (!book.get().getOwner().equals(loan.getLender())) {
+                            String errorMsg = "The selected book is not owned by " + loan.getLender().getUsername();
+                            System.out.println("❌ BOOK OWNERSHIP ERROR: " + errorMsg);
+                            throw new IllegalArgumentException(errorMsg);
+                        }
+
+                        // Check if book is available for the date range (excluding current loan)
+                        boolean isAvailable = isBookAvailableForDateRange(book.get().getId(), loan.getStartDate(), loan.getEndDate(), loan.getId());
+                        System.out.println("📖 Book availability check (excluding current loan): " + isAvailable);
+
+                        if (!isAvailable) {
+                            String errorMsg = "The selected book is currently loaned out during the selected date range. Please choose another book or adjust the dates.";
+                            System.out.println("❌ BOOK AVAILABILITY ERROR: " + errorMsg);
+                            throw new IllegalArgumentException(errorMsg);
+                        }
+
+                        loan.setBook(book.get());
+                        System.out.println("✅ Book updated successfully");
+                    } else {
+                        String errorMsg = "Book not found with id: " + loanDTO.book().id();
+                        System.out.println("❌ BOOK NOT FOUND ERROR: " + errorMsg);
+                        throw new IllegalArgumentException(errorMsg);
                     }
-                    loan.setBook(book.get());
-                } else {
-                    throw new IllegalArgumentException("Book not found with id: " + loanDTO.book().id());
+                } catch (Exception e) {
+                    System.out.println("❌ EXCEPTION in book update: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+                    throw e;
                 }
             }
 
             // Update borrower if provided
             if (loanDTO.borrower() != null) {
-                Optional<User> borrower = userRepository.findById(loanDTO.borrower().id());
-                if (borrower.isPresent()) {
-                    loan.setBorrower(borrower.get());
-                } else {
-                    throw new IllegalArgumentException("Borrower not found with id: " + loanDTO.borrower().id());
+                System.out.println("👤 Updating borrower - DTO borrower ID: " + loanDTO.borrower().id());
+                try {
+                    Optional<User> borrower = userRepository.findById(loanDTO.borrower().id());
+                    if (borrower.isPresent()) {
+                        System.out.println("👤 Borrower found: " + borrower.get().getUsername());
+                        loan.setBorrower(borrower.get());
+                        System.out.println("✅ Borrower updated successfully");
+                    } else {
+                        String errorMsg = "Borrower not found with id: " + loanDTO.borrower().id();
+                        System.out.println("❌ BORROWER NOT FOUND ERROR: " + errorMsg);
+                        throw new IllegalArgumentException(errorMsg);
+                    }
+                } catch (Exception e) {
+                    System.out.println("❌ EXCEPTION in borrower update: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+                    throw e;
                 }
             }
 
             // Update dates
             if (loanDTO.startDate() != null) {
-                loan.setStartDate(loanDTO.startDate());
+                System.out.println("📅 Updating start date: " + loanDTO.startDate());
+                try {
+                    loan.setStartDate(loanDTO.startDate());
+                    System.out.println("✅ Start date updated successfully");
+                } catch (Exception e) {
+                    System.out.println("❌ EXCEPTION in start date update: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+                    throw e;
+                }
             }
             if (loanDTO.endDate() != null) {
-                if (loanDTO.endDate().isBefore(loan.getStartDate())) {
-                    throw new IllegalArgumentException(
-                            "End date cannot be before the start date. Please select a date after " + loan.getStartDate() + ".");
+                System.out.println("📅 Updating end date: " + loanDTO.endDate());
+                try {
+                    if (loanDTO.endDate().isBefore(loan.getStartDate())) {
+                        String errorMsg = "End date cannot be before the start date. Please select a date after " + loan.getStartDate() + ".";
+                        System.out.println("❌ END DATE VALIDATION ERROR: " + errorMsg);
+                        throw new IllegalArgumentException(errorMsg);
+                    }
+                    loan.setEndDate(loanDTO.endDate());
+                    System.out.println("✅ End date updated successfully");
+                } catch (Exception e) {
+                    System.out.println("❌ EXCEPTION in end date update: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+                    throw e;
                 }
-                loan.setEndDate(loanDTO.endDate());
             }
 
             // Update status with validation
             if (loanDTO.status() != null) {
-                if (loan.getStatus() == Loan.Status.Completed && loanDTO.status() == Loan.Status.Active) {
-                    throw new IllegalArgumentException(
-                            "A completed loan cannot be reactivated. Consider creating a new loan instead.");
+                System.out.println("📊 Updating status from " + loan.getStatus() + " to " + loanDTO.status());
+                try {
+                    if (loan.getStatus() == Loan.Status.Completed && loanDTO.status() == Loan.Status.Active) {
+                        String errorMsg = "A completed loan cannot be reactivated. Consider creating a new loan instead.";
+                        System.out.println("❌ STATUS VALIDATION ERROR: " + errorMsg);
+                        throw new IllegalArgumentException(errorMsg);
+                    }
+                    loan.setStatus(loanDTO.status());
+                    System.out.println("✅ Status updated successfully");
+                } catch (Exception e) {
+                    System.out.println("❌ EXCEPTION in status update: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+                    throw e;
                 }
-                loan.setStatus(loanDTO.status());
             }
 
-            Loan savedLoan = loanRepository.save(loan);
-            return Optional.of(loanMapper.toDTO(savedLoan));
+            System.out.println("💾 Attempting to save loan...");
+            try {
+                Loan savedLoan = loanRepository.save(loan);
+                System.out.println("✅ Loan saved successfully with ID: " + savedLoan.getId());
+                return Optional.of(loanMapper.toDTO(savedLoan));
+            } catch (Exception e) {
+                System.out.println("❌ EXCEPTION during loan save: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+                e.printStackTrace();
+                throw e;
+            }
         }
         return Optional.empty();
     }
