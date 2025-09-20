@@ -27,6 +27,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+class UpdateUsernameRequest {
+    public String username;
+}
+
+class VerifyPasswordRequest {
+    public String password;
+}
+
+class UpdatePasswordRequest {
+    public String currentPassword;
+    public String newPassword;
+}
+
 @RestController
 @Tag(name = "Users", description = "User management API")
 public class UserRestController {
@@ -42,7 +55,7 @@ public class UserRestController {
     @PostMapping("/api/users/update-username")
     public ResponseEntity<Map<String, Object>> updateUsername(
             @AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails,
-            @RequestParam String newUsername) {
+            @RequestBody UpdateUsernameRequest request) {
 
         if (userDetails == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("success", false, "error", "User not authenticated."));
@@ -55,7 +68,7 @@ public class UserRestController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("success", false, "error", "User not found."));
         }
 
-        user.get().setUsername(newUsername);
+        user.get().setUsername(request.username);
         userService.saveUser(user.get());
 
         //  Refresh authentication to ensure future requests still work
@@ -70,8 +83,7 @@ public class UserRestController {
     @PostMapping("/api/users/update-password")
     public ResponseEntity<Map<String, Object>> updatePassword(
             @AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails,
-            @RequestParam String currentPassword,
-            @RequestParam String newPassword) {
+            @RequestBody UpdatePasswordRequest request) {
 
         if (userDetails == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("success", false, "error", "User not authenticated."));
@@ -84,12 +96,12 @@ public class UserRestController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("success", false, "error", "User not found."));
         }
 
-        if (!passwordEncoder.matches(currentPassword, user.get().getEncodedPassword())) {
+        if (!passwordEncoder.matches(request.currentPassword, user.get().getEncodedPassword())) {
             return ResponseEntity.ok(Map.of("success", false, "error", "Incorrect current password."));
         }
 
         // Encode and update the new password
-        user.get().setEncodedPassword(passwordEncoder.encode(newPassword));
+        user.get().setEncodedPassword(passwordEncoder.encode(request.newPassword));
         userService.saveUser(user.get());
 
         // Invalidate session after password change
@@ -106,7 +118,7 @@ public class UserRestController {
     @PostMapping("/api/users/verify-password")
     public ResponseEntity<Map<String, Object>> verifyPassword(
             @AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails,
-            @RequestParam String currentPassword) {
+            @RequestBody VerifyPasswordRequest request) {
 
         if (userDetails == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("success", false, "error", "User is not authenticated."));
@@ -119,7 +131,7 @@ public class UserRestController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("success", false, "error", "User not found."));
         }
 
-        if (!passwordEncoder.matches(currentPassword, user.get().getEncodedPassword())) {
+        if (!passwordEncoder.matches(request.password, user.get().getEncodedPassword())) {
             return ResponseEntity.ok(Map.of("success", false, "error", "Incorrect current password."));
         }
 
