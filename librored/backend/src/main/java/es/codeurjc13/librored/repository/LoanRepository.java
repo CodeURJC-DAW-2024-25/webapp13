@@ -3,6 +3,8 @@ package es.codeurjc13.librored.repository;
 import es.codeurjc13.librored.model.Book;
 import es.codeurjc13.librored.model.Loan;
 import es.codeurjc13.librored.model.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -53,5 +55,15 @@ public interface LoanRepository extends JpaRepository<Loan, Long> {
                                            @Param("startDate") LocalDate startDate,
                                            @Param("endDate") LocalDate endDate,
                                            @Param("excludeLoanId") Long excludeLoanId);
+
+    /**
+     * Find all loans with eager loading of related entities (book, lender, borrower)
+     * This prevents LazyInitializationException when mapping to DTOs
+     */
+    @Query("SELECT l FROM Loan l " +
+           "JOIN FETCH l.book " +
+           "JOIN FETCH l.lender " +
+           "JOIN FETCH l.borrower")
+    Page<Loan> findAllWithDetails(Pageable pageable);
 
 }
