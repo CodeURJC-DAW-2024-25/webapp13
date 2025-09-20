@@ -47,7 +47,7 @@ export class LoanListComponent implements OnInit {
   }
 
   deleteLoan(loan: LoanDTO): void {
-    if (confirm(`Are you sure you want to delete this loan for "${loan.bookTitle}"?`)) {
+    if (confirm(`Are you sure you want to delete this loan for "${loan.book?.title || 'Unknown Book'}"?`)) {
       this.loanService.deleteLoan(loan.id!).subscribe({
         next: () => {
           this.loadLoans(); // Reload list after delete
@@ -62,12 +62,12 @@ export class LoanListComponent implements OnInit {
 
   canEditLoan(loan: LoanDTO): boolean {
     // Admin can edit any loan, user can edit loans where they are the lender
-    return this.isAdmin || loan.lenderId === this.currentUserId;
+    return this.isAdmin || loan.lender?.id === this.currentUserId;
   }
 
   canDeleteLoan(loan: LoanDTO): boolean {
     // Admin can delete any loan, user can delete loans where they are the lender
-    return this.isAdmin || loan.lenderId === this.currentUserId;
+    return this.isAdmin || loan.lender?.id === this.currentUserId;
   }
 
   getStatusClass(status: string): string {
