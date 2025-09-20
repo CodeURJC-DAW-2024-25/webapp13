@@ -101,7 +101,10 @@ public class SecurityConfig {
                     // API access: Only logged-in users
                     .requestMatchers("/api/users/**").hasAnyRole("USER", "ADMIN")
                     .requestMatchers("/api/users/verify-password", "/api/users/update-username", "/api/users/update-password").authenticated()
-                    
+
+                    // Admin API endpoints
+                    .requestMatchers("/api/download-report").hasRole("ADMIN")
+
                     // All other API endpoints require authentication
                     .requestMatchers("/api/**").authenticated()
             );

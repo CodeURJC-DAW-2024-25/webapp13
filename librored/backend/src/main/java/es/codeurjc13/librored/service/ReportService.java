@@ -31,222 +31,165 @@ public class ReportService {
 
     // Generate a complete admin report with users, books, and loans
     public byte[] generateAdminReport() throws IOException {
-        try (PDDocument document = new PDDocument();
-             ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            
-            PDPageContentStream contentStream = null;
-            PDPage currentPage = null;
-            int y = 0;
 
-            // Create first page and initialize
-            PDFPageHelper pageHelper = new PDFPageHelper(document);
-            currentPage = pageHelper.createNewPage();
-            contentStream = pageHelper.createContentStream(currentPage);
-            y = pageHelper.addTitle(contentStream, "ADMIN REPORT");
+        try (PDDocument document = new PDDocument()) {
+            PDPage currentPage = new PDPage();
+            document.addPage(currentPage);
+            PDPageContentStream contentStream = new PDPageContentStream(document, currentPage);
 
-            // Add Users Table
-            PDFResult result = addSectionAndTable(document, contentStream, currentPage, y, pageHelper, "Users List", "users");
-            contentStream = result.contentStream;
-            currentPage = result.currentPage;
-            y = result.y;
+            // Title
+            contentStream.beginText();
+            contentStream.setFont(PDType1Font.HELVETICA_BOLD, 18);
+            contentStream.newLineAtOffset(50, 750);
+            contentStream.showText("LIBRORED ADMIN REPORT");
+            contentStream.endText();
 
-            // Add Books Table
-            result = addSectionAndTable(document, contentStream, currentPage, y, pageHelper, "Books List", "books");
-            contentStream = result.contentStream;
-            currentPage = result.currentPage;
-            y = result.y;
+            // Current date
+            contentStream.beginText();
+            contentStream.setFont(PDType1Font.HELVETICA, 12);
+            contentStream.newLineAtOffset(50, 720);
+            contentStream.showText("Generated: " + java.time.LocalDateTime.now().toString());
+            contentStream.endText();
 
-            // Add Loans Table
-            result = addSectionAndTable(document, contentStream, currentPage, y, pageHelper, "Loans List", "loans");
+            float yPosition = 680;
+            final float bottomMargin = 50;
+            final float topMargin = 750;
 
-            result.contentStream.close();
-            document.save(baos);
-            return baos.toByteArray();
-        }
-    }
+            // Users section
+            yPosition = addSectionTitle(contentStream, "USERS", yPosition);
+            List<User> users = userService.getAllUsers();
 
-    private PDFResult addSectionAndTable(PDDocument document, PDPageContentStream contentStream, 
-                                        PDPage currentPage, int y, PDFPageHelper pageHelper, 
-                                        String sectionTitle, String tableType) throws IOException {
-        // Check if section header needs new page
-        if (pageHelper.needsNewPage(y + 30)) {
+            for (User user : users) {
+                String userText = String.format("ID: %d | User: %s | Email: %s | Role: %s",
+                    user.getId(), user.getUsername(), user.getEmail(),
+                    user.getRole().name().replace("ROLE_", ""));
+
+                // Check if we need a new page
+                if (yPosition < bottomMargin + 30) {
+                    contentStream.close();
+                    currentPage = new PDPage();
+                    document.addPage(currentPage);
+                    contentStream = new PDPageContentStream(document, currentPage);
+                    yPosition = topMargin;
+                }
+
+                yPosition = addTextLine(contentStream, userText, yPosition);
+            }
+
+            yPosition -= 20;
+
+            // Books section
+            if (yPosition < bottomMargin + 50) {
+                contentStream.close();
+                currentPage = new PDPage();
+                document.addPage(currentPage);
+                contentStream = new PDPageContentStream(document, currentPage);
+                yPosition = topMargin;
+            }
+
+            yPosition = addSectionTitle(contentStream, "BOOKS", yPosition);
+            List<Book> books = bookService.getAllBooks();
+
+            for (Book book : books) {
+                String bookText = String.format("ID: %d | Title: %s | Author: %s | Genre: %s",
+                    book.getId(), book.getTitle(), book.getAuthor(), book.getGenre().toString());
+
+                // Check if we need a new page
+                if (yPosition < bottomMargin + 30) {
+                    contentStream.close();
+                    currentPage = new PDPage();
+                    document.addPage(currentPage);
+                    contentStream = new PDPageContentStream(document, currentPage);
+                    yPosition = topMargin;
+                }
+
+                yPosition = addTextLine(contentStream, bookText, yPosition);
+            }
+
+            yPosition -= 20;
+
+            // Loans section
+            if (yPosition < bottomMargin + 50) {
+                contentStream.close();
+                currentPage = new PDPage();
+                document.addPage(currentPage);
+                contentStream = new PDPageContentStream(document, currentPage);
+                yPosition = topMargin;
+            }
+
+            yPosition = addSectionTitle(contentStream, "LOANS", yPosition);
+            List<Loan> loans = loanService.getAllLoans();
+
+            for (Loan loan : loans) {
+                String loanText = String.format("ID: %d | Book: %s | Borrower: %s | Start: %s | End: %s",
+                    loan.getId(),
+                    loan.getBook() != null ? loan.getBook().getTitle() : "N/A",
+                    loan.getBorrower() != null ? loan.getBorrower().getUsername() : "N/A",
+                    loan.getStartDate() != null ? loan.getStartDate().toString() : "N/A",
+                    loan.getEndDate() != null ? loan.getEndDate().toString() : "N/A");
+
+                // Check if we need a new page
+                if (yPosition < bottomMargin + 30) {
+                    contentStream.close();
+                    currentPage = new PDPage();
+                    document.addPage(currentPage);
+                    contentStream = new PDPageContentStream(document, currentPage);
+                    yPosition = topMargin;
+                }
+
+                yPosition = addTextLine(contentStream, loanText, yPosition);
+            }
+
             contentStream.close();
-            currentPage = pageHelper.createNewPage();
-            contentStream = pageHelper.createContentStream(currentPage);
-            y = PDFPageHelper.getTopMargin();
-        }
 
-        // Add section header
-        y = pageHelper.addSectionHeader(contentStream, sectionTitle, y);
+            // Convert to byte array
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            document.save(baos);
+            byte[] pdfBytes = baos.toByteArray();
 
-        // Add appropriate table
-        switch (tableType) {
-            case "users":
-                return addUserTableWithPagination(document, contentStream, currentPage, y, pageHelper);
-            case "books":
-                return addBookTableWithPagination(document, contentStream, currentPage, y, pageHelper);
-            case "loans":
-                return addLoanTableWithPagination(document, contentStream, currentPage, y, pageHelper);
-            default:
-                return new PDFResult(contentStream, currentPage, y);
+            return pdfBytes;
+
+        } catch (Exception e) {
+            throw new IOException("Failed to generate admin report", e);
         }
     }
 
-    private PDFResult addUserTableWithPagination(PDDocument document, PDPageContentStream contentStream, 
-                                                 PDPage currentPage, int y, PDFPageHelper pageHelper) throws IOException {
-        List<User> users = userService.getAllUsers();
-        
-        // Add column headers
+    private float addSectionTitle(PDPageContentStream contentStream, String title, float yPosition) throws IOException {
         contentStream.beginText();
-        contentStream.setFont(PDType1Font.HELVETICA_BOLD, 12);
-        contentStream.newLineAtOffset(PDFPageHelper.getLeftMargin(), y);
-        contentStream.showText("ID | Username | Email | Role");
+        contentStream.setFont(PDType1Font.HELVETICA_BOLD, 14);
+        contentStream.newLineAtOffset(50, yPosition);
+        contentStream.showText(title);
         contentStream.endText();
-        y -= PDFPageHelper.getLineHeight() + 5;
-        
-        for (User user : users) {
-            if (pageHelper.needsNewPage(y)) {
-                contentStream.close();
-                currentPage = pageHelper.createNewPage();
-                contentStream = pageHelper.createContentStream(currentPage);
-                y = PDFPageHelper.getTopMargin();
-                
-                // Re-add headers on new page
-                contentStream.beginText();
-                contentStream.setFont(PDType1Font.HELVETICA_BOLD, 12);
-                contentStream.newLineAtOffset(PDFPageHelper.getLeftMargin(), y);
-                contentStream.showText("ID | Username | Email | Role");
-                contentStream.endText();
-                y -= PDFPageHelper.getLineHeight() + 5;
-            }
-
-            String userText = user.getId() + " | " + user.getUsername() + " | " + user.getEmail() + " | " + user.getRole().name().replace("ROLE_", "");
-            String truncatedText = pageHelper.truncateText(userText, PDType1Font.HELVETICA, 12);
-            
-            contentStream.beginText();
-            contentStream.setFont(PDType1Font.HELVETICA, 12);
-            contentStream.newLineAtOffset(PDFPageHelper.getLeftMargin(), y);
-            contentStream.showText(truncatedText);
-            contentStream.endText();
-            y -= PDFPageHelper.getLineHeight();
-        }
-        
-        return new PDFResult(contentStream, currentPage, y - 10);
+        return yPosition - 25;
     }
 
-    private PDFResult addBookTableWithPagination(PDDocument document, PDPageContentStream contentStream, 
-                                                 PDPage currentPage, int y, PDFPageHelper pageHelper) throws IOException {
-        List<Book> books = bookService.getAllBooks();
-        
-        // Add column headers
+    private float addTextLine(PDPageContentStream contentStream, String text, float yPosition) throws IOException {
         contentStream.beginText();
-        contentStream.setFont(PDType1Font.HELVETICA_BOLD, 12);
-        contentStream.newLineAtOffset(PDFPageHelper.getLeftMargin(), y);
-        contentStream.showText("ID | Title | Author | Genre");
+        contentStream.setFont(PDType1Font.HELVETICA, 10);
+        contentStream.newLineAtOffset(50, yPosition);
+        contentStream.showText(text);
         contentStream.endText();
-        y -= PDFPageHelper.getLineHeight() + 5;
-        
-        for (Book book : books) {
-            if (pageHelper.needsNewPage(y)) {
-                contentStream.close();
-                currentPage = pageHelper.createNewPage();
-                contentStream = pageHelper.createContentStream(currentPage);
-                y = PDFPageHelper.getTopMargin();
-                
-                // Re-add headers on new page
-                contentStream.beginText();
-                contentStream.setFont(PDType1Font.HELVETICA_BOLD, 12);
-                contentStream.newLineAtOffset(PDFPageHelper.getLeftMargin(), y);
-                contentStream.showText("ID | Title | Author | Genre");
-                contentStream.endText();
-                y -= PDFPageHelper.getLineHeight() + 5;
-            }
-
-            String bookText = book.getId() + " | " + book.getTitle() + " | " + book.getAuthor() + " | " + book.getGenre();
-            String truncatedText = pageHelper.truncateText(bookText, PDType1Font.HELVETICA, 12);
-            
-            contentStream.beginText();
-            contentStream.setFont(PDType1Font.HELVETICA, 12);
-            contentStream.newLineAtOffset(PDFPageHelper.getLeftMargin(), y);
-            contentStream.showText(truncatedText);
-            contentStream.endText();
-            y -= PDFPageHelper.getLineHeight();
-        }
-        
-        return new PDFResult(contentStream, currentPage, y - 10);
+        return yPosition - 15;
     }
 
-    private PDFResult addLoanTableWithPagination(PDDocument document, PDPageContentStream contentStream, 
-                                                 PDPage currentPage, int y, PDFPageHelper pageHelper) throws IOException {
-        List<Loan> loans = loanService.getAllLoans();
-        
-        for (Loan loan : loans) {
-            // Check if we need space for a complete loan entry (6 lines)
-            if (pageHelper.needsNewPage(y - (6 * PDFPageHelper.getLineHeight()))) {
-                contentStream.close();
-                currentPage = pageHelper.createNewPage();
-                contentStream = pageHelper.createContentStream(currentPage);
-                y = PDFPageHelper.getTopMargin();
-            }
+    // Generate a simple text report
+    public String generateTextReport() {
+        StringBuilder report = new StringBuilder();
+        report.append("LIBRORED ADMIN REPORT\n");
+        report.append("====================\n\n");
+        report.append("Generated: ").append(java.time.LocalDateTime.now()).append("\n\n");
 
-            // Add loan header with ID
-            contentStream.beginText();
-            contentStream.setFont(PDType1Font.HELVETICA_BOLD, 12);
-            contentStream.newLineAtOffset(PDFPageHelper.getLeftMargin(), y);
-            contentStream.showText("Loan ID: " + loan.getId());
-            contentStream.endText();
-            y -= PDFPageHelper.getLineHeight();
+        report.append("USERS:\n");
+        userService.getAllUsers().forEach(user -> {
+            report.append("- ID: ").append(user.getId())
+                  .append(", User: ").append(user.getUsername())
+                  .append(", Email: ").append(user.getEmail())
+                  .append(", Role: ").append(user.getRole().name().replace("ROLE_", ""))
+                  .append("\n");
+        });
 
-            // Add book information
-            String bookText = "Book: " + loan.getBook().getTitle();
-            String truncatedBookText = pageHelper.truncateText(bookText, PDType1Font.HELVETICA, 12);
-            contentStream.beginText();
-            contentStream.setFont(PDType1Font.HELVETICA, 12);
-            contentStream.newLineAtOffset(PDFPageHelper.getLeftMargin() + 15, y);
-            contentStream.showText(truncatedBookText);
-            contentStream.endText();
-            y -= PDFPageHelper.getLineHeight();
-
-            // Add lender information
-            contentStream.beginText();
-            contentStream.setFont(PDType1Font.HELVETICA, 12);
-            contentStream.newLineAtOffset(PDFPageHelper.getLeftMargin() + 15, y);
-            contentStream.showText("Lender: " + loan.getLender().getUsername());
-            contentStream.endText();
-            y -= PDFPageHelper.getLineHeight();
-
-            // Add borrower information
-            contentStream.beginText();
-            contentStream.setFont(PDType1Font.HELVETICA, 12);
-            contentStream.newLineAtOffset(PDFPageHelper.getLeftMargin() + 15, y);
-            contentStream.showText("Borrower: " + loan.getBorrower().getUsername());
-            contentStream.endText();
-            y -= PDFPageHelper.getLineHeight();
-
-            // Add status information
-            contentStream.beginText();
-            contentStream.setFont(PDType1Font.HELVETICA, 12);
-            contentStream.newLineAtOffset(PDFPageHelper.getLeftMargin() + 15, y);
-            contentStream.showText("Status: " + loan.getStatus());
-            contentStream.endText();
-            y -= PDFPageHelper.getLineHeight();
-
-            // Add dates if available
-            String dateInfo = "Start: " + loan.getStartDate();
-            if (loan.getEndDate() != null) {
-                dateInfo += " | End: " + loan.getEndDate();
-            }
-            contentStream.beginText();
-            contentStream.setFont(PDType1Font.HELVETICA, 12);
-            contentStream.newLineAtOffset(PDFPageHelper.getLeftMargin() + 15, y);
-            contentStream.showText(dateInfo);
-            contentStream.endText();
-            y -= PDFPageHelper.getLineHeight();
-
-            // Add spacing between loans
-            y -= 5;
-        }
-        
-        return new PDFResult(contentStream, currentPage, y);
+        return report.toString();
     }
+
+
 }

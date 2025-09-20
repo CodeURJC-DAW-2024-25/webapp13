@@ -3,49 +3,22 @@ package es.codeurjc13.librored.controller;
 import es.codeurjc13.librored.service.ReportService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 
-
-@Controller
-@RequestMapping("/admin")
-@CrossOrigin(origins = {"http://localhost:4200", "http://localhost:8080"}, allowCredentials = "true")
-public class AdminController {
+@RestController
+@RequestMapping("/api")
+@CrossOrigin(origins = {"https://localhost:8443"}, allowCredentials = "true")
+public class AdminRestController {
 
     private final ReportService reportService;
 
-    public AdminController(ReportService reportService) {
+    public AdminRestController(ReportService reportService) {
         this.reportService = reportService;
-    }
-
-    @GetMapping
-    public String adminDashboard() {
-        return "admin";
-    }
-
-
-
-    @GetMapping("/download-report-text")
-    @PreAuthorize("hasRole('ADMIN')")
-    public void downloadTextReport(HttpServletResponse response) throws IOException {
-        try {
-            // Generate text report using service
-            String reportContent = reportService.generateTextReport();
-            byte[] textData = reportContent.getBytes("UTF-8");
-
-            response.setContentType("text/plain");
-            response.setHeader("Content-Disposition", "attachment; filename=\"Admin_Report.txt\"");
-            response.setContentLength(textData.length);
-            response.getOutputStream().write(textData);
-            response.getOutputStream().flush();
-
-        } catch (Exception e) {
-            response.setStatus(500);
-        }
     }
 
     @GetMapping("/download-report")
@@ -77,6 +50,4 @@ public class AdminController {
             response.getWriter().write("{\"error\":\"Failed to generate report: " + e.getMessage() + "\"}");
         }
     }
-
-
 }
