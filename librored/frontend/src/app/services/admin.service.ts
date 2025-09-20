@@ -139,7 +139,7 @@ export class AdminService {
       'Accept': 'application/pdf'
     });
 
-    return this.http.get('https://localhost:8443/admin/download-report', {
+    return this.http.get('https://localhost:8443/api/download-report', {
       responseType: 'blob',
       headers: headers
     });
