@@ -29,7 +29,7 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   navigateToLoanManagement(): void {
-    this.router.navigate(['/loans']);
+    this.router.navigate(['/admin/loans']);
   }
 
   downloadReport(): void {
