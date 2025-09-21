@@ -57,7 +57,7 @@ export class AdminService {
   getAllUsers(page: number = 0, size: number = 10): Observable<PaginatedUsersResponse> {
     return this.http.get<PaginatedUsersResponse>(
       `${this.API_URL}?page=${page}&size=${size}`,
-      { withCredentials: true }
+      { headers: this.getAuthHeaders(), withCredentials: true }
     );
   }
 
@@ -67,7 +67,7 @@ export class AdminService {
   getUserById(id: number): Observable<UserDTO> {
     return this.http.get<UserDTO>(
       `${this.API_URL}/${id}`,
-      { withCredentials: true }
+      { headers: this.getAuthHeaders(), withCredentials: true }
     );
   }
 
@@ -78,7 +78,7 @@ export class AdminService {
     return this.http.post<UserDTO>(
       this.API_URL,
       user,
-      { withCredentials: true }
+      { headers: this.getAuthHeaders(), withCredentials: true }
     );
   }
 
@@ -89,7 +89,7 @@ export class AdminService {
     return this.http.put<UserDTO>(
       `${this.API_URL}/${id}`,
       user,
-      { withCredentials: true }
+      { headers: this.getAuthHeaders(), withCredentials: true }
     );
   }
 
@@ -99,7 +99,7 @@ export class AdminService {
   deleteUser(id: number): Observable<any> {
     return this.http.delete(
       `${this.API_URL}/${id}`,
-      { withCredentials: true }
+      { headers: this.getAuthHeaders(), withCredentials: true }
     );
   }
 
@@ -109,7 +109,7 @@ export class AdminService {
   getUserByUsername(username: string): Observable<UserDTO> {
     return this.http.get<UserDTO>(
       `${this.API_URL}/username/${username}`,
-      { withCredentials: true }
+      { headers: this.getAuthHeaders(), withCredentials: true }
     );
   }
 
@@ -119,7 +119,7 @@ export class AdminService {
   getUserByEmail(email: string): Observable<UserDTO> {
     return this.http.get<UserDTO>(
       `${this.API_URL}/email/${email}`,
-      { withCredentials: true }
+      { headers: this.getAuthHeaders(), withCredentials: true }
     );
   }
 

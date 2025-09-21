@@ -7,6 +7,7 @@ import { UserService } from "../../services/user.service";
 import { LoanDTO, LoanRequest, LoanStatus, BookBasicDTO, UserBasicDTO } from "../../dtos/loan.dto";
 import { BookDTO } from "../../dtos/book.dto";
 import { UserDTO } from "../../dtos/user.dto";
+import { UserAccountService } from "../../services/user-account.service";
 
 @Component({
   selector: "loan-form",
@@ -40,6 +41,8 @@ export class LoanFormComponent implements OnInit {
   availableUsers: UserDTO[] = [];
   isAdmin = false;
   currentUserId: number | null = null;
+  currentUser: any = null;
+  isUserMode = false; // True if accessed from user loan management
   
   loanStatuses = Object.values(LoanStatus);
 
@@ -48,16 +51,24 @@ export class LoanFormComponent implements OnInit {
     private router: Router,
     private loanService: LoanService,
     private bookService: BookService,
-    private userService: UserService
+    private userService: UserService,
+    private authService: AuthService,
+    private userAccountService: UserAccountService
   ) {}
 
   ngOnInit(): void {
-    // NO AUTH CHECK - Let backend handle it
     this.initializeComponent();
   }
 
   private initializeComponent(): void {
-    // Skip user/admin checks - let backend handle permissions
+    // Check if we're coming from user loan management
+    this.isUserMode = this.router.url.includes('/my-loans') ||
+                     (this.route.snapshot.queryParams['userMode'] === 'true');
+
+    // Load current user for user mode
+    if (this.isUserMode) {
+      this.loadCurrentUser();
+    }
 
     // Check if editing existing loan
     const id = Number(this.route.snapshot.paramMap.get('id'));
@@ -69,13 +80,34 @@ export class LoanFormComponent implements OnInit {
     }
   }
 
+  private loadCurrentUser(): void {
+    this.userAccountService.getCurrentUser().subscribe({
+      next: (user) => {
+        this.currentUser = user;
+        this.currentUserId = user.id;
+        // Auto-set lender to current user in user mode
+        this.loanForm.lenderId = user.id;
+      },
+      error: (error) => {
+        console.error('Error loading current user:', error);
+        if (error.status === 401) {
+          this.router.navigate(['/login']);
+        }
+      }
+    });
+  }
+
   initializeForCreate(): void {
     this.loadUsers();
-    // Load all books - let backend handle permissions
 
     // Set default start date to today
     const today = new Date();
     this.loanForm.startDate = today.toISOString().split('T')[0];
+
+    // In user mode, load user's books when lender is set
+    if (this.isUserMode && this.currentUserId) {
+      this.loadBooksByLender(this.currentUserId);
+    }
   }
 
   loadLoan(id: number): void {
@@ -149,18 +181,32 @@ export class LoanFormComponent implements OnInit {
     this.submitting = true;
 
     const loanRequest = this.convertFormToLoanRequest();
-    const operation = this.isEditMode
-      ? this.loanService.updateLoan(Number(this.route.snapshot.paramMap.get('id')), loanRequest)
-      : this.loanService.createLoan(loanRequest);
+    let operation;
+
+    if (this.isUserMode) {
+      // Use user-specific methods
+      operation = this.isEditMode
+        ? this.loanService.updateUserLoan(Number(this.route.snapshot.paramMap.get('id')), loanRequest)
+        : this.loanService.createUserLoan(loanRequest);
+    } else {
+      // Use admin methods
+      operation = this.isEditMode
+        ? this.loanService.updateLoan(Number(this.route.snapshot.paramMap.get('id')), loanRequest)
+        : this.loanService.createLoan(loanRequest);
+    }
 
     operation.subscribe({
       next: (savedLoan) => {
         this.successMessage = this.isEditMode ? 'Loan updated successfully' : 'Loan created successfully';
         this.submitting = false;
 
-        // Navigate back to loan list after short delay
+        // Navigate back to appropriate list after short delay
         setTimeout(() => {
-          this.router.navigate(['/loans']);
+          if (this.isUserMode) {
+            this.router.navigate(['/my-loans']);
+          } else {
+            this.router.navigate(['/loans']);
+          }
         }, 1500);
       },
       error: (error) => {
@@ -245,7 +291,11 @@ export class LoanFormComponent implements OnInit {
   }
 
   cancel(): void {
-    this.router.navigate(['/loans']);
+    if (this.isUserMode) {
+      this.router.navigate(['/my-loans']);
+    } else {
+      this.router.navigate(['/loans']);
+    }
   }
 
   getUserDisplayName(user: UserDTO): string {

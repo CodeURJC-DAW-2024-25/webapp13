@@ -22,6 +22,7 @@ import { AdminLoansComponent } from "./components/admin/admin-loans/admin-loans.
 import { GenreChartComponent } from "./components/genre-chart/genre-chart.component";
 import { UserAccountComponent } from "./components/user-account/user-account.component";
 import { UserBooksComponent } from "./components/user-books/user-books.component";
+import { UserLoansComponent } from "./components/user-loans/user-loans.component";
 import { AuthInterceptor } from "./interceptors/auth.interceptor";
 
 @NgModule({
@@ -42,6 +43,7 @@ import { AuthInterceptor } from "./interceptors/auth.interceptor";
     GenreChartComponent,
     UserAccountComponent,
     UserBooksComponent,
+    UserLoansComponent,
   ],
   imports: [BrowserModule, FormsModule, HttpClientModule, RouterModule, routing, NgbModule],
   providers: [

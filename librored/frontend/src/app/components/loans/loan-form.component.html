@@ -23,7 +23,7 @@
 
         <form (ngSubmit)="onSubmit()" #loanForm="ngForm">
             <!-- Lender Selection (Admin only) -->
-            <div *ngIf="isAdmin" class="form-group mb-3">
+            <div *ngIf="!isUserMode" class="form-group mb-3">
                 <label for="lender">Lender *</label>
                 <select 
                     id="lender"
@@ -40,6 +40,14 @@
                 </select>
                 <div *ngIf="lender.invalid && lender.touched" class="text-danger">
                     Lender is required
+                </div>
+            </div>
+
+            <!-- Lender Display (User Mode) -->
+            <div *ngIf="isUserMode && currentUser" class="form-group mb-3">
+                <label>Lender</label>
+                <div class="form-control-plaintext bg-light p-2 rounded">
+                    <strong>{{currentUser.username}}</strong> (You)
                 </div>
             </div>
 
