@@ -15,6 +15,21 @@
     <!-- Welcome Header -->
     <h1 class="mb-4">Hello {{user.username}}</h1>
 
+    <!-- Navigation Menu -->
+    <div class="card mb-4">
+      <div class="card-body">
+        <h5 class="card-title">Quick Actions</h5>
+        <div class="d-flex gap-2">
+          <a routerLink="/my-books" class="btn btn-primary">
+            <i class="bi bi-book me-1"></i>Manage My Books
+          </a>
+          <a routerLink="/new/loans" class="btn btn-outline-primary">
+            <i class="bi bi-arrow-left-right me-1"></i>My Loans
+          </a>
+        </div>
+      </div>
+    </div>
+
     <!-- Book Recommendations Section -->
     <div class="card p-3 mb-4">
       <h2 class="text-center mb-3">Book Recommendations</h2>
@@ -75,9 +90,9 @@
         <div class="card p-3">
           <h5>Manage My Books</h5>
           <p class="text-muted">Create, edit, and manage your book collection</p>
-          <button class="btn btn-primary" disabled>
-            Coming Soon - Manage My Books
-          </button>
+          <a routerLink="/my-books" class="btn btn-primary">
+            <i class="bi bi-book me-1"></i>Manage My Books
+          </a>
         </div>
       </div>
 
