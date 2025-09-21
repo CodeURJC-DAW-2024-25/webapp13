@@ -9,6 +9,7 @@ import { PaginatedResponse } from "../interfaces/paginated-response.interface";
 export class LoanService {
   private readonly API_URL = "/api/loans"; // For public loans
   private readonly ADMIN_API_URL = "/api/v1/loans"; // For admin CRUD operations
+  private readonly USER_LOANS_API_URL = "/api/v1/loans/lender"; // For user loan management
 
   constructor(private http: HttpClient) {}
 
@@ -131,10 +132,64 @@ export class LoanService {
     if (endDate) params.endDate = endDate;
     if (excludeLoanId) params.excludeLoanId = excludeLoanId.toString();
     
-    return this.http.get<boolean>(`${this.API_URL}/validate/borrower-availability`, { 
+    return this.http.get<boolean>(`${this.API_URL}/validate/borrower-availability`, {
       params,
-      withCredentials: true 
+      withCredentials: true
     }).pipe(catchError(this.handleError));
+  }
+
+  /**
+   * USER LOAN MANAGEMENT METHODS - For managing loans where the user is the lender
+   */
+
+  // Get current user's loans (where they are the lender)
+  getUserLoans(userId: number): Observable<LoanDTO[]> {
+    return this.http.get<LoanDTO[]>(`${this.USER_LOANS_API_URL}/${userId}`, { withCredentials: true })
+      .pipe(catchError(this.handleError));
+  }
+
+  // Create new loan for current user (as lender)
+  createUserLoan(loan: LoanRequest): Observable<LoanDTO> {
+    const loanDTO = {
+      id: null,
+      book: loan.book,
+      lender: loan.lender,
+      borrower: loan.borrower,
+      startDate: loan.startDate,
+      endDate: loan.endDate || null,
+      status: loan.status
+    };
+
+    return this.http.post<LoanDTO>(this.ADMIN_API_URL, loanDTO, { withCredentials: true })
+      .pipe(catchError(this.handleError));
+  }
+
+  // Update existing loan for current user (as lender)
+  updateUserLoan(id: number, loan: LoanRequest): Observable<LoanDTO> {
+    const loanDTO = {
+      id: id,
+      book: loan.book,
+      lender: loan.lender,
+      borrower: loan.borrower,
+      startDate: loan.startDate,
+      endDate: loan.endDate || null,
+      status: loan.status
+    };
+
+    return this.http.put<LoanDTO>(`${this.ADMIN_API_URL}/${id}`, loanDTO, { withCredentials: true })
+      .pipe(catchError(this.handleError));
+  }
+
+  // Delete loan for current user (as lender)
+  deleteUserLoan(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.ADMIN_API_URL}/${id}`, { withCredentials: true })
+      .pipe(catchError(this.handleError));
+  }
+
+  // Get available books for current user (for loan creation)
+  getUserAvailableBooks(userId: number): Observable<{id: number, title: string}[]> {
+    return this.http.get<{id: number, title: string}[]>(`/api/v1/books/available/${userId}`, { withCredentials: true })
+      .pipe(catchError(this.handleError));
   }
 
   private handleError(error: any): Observable<never> {
