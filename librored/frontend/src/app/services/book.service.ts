@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import { BookDTO } from '../dtos/book.dto';
 import { PaginatedResponse } from '../interfaces/paginated-response.interface';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -11,8 +12,27 @@ import { PaginatedResponse } from '../interfaces/paginated-response.interface';
 export class BookService {
   private readonly API_URL = '/api/books'; // For public books
   private readonly ADMIN_API_URL = '/api/v1/books'; // For admin CRUD operations
+  private readonly BASE_URL = 'https://localhost:8443';
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService
+  ) {}
+
+  private getHeaders(): HttpHeaders {
+    const token = this.authService.getAccessToken();
+    console.log('🔐 BookService - JWT token for request:', token ? 'Token present' : 'No token found');
+    console.log('🔐 BookService - Full token value:', token);
+    if (!token) {
+      console.warn('⚠️ No JWT token available - request will fail authentication');
+    }
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    });
+    console.log('🔐 BookService - Authorization header:', headers.get('Authorization'));
+    return headers;
+  }
 
   /**
    * Get all books (legacy method for backwards compatibility)
@@ -45,6 +65,17 @@ export class BookService {
   }
 
   /**
+   * Get books by owner ID
+   */
+  getBooksByOwner(ownerId: number): Observable<BookDTO[]> {
+    return this.http.get<BookDTO[]>(`${this.BASE_URL}${this.ADMIN_API_URL}/owner/${ownerId}`, {
+      headers: this.getHeaders()
+    }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
    * ADMIN METHODS - Full CRUD operations for admin users
    */
 
@@ -63,21 +94,33 @@ export class BookService {
    * Create new book (admin)
    */
   createBook(book: BookDTO): Observable<BookDTO> {
-    return this.http.post<BookDTO>(this.ADMIN_API_URL, book);
+    return this.http.post<BookDTO>(`${this.BASE_URL}${this.ADMIN_API_URL}`, book, {
+      headers: this.getHeaders()
+    }).pipe(
+      catchError(this.handleError)
+    );
   }
 
   /**
    * Update existing book (admin)
    */
   updateBook(id: number, book: BookDTO): Observable<BookDTO> {
-    return this.http.put<BookDTO>(`${this.ADMIN_API_URL}/${id}`, book);
+    return this.http.put<BookDTO>(`${this.BASE_URL}${this.ADMIN_API_URL}/${id}`, book, {
+      headers: this.getHeaders()
+    }).pipe(
+      catchError(this.handleError)
+    );
   }
 
   /**
    * Delete book (admin)
    */
   deleteBook(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.ADMIN_API_URL}/${id}`);
+    return this.http.delete<void>(`${this.BASE_URL}${this.ADMIN_API_URL}/${id}`, {
+      headers: this.getHeaders()
+    }).pipe(
+      catchError(this.handleError)
+    );
   }
 
   /**
@@ -86,14 +129,26 @@ export class BookService {
   uploadCoverImage(id: number, file: File): Observable<any> {
     const formData = new FormData();
     formData.append('file', file);
-    return this.http.post(`${this.ADMIN_API_URL}/${id}/cover`, formData);
+    console.log('📤 Uploading cover image for book ID:', id, 'File:', file.name);
+
+    // Get JWT token for authorization
+    const token = this.authService.getAccessToken();
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+
+    return this.http.post(`${this.BASE_URL}${this.ADMIN_API_URL}/${id}/cover`, formData, {
+      headers: headers
+    }).pipe(
+      catchError(this.handleError)
+    );
   }
 
   /**
    * Get book cover image URL
    */
   getCoverImageUrl(id: number): string {
-    return `${this.ADMIN_API_URL}/${id}/cover`;
+    return `${this.BASE_URL}${this.API_URL}/${id}/cover`;
   }
 
   /**
@@ -101,5 +156,10 @@ export class BookService {
    */
   getImageUrl(id: number): string {
     return `${this.API_URL}/${id}/cover`;
+  }
+
+  private handleError(error: any): Observable<never> {
+    console.error('BookService error:', error);
+    return throwError(() => error);
   }
 }
