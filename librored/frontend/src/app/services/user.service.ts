@@ -1,30 +1,59 @@
 import { Injectable } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Observable, throwError } from "rxjs";
-import { catchError } from "rxjs/operators";
+import { catchError, map } from "rxjs/operators";
 import { UserDTO } from "../dtos/user.dto";
 
 @Injectable({ providedIn: "root" })
 export class UserService {
   private readonly API_URL = "/api/users";
+  private readonly API_V1_URL = "/api/v1/users";
 
   constructor(private http: HttpClient) {}
 
+  /**
+   * Get HTTP headers with JWT token
+   */
+  private getAuthHeaders(): HttpHeaders {
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      return new HttpHeaders({
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      });
+    }
+    return new HttpHeaders({
+      'Content-Type': 'application/json'
+    });
+  }
+
   // Get all users (for admin or selection dropdowns)
   getUsers(): Observable<UserDTO[]> {
-    return this.http.get<UserDTO[]>(this.API_URL, { withCredentials: true })
-      .pipe(catchError(this.handleError));
+    return this.http.get<{content: UserDTO[]}>(`${this.API_V1_URL}?page=0&size=1000`, {
+      headers: this.getAuthHeaders(),
+      withCredentials: true
+    })
+      .pipe(
+        map(response => response.content),
+        catchError(this.handleError)
+      );
   }
 
   // Get single user by ID
   getUser(id: number): Observable<UserDTO> {
-    return this.http.get<UserDTO>(`${this.API_URL}/${id}`, { withCredentials: true })
+    return this.http.get<UserDTO>(`${this.API_V1_URL}/${id}`, {
+      headers: this.getAuthHeaders(),
+      withCredentials: true
+    })
       .pipe(catchError(this.handleError));
   }
 
   // Get current user profile
   getCurrentUser(): Observable<UserDTO> {
-    return this.http.get<UserDTO>(`${this.API_URL}/me`, { withCredentials: true })
+    return this.http.get<UserDTO>(`${this.API_URL}/me`, {
+      headers: this.getAuthHeaders(),
+      withCredentials: true
+    })
       .pipe(catchError(this.handleError));
   }
 
