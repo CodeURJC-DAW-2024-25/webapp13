@@ -91,12 +91,21 @@ public class SecurityConfig {
                     .requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**", "/swagger-ui/index.html").permitAll()
                     .requestMatchers("/actuator/health", "/actuator/info").permitAll() // Actuator health checks
                     .requestMatchers("/api/auth/**").permitAll() // JWT auth endpoints
-                    
-                    // PRIVATE API ENDPOINTS (P2 requirements)
-                    .requestMatchers("/api/v1/**").authenticated()
-                    .requestMatchers(HttpMethod.POST,"/api/books/").hasRole("USER")
-                    .requestMatchers(HttpMethod.PUT,"/api/books/**").hasRole("USER")
+
+                    // Book API endpoints - SPECIFIC RULES FIRST (before general /api/v1/**)
+                    .requestMatchers(HttpMethod.GET,"/api/v1/books/**").hasAnyRole("USER", "ADMIN")
+                    .requestMatchers(HttpMethod.POST,"/api/v1/books").hasAnyRole("USER", "ADMIN")
+                    .requestMatchers(HttpMethod.PUT,"/api/v1/books/**").hasAnyRole("USER", "ADMIN")
+                    .requestMatchers(HttpMethod.DELETE,"/api/v1/books/**").hasAnyRole("USER", "ADMIN")
+                    .requestMatchers(HttpMethod.POST,"/api/v1/books/*/cover").hasAnyRole("USER", "ADMIN")
+
+                    // Legacy book endpoints
+                    .requestMatchers(HttpMethod.POST,"/api/books/").hasAnyRole("USER", "ADMIN")
+                    .requestMatchers(HttpMethod.PUT,"/api/books/**").hasAnyRole("USER", "ADMIN")
                     .requestMatchers(HttpMethod.DELETE,"/api/books/**").hasRole("ADMIN")
+
+                    // PRIVATE API ENDPOINTS (P2 requirements) - AFTER specific rules
+                    .requestMatchers("/api/v1/**").authenticated()
                     
                     // API access: Only logged-in users
                     .requestMatchers("/api/users/**").hasAnyRole("USER", "ADMIN")
