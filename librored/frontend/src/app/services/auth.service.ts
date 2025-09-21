@@ -183,7 +183,6 @@ export class AuthService {
     this.logged = false;
     this.user = undefined;
     this.authStateSubject.next(false);
-    console.log("🔐 Tokens and user data cleared");
   }
 
   /**
@@ -206,9 +205,9 @@ export class AuthService {
         this.user = {
           username: payload.sub || username,
           email: payload.email || '',
-          roles: roles
+          roles: roles,
+          id: payload.id || payload.userId || undefined
         };
-        console.log("🔐 Parsed user roles:", roles);
       } catch (error) {
         // Fallback if token parsing fails
         this.user = {
@@ -221,7 +220,6 @@ export class AuthService {
       localStorage.setItem(this.USER_KEY, JSON.stringify(this.user));
       this.logged = true;
       this.authStateSubject.next(true);
-      console.log("🔐 User logged in:", this.user);
     }
   }
 
@@ -242,7 +240,6 @@ export class AuthService {
       tap((response: AuthResponse) => {
         if (response.status === 'SUCCESS' && response.accessToken) {
           localStorage.setItem(this.ACCESS_TOKEN_KEY, response.accessToken);
-          console.log("🔐 Access token refreshed");
         }
       }),
       catchError((error) => {
@@ -258,7 +255,6 @@ export class AuthService {
    */
   public clearAllAuthData(): void {
     this.clearTokens();
-    console.log('🔐 All authentication data cleared');
   }
 
   /**

@@ -57,7 +57,10 @@ public class BookMapper {
             return null;
         }
         Book book = new Book();
-        book.setId(bookDTO.id());
+        // Only set ID if it's not null and not 0 (for new entities, let Hibernate generate the ID)
+        if (bookDTO.id() != null && bookDTO.id() > 0) {
+            book.setId(bookDTO.id());
+        }
         book.setTitle(bookDTO.title());
         book.setAuthor(bookDTO.author());
         book.setGenre(bookDTO.genre());

@@ -10,6 +10,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import es.codeurjc13.librored.model.User;
+import es.codeurjc13.librored.service.UserService;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
@@ -31,9 +34,11 @@ import java.util.Optional;
 public class BookRestController {
 
     private final BookService bookService;
+    private final UserService userService;
 
-    public BookRestController(BookService bookService) {
+    public BookRestController(BookService bookService, UserService userService) {
         this.bookService = bookService;
+        this.userService = userService;
     }
 
     // ==================== WEB APP ENDPOINTS (/api/books) ====================
@@ -114,15 +119,35 @@ public class BookRestController {
         return book.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
-    @Operation(summary = "Create a new book", description = "Create a new book entry")
-    @ApiResponses(value = {@ApiResponse(responseCode = "201", description = "Book created successfully"), @ApiResponse(responseCode = "400", description = "Invalid book data"), @ApiResponse(responseCode = "500", description = "Internal server error")})
-    @PostMapping("/api/v1/books")
-    public ResponseEntity<BookDTO> createBook(@Parameter(description = "Book data") @Valid @RequestBody BookDTO bookDTO) {
+    @PostMapping(value = "/api/v1/books", consumes = "application/json", produces = "application/json")
+    public ResponseEntity<BookDTO> createBook(@AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails, @RequestBody BookDTO bookDTO) {
+        System.out.println("🔥 DEBUG: createBook method called with: " + bookDTO);
         try {
+            // Get current user
+            User currentUser = userService.getUserByEmail(userDetails.getUsername())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            boolean isAdmin = currentUser.getRole() == User.Role.ROLE_ADMIN;
+
+            // For non-admin users, force them to be the owner
+            if (!isAdmin) {
+                bookDTO = new BookDTO(
+                    bookDTO.id(),
+                    bookDTO.title(),
+                    bookDTO.author(),
+                    bookDTO.genre(),
+                    bookDTO.description(),
+                    bookDTO.hasCoverImage(),
+                    new es.codeurjc13.librored.dto.UserBasicDTO(currentUser.getId(), currentUser.getUsername())
+                );
+            }
+
             BookDTO createdBook = bookService.createBookDTO(bookDTO);
             URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(createdBook.id()).toUri();
+            System.out.println("🔥 DEBUG: Book created successfully: " + createdBook);
             return ResponseEntity.created(location).body(createdBook);
         } catch (IllegalArgumentException e) {
+            System.out.println("🔥 DEBUG: Error creating book: " + e.getMessage());
             return ResponseEntity.badRequest().build();
         }
     }
@@ -130,17 +155,76 @@ public class BookRestController {
     @Operation(summary = "Update book", description = "Update an existing book")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Book updated successfully"), @ApiResponse(responseCode = "404", description = "Book not found"), @ApiResponse(responseCode = "400", description = "Invalid book data")})
     @PutMapping("/api/v1/books/{id}")
-    public ResponseEntity<BookDTO> updateBook(@Parameter(description = "Book ID") @PathVariable Long id, @Parameter(description = "Updated book data") @Valid @RequestBody BookDTO bookDTO) {
-        Optional<BookDTO> updatedBook = bookService.updateBookDTO(id, bookDTO);
-        return updatedBook.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<BookDTO> updateBook(@AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails, @Parameter(description = "Book ID") @PathVariable Long id, @Parameter(description = "Updated book data") @Valid @RequestBody BookDTO bookDTO) {
+        try {
+            // Get current user
+            User currentUser = userService.getUserByEmail(userDetails.getUsername())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            boolean isAdmin = currentUser.getRole() == User.Role.ROLE_ADMIN;
+
+            // Check if book exists and get current book
+            Optional<BookDTO> existingBookOpt = bookService.getBookByIdDTO(id);
+            if (existingBookOpt.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            BookDTO existingBook = existingBookOpt.get();
+
+            // Authorization check: Admin can edit any book, User can only edit their own books
+            if (!isAdmin && !existingBook.owner().id().equals(currentUser.getId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
+            // For non-admin users, prevent them from changing ownership
+            if (!isAdmin) {
+                bookDTO = new BookDTO(
+                    bookDTO.id(),
+                    bookDTO.title(),
+                    bookDTO.author(),
+                    bookDTO.genre(),
+                    bookDTO.description(),
+                    bookDTO.hasCoverImage(),
+                    existingBook.owner() // Keep original owner
+                );
+            }
+
+            Optional<BookDTO> updatedBook = bookService.updateBookDTO(id, bookDTO);
+            return updatedBook.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @Operation(summary = "Delete book", description = "Delete a book by ID")
     @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Book deleted successfully"), @ApiResponse(responseCode = "404", description = "Book not found")})
     @DeleteMapping("/api/v1/books/{id}")
-    public ResponseEntity<Void> deleteBook(@Parameter(description = "Book ID") @PathVariable Long id) {
-        boolean deleted = bookService.deleteBookDTO(id);
-        return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+    public ResponseEntity<Void> deleteBook(@AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails, @Parameter(description = "Book ID") @PathVariable Long id) {
+        try {
+            // Get current user
+            User currentUser = userService.getUserByEmail(userDetails.getUsername())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            boolean isAdmin = currentUser.getRole() == User.Role.ROLE_ADMIN;
+
+            // Check if book exists
+            Optional<BookDTO> existingBookOpt = bookService.getBookByIdDTO(id);
+            if (existingBookOpt.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            BookDTO existingBook = existingBookOpt.get();
+
+            // Authorization check: Admin can delete any book, User can only delete their own books
+            if (!isAdmin && !existingBook.owner().id().equals(currentUser.getId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
+            boolean deleted = bookService.deleteBookDTO(id);
+            return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @Operation(summary = "Get books by owner", description = "Retrieve books owned by a specific user")
@@ -197,11 +281,16 @@ public class BookRestController {
     @Operation(summary = "Upload book cover image", description = "Upload a cover image for a specific book")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Cover image uploaded successfully"), @ApiResponse(responseCode = "400", description = "Invalid file or request"), @ApiResponse(responseCode = "404", description = "Book not found"), @ApiResponse(responseCode = "413", description = "File too large"), @ApiResponse(responseCode = "415", description = "Unsupported media type")})
     @PostMapping("/api/v1/books/{id}/cover")
-    public ResponseEntity<Map<String, String>> uploadBookCoverImage(@Parameter(description = "Book ID") @PathVariable Long id, @Parameter(description = "Cover image file") @RequestParam("file") MultipartFile file) {
+    public ResponseEntity<Map<String, String>> uploadBookCoverImage(@AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails, @Parameter(description = "Book ID") @PathVariable Long id, @Parameter(description = "Cover image file") @RequestParam("file") MultipartFile file) {
 
         Map<String, String> response = new HashMap<>();
 
         try {
+            // Get current user
+            User currentUser = userService.getUserByEmail(userDetails.getUsername())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            boolean isAdmin = currentUser.getRole() == User.Role.ROLE_ADMIN;
             // Validate file
             if (file.isEmpty()) {
                 response.put("error", "File is empty");
@@ -221,11 +310,19 @@ public class BookRestController {
                 return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).body(response);
             }
 
-            // Check if book exists
-            Optional<Book> bookOptional = bookService.getBookById(id);
-            if (bookOptional.isEmpty()) {
+            // Check if book exists and get book details
+            Optional<BookDTO> bookDTOOptional = bookService.getBookByIdDTO(id);
+            if (bookDTOOptional.isEmpty()) {
                 response.put("error", "Book not found");
                 return ResponseEntity.notFound().build();
+            }
+
+            BookDTO bookDTO = bookDTOOptional.get();
+
+            // Authorization check: Admin can upload to any book, User can only upload to their own books
+            if (!isAdmin && !bookDTO.owner().id().equals(currentUser.getId())) {
+                response.put("error", "You can only upload cover images to your own books");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
             }
 
             // Upload the image
