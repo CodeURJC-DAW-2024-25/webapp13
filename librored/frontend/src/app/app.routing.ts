@@ -14,6 +14,7 @@ import { AdminBooksComponent } from "./components/admin/admin-books/admin-books.
 import { AdminLoansComponent } from "./components/admin/admin-loans/admin-loans.component";
 import { UserAccountComponent } from "./components/user-account/user-account.component";
 import { UserBooksComponent } from "./components/user-books/user-books.component";
+import { UserLoansComponent } from "./components/user-loans/user-loans.component";
 
 const appRoutes: Routes = [
   // Public routes
@@ -35,6 +36,7 @@ const appRoutes: Routes = [
   // User account routes
   { path: "account", component: UserAccountComponent },
   { path: "my-books", component: UserBooksComponent },
+  { path: "my-loans", component: UserLoansComponent },
 
   // Admin routes (no guard - backend will handle permissions)
   { path: "admin", component: AdminDashboardComponent },
