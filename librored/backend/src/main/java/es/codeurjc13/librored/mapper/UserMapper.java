@@ -15,6 +15,7 @@ public class UserMapper {
 
     /**
      * Convert User entity to UserDTO
+     * Password is never included in response DTOs for security
      */
     public UserDTO toDTO(User user) {
         if (user == null) {
@@ -24,7 +25,8 @@ public class UserMapper {
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
-                user.getRole()
+                user.getRole(),
+                null  // Never include password in response DTOs
         );
     }
 

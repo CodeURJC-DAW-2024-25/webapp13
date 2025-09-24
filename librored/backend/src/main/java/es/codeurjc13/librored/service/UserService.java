@@ -132,25 +132,34 @@ public class UserService {
     }
 
     public UserDTO createUserDTO(UserDTO userDTO) {
-        User user = userMapper.toDomain(userDTO);
-        if (user.getUsername() == null || user.getUsername().isEmpty()) {
+        if (userDTO.username() == null || userDTO.username().isEmpty()) {
             throw new IllegalArgumentException("Username cannot be null or empty");
         }
-        if (user.getEmail() == null || user.getEmail().isEmpty()) {
+        if (userDTO.email() == null || userDTO.email().isEmpty()) {
             throw new IllegalArgumentException("Email cannot be null or empty");
         }
-        
-        // Set a default password for REST API created users
-        String defaultPassword = "defaultPassword123";
-        user.setEncodedPassword(passwordEncoder.encode(defaultPassword));
-        
-        // Use role from DTO or default to ROLE_USER
-        if (user.getRole() == null) {
-            user.setRole(User.Role.ROLE_USER);
+        if (userDTO.password() == null || userDTO.password().isEmpty()) {
+            throw new IllegalArgumentException("Password cannot be null or empty for user creation");
         }
-        
+
+        // Check for existing username and email
+        if (userRepository.findByUsername(userDTO.username()).isPresent()) {
+            throw new IllegalArgumentException("Username already exists");
+        }
+        if (userRepository.findByEmail(userDTO.email()).isPresent()) {
+            throw new IllegalArgumentException("Email already exists");
+        }
+
+        // Create new user entity
+        User user = new User();
+        user.setUsername(userDTO.username());
+        user.setEmail(userDTO.email());
+        user.setEncodedPassword(passwordEncoder.encode(userDTO.password()));
+        user.setRole(userDTO.role() != null ? userDTO.role() : User.Role.ROLE_USER);
+
         User savedUser = userRepository.save(user);
-        return userMapper.toDTO(savedUser);
+        // Return DTO without password
+        return new UserDTO(savedUser.getId(), savedUser.getUsername(), savedUser.getEmail(), savedUser.getRole(), null);
     }
 
     public Optional<UserDTO> updateUserDTO(Long id, UserDTO userDTO) {
