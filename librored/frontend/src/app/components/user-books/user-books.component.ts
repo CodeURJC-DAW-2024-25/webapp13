@@ -1,7 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { BookService } from '../../services/book.service';
 import { UserAccountService } from '../../services/user-account.service';
+import { LoanService } from '../../services/loan.service';
 import { BookDTO } from '../../dtos/book.dto';
+import { forkJoin, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 
 interface UserInfo {
   id: number;
@@ -61,7 +64,8 @@ export class UserBooksComponent implements OnInit {
 
   constructor(
     private bookService: BookService,
-    private userAccountService: UserAccountService
+    private userAccountService: UserAccountService,
+    private loanService: LoanService
   ) {}
 
   ngOnInit(): void {
@@ -90,14 +94,68 @@ export class UserBooksComponent implements OnInit {
     this.loading = true;
     this.bookService.getBooksByOwner(this.currentUser.id).subscribe({
       next: (books) => {
-        this.books = books;
-        this.totalItems = books.length;
-        this.totalPages = Math.ceil(this.totalItems / this.pageSize);
-        this.loading = false;
+        // Load loan information for each book
+        this.loadLoanInformationForBooks(books);
       },
       error: (error) => {
         console.error('Error loading user books:', error);
         this.errorMessage = 'Failed to load books';
+        this.loading = false;
+      }
+    });
+  }
+
+  loadLoanInformationForBooks(books: BookDTO[]): void {
+    if (books.length === 0) {
+      this.books = books;
+      this.totalItems = books.length;
+      this.totalPages = Math.ceil(this.totalItems / this.pageSize);
+      this.loading = false;
+      return;
+    }
+
+    // Create observables for each book's loan information
+    const loanRequests = books.map(book => {
+      if (book.id) {
+        return this.loanService.getActiveLoansForBook(book.id).pipe(
+          map(activeLoans => {
+            book.isCurrentlyOnLoan = activeLoans.length > 0;
+            if (activeLoans.length > 0) {
+              const activeLoan = activeLoans[0];
+              book.currentLoanInfo = {
+                borrower: activeLoan.borrower.username,
+                startDate: activeLoan.startDate,
+                endDate: activeLoan.endDate || undefined
+              };
+            }
+            return book;
+          }),
+          catchError(() => {
+            // On error, just mark as not on loan
+            book.isCurrentlyOnLoan = false;
+            return of(book);
+          })
+        );
+      } else {
+        book.isCurrentlyOnLoan = false;
+        return of(book);
+      }
+    });
+
+    // Wait for all loan requests to complete
+    forkJoin(loanRequests).subscribe({
+      next: (booksWithLoanInfo) => {
+        this.books = booksWithLoanInfo;
+        this.totalItems = booksWithLoanInfo.length;
+        this.totalPages = Math.ceil(this.totalItems / this.pageSize);
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error loading loan information:', error);
+        // Even on error, show books without loan info
+        this.books = books;
+        this.totalItems = books.length;
+        this.totalPages = Math.ceil(this.totalItems / this.pageSize);
         this.loading = false;
       }
     });

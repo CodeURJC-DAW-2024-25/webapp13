@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { Observable, throwError } from "rxjs";
-import { catchError } from "rxjs/operators";
+import { catchError, map } from "rxjs/operators";
 import { LoanDTO, LoanRequest } from "../dtos/loan.dto";
 import { PaginatedResponse } from "../interfaces/paginated-response.interface";
 
@@ -185,6 +185,17 @@ export class LoanService {
   getUserAvailableBooks(userId: number): Observable<{id: number, title: string}[]> {
     return this.http.get<{id: number, title: string}[]>(`/api/v1/books/available/${userId}`, { withCredentials: true })
       .pipe(catchError(this.handleError));
+  }
+
+  // Get active loans by book ID
+  getActiveLoansForBook(bookId: number): Observable<LoanDTO[]> {
+    return this.http.get<LoanDTO[]>(`${this.ADMIN_API_URL}/book/${bookId}`, { withCredentials: true })
+      .pipe(
+        map((loans: LoanDTO[]) =>
+          loans.filter(loan => loan.status === 'Active')
+        ),
+        catchError(this.handleError)
+      );
   }
 
   private handleError(error: any): Observable<never> {

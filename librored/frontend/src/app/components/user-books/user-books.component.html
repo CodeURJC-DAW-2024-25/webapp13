@@ -43,6 +43,7 @@
                   <th>Title</th>
                   <th>Author</th>
                   <th>Genre</th>
+                  <th>Loan Status</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -63,6 +64,22 @@
                   <td>{{ book.author }}</td>
                   <td>
                     <span class="badge bg-secondary">{{ book.genre.replace('_', ' ') }}</span>
+                  </td>
+                  <td>
+                    <div *ngIf="book.isCurrentlyOnLoan" class="text-danger">
+                      <strong>Currently on Loan</strong>
+                      <br>
+                      <small class="text-muted">
+                        To: {{ book.currentLoanInfo?.borrower }}<br>
+                        Since: {{ book.currentLoanInfo?.startDate | date:'shortDate' }}
+                        <span *ngIf="book.currentLoanInfo?.endDate">
+                          <br>Until: {{ book.currentLoanInfo?.endDate | date:'shortDate' }}
+                        </span>
+                      </small>
+                    </div>
+                    <div *ngIf="!book.isCurrentlyOnLoan" class="text-success">
+                      <i class="bi bi-check-circle"></i> Available
+                    </div>
                   </td>
                   <td style="min-width: 100px;">
                     <div class="d-grid gap-1">
