@@ -1,6 +1,20 @@
-# Multi-stage build for LibroRed Spring Boot Application
-# Stage 1: Build stage with Maven
-FROM maven:3.9.6-eclipse-temurin-21 AS build
+# Multi-stage build for LibroRed Application
+# Stage 1: Build Angular frontend with Node.js
+FROM node:18-alpine AS angular-build
+
+# Set working directory for Angular
+WORKDIR /frontend
+
+# Copy Angular frontend files
+COPY librored/frontend/package*.json ./
+COPY librored/frontend/ ./
+
+# Install dependencies and build Angular
+RUN npm install
+RUN npx ng build --configuration production
+
+# Stage 2: Build Spring Boot backend with Maven
+FROM maven:3.9.6-eclipse-temurin-21 AS spring-build
 
 # Set working directory
 WORKDIR /app
@@ -9,10 +23,13 @@ WORKDIR /app
 COPY librored/backend/pom.xml ./
 COPY librored/backend/src ./src/
 
+# Copy built Angular files to Spring Boot static resources
+COPY --from=angular-build /frontend/dist/ ./src/main/resources/static/new/
+
 # Build the application
 RUN mvn clean package -DskipTests
 
-# Stage 2: Runtime stage with Java 21
+# Stage 3: Runtime stage with Java 21
 FROM eclipse-temurin:21-jre-jammy
 
 # Set working directory
@@ -22,8 +39,8 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/* && \
     addgroup --system librored && adduser --system --group librored
 
-# Copy the built JAR from build stage
-COPY --from=build /app/target/*.jar app.jar
+# Copy the built JAR from spring-build stage
+COPY --from=spring-build /app/target/*.jar app.jar
 
 # Change ownership to non-root user
 RUN chown librored:librored app.jar
