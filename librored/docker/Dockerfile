@@ -3,13 +3,17 @@
 FROM node:18-alpine AS angular-build
 
 # Set working directory for Angular
-WORKDIR /frontend
+WORKDIR /app
 
 # Copy Angular frontend files
-COPY librored/frontend/package*.json ./
-COPY librored/frontend/ ./
+COPY librored/frontend/package*.json ./frontend/
+COPY librored/frontend/ ./frontend/
 
-# Install dependencies and build Angular
+# Create backend directory structure for Angular output
+RUN mkdir -p ./backend/src/main/resources/static/new
+
+# Set working directory to frontend and build
+WORKDIR /app/frontend
 RUN npm install
 RUN npx ng build --configuration production
 
@@ -23,8 +27,8 @@ WORKDIR /app
 COPY librored/backend/pom.xml ./
 COPY librored/backend/src ./src/
 
-# Copy built Angular files to Spring Boot static resources
-COPY --from=angular-build /frontend/dist/ ./src/main/resources/static/new/
+# Copy built Angular files from angular-build stage
+COPY --from=angular-build /app/backend/src/main/resources/static/new/ ./src/main/resources/static/new/
 
 # Build the application
 RUN mvn clean package -DskipTests
