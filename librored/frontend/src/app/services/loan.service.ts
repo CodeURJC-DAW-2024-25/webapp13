@@ -197,7 +197,11 @@ export class LoanService {
     console.error('Full error object:', JSON.stringify(error, null, 2));
     let errorMessage = 'An error occurred';
 
-    if (error.error?.message) {
+    if (error.error?.error) {
+      // Backend validation errors come in format: {"error": "message"}
+      errorMessage = error.error.error;
+    } else if (error.error?.message) {
+      // Other backend errors
       errorMessage = error.error.message;
     } else if (error.message) {
       errorMessage = error.message;

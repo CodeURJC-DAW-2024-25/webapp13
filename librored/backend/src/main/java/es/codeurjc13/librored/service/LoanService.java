@@ -151,31 +151,47 @@ public class LoanService {
     }
 
     public LoanDTO createLoanDTO(LoanDTO loanDTO) {
+        System.out.println("🔥 DEBUG: createLoanDTO called with: " + loanDTO.toString());
+
         Loan loan = loanMapper.toDomain(loanDTO);
-        
+
         // Set book, lender, and borrower from DTO references
         if (loanDTO.book() != null) {
+            System.out.println("🔥 DEBUG: Looking for book with id: " + loanDTO.book().id());
             Book book = bookRepository.findById(loanDTO.book().id())
                     .orElseThrow(() -> new IllegalArgumentException("Book not found with id: " + loanDTO.book().id()));
             loan.setBook(book);
+            System.out.println("🔥 DEBUG: Book set successfully: " + book.getTitle());
         }
-        
+
         if (loanDTO.lender() != null) {
+            System.out.println("🔥 DEBUG: Looking for lender with id: " + loanDTO.lender().id());
             User lender = userRepository.findById(loanDTO.lender().id())
                     .orElseThrow(() -> new IllegalArgumentException("Lender not found with id: " + loanDTO.lender().id()));
             loan.setLender(lender);
+            System.out.println("🔥 DEBUG: Lender set successfully: " + lender.getUsername());
         }
-        
+
         if (loanDTO.borrower() != null) {
+            System.out.println("🔥 DEBUG: Looking for borrower with id: " + loanDTO.borrower().id());
             User borrower = userRepository.findById(loanDTO.borrower().id())
                     .orElseThrow(() -> new IllegalArgumentException("Borrower not found with id: " + loanDTO.borrower().id()));
             loan.setBorrower(borrower);
+            System.out.println("🔥 DEBUG: Borrower set successfully: " + borrower.getUsername());
         }
-        
-        // Validate business rules
-        validateLoanBusinessRules(loan);
-        
+
+        System.out.println("🔥 DEBUG: About to validate business rules...");
+        try {
+            // Validate business rules
+            validateLoanBusinessRules(loan);
+            System.out.println("🔥 DEBUG: Business rules validation passed");
+        } catch (IllegalArgumentException e) {
+            System.out.println("🔥 DEBUG: Business rules validation FAILED: " + e.getMessage());
+            throw e;
+        }
+
         Loan savedLoan = loanRepository.save(loan);
+        System.out.println("🔥 DEBUG: Loan saved successfully with id: " + savedLoan.getId());
         return loanMapper.toDTO(savedLoan);
     }
 
