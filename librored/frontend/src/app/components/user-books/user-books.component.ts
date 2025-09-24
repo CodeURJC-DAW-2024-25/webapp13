@@ -208,6 +208,8 @@ export class UserBooksComponent implements OnInit {
     this.showCreateModal = false;
     this.bookForm = this.getEmptyBookForm();
     this.selectedFile = null;
+    // Clear the file input element
+    this.clearFileInput('createCoverImage');
   }
 
   openEditModal(book: BookDTO): void {
@@ -223,6 +225,8 @@ export class UserBooksComponent implements OnInit {
     this.bookForm = this.getEmptyBookForm();
     this.selectedFile = null;
     this.selectedBookId = null;
+    // Clear the file input element
+    this.clearFileInput('editCoverImage');
   }
 
   openDeleteModal(book: BookDTO): void {
@@ -412,5 +416,12 @@ export class UserBooksComponent implements OnInit {
   clearMessages(): void {
     this.errorMessage = '';
     this.successMessage = '';
+  }
+
+  clearFileInput(elementId: string): void {
+    const fileInput = document.getElementById(elementId) as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
   }
 }

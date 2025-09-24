@@ -299,6 +299,8 @@ export class AdminBooksComponent implements OnInit {
     this.showCreateModal = false;
     this.bookForm = this.getEmptyBookForm();
     this.selectedFile = null;
+    // Clear the file input element
+    this.clearFileInput('createCoverImage');
   }
 
   closeEditModal(): void {
@@ -306,6 +308,8 @@ export class AdminBooksComponent implements OnInit {
     this.bookForm = this.getEmptyBookForm();
     this.selectedFile = null;
     this.selectedBookId = null;
+    // Clear the file input element
+    this.clearFileInput('editCoverImage');
   }
 
   closeDeleteModal(): void {
@@ -317,5 +321,12 @@ export class AdminBooksComponent implements OnInit {
   clearMessages(): void {
     this.errorMessage = '';
     this.successMessage = '';
+  }
+
+  clearFileInput(elementId: string): void {
+    const fileInput = document.getElementById(elementId) as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
   }
 }
