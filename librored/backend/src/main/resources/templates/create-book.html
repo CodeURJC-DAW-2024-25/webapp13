@@ -34,7 +34,6 @@
         <div class="form-group">
             <label>Cover Picture</label>
             <input type="file" id="coverUpload" name="coverImage" class="form-control">
-            <button type="button" id="uploadBtn" class="btn btn-secondary mt-2">Upload from Local</button>
         </div>
 
         <!--  Owner Selection (Only for Admins) -->
@@ -62,10 +61,6 @@
 </div>
 
 <script>
-    document.getElementById('uploadBtn').addEventListener('click', function () {
-        document.getElementById('coverUpload').click();
-    });
-
     document.getElementById('coverUpload').addEventListener('change', function (event) {
         const file = event.target.files[0];
         if (file) {
