@@ -154,14 +154,20 @@ export class AdminBooksComponent implements OnInit {
     this.bookService.createBook(this.bookForm).subscribe({
       next: (createdBook) => {
         this.successMessage = 'Book created successfully!';
+        this.loading = false;
+
+        // Get file directly from DOM before modal is closed
+        const fileInput = document.getElementById('createCoverImage') as HTMLInputElement;
+        const fileToUpload = fileInput?.files?.[0] || null;
+
         this.closeCreateModal();
-        this.loadBooks();
 
         // Upload cover image if selected
-        if (this.selectedFile && createdBook.id) {
-          this.uploadCoverImage(createdBook.id);
+        if (fileToUpload && createdBook.id) {
+          this.uploadCoverImageWithFile(createdBook.id, fileToUpload);
+        } else {
+          this.loadBooks();
         }
-        this.loading = false;
       },
       error: (error) => {
         console.error('Error creating book:', error);
@@ -177,18 +183,26 @@ export class AdminBooksComponent implements OnInit {
       return;
     }
 
+    const bookId = this.selectedBookId;
+
     this.loading = true;
     this.bookService.updateBook(this.selectedBookId, this.bookForm).subscribe({
       next: () => {
         this.successMessage = 'Book updated successfully!';
+        this.loading = false;
+
+        // Get file directly from DOM before modal is closed
+        const fileInput = document.getElementById('editCoverImage') as HTMLInputElement;
+        const fileToUpload = fileInput?.files?.[0] || null;
+
         this.closeEditModal();
-        this.loadBooks();
 
         // Upload cover image if selected
-        if (this.selectedFile && this.selectedBookId) {
-          this.uploadCoverImage(this.selectedBookId);
+        if (fileToUpload && bookId) {
+          this.uploadCoverImageWithFile(bookId, fileToUpload);
+        } else {
+          this.loadBooks();
         }
-        this.loading = false;
       },
       error: (error) => {
         console.error('Error updating book:', error);
@@ -243,6 +257,18 @@ export class AdminBooksComponent implements OnInit {
     if (!this.selectedFile) return;
 
     this.bookService.uploadCoverImage(bookId, this.selectedFile).subscribe({
+      next: () => {
+        this.loadBooks(); // Refresh to show updated cover
+      },
+      error: (error) => {
+        console.error('Error uploading cover image:', error);
+        this.errorMessage = 'Book saved but failed to upload cover image';
+      }
+    });
+  }
+
+  uploadCoverImageWithFile(bookId: number, file: File): void {
+    this.bookService.uploadCoverImage(bookId, file).subscribe({
       next: () => {
         this.loadBooks(); // Refresh to show updated cover
       },
