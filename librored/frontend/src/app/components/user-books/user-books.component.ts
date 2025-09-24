@@ -196,41 +196,33 @@ export class UserBooksComponent implements OnInit {
     // Check for file selection BEFORE creating book
     const fileInput = document.getElementById('createCoverImage') as HTMLInputElement;
     const selectedFile = fileInput?.files?.[0] || this.selectedFile || null;
-    console.log('📷 DOM file check:', selectedFile ? selectedFile.name : 'No file found in DOM');
-    console.log('📷 Component selectedFile:', this.selectedFile ? this.selectedFile.name : 'No component file');
 
     // Set hasCoverImage flag to true if a file is selected - the image will be uploaded after book creation
     this.bookForm.hasCoverImage = selectedFile !== null;
 
-    console.log('📚 Creating book with form data:', this.bookForm);
-    console.log('🔍 DEBUG: Final hasCoverImage flag:', this.bookForm.hasCoverImage);
 
     this.loading = true;
     this.bookService.createBook(this.bookForm).subscribe({
       next: (createdBook) => {
-        console.log('✅ Book created successfully:', createdBook);
-        console.log('🆔 DEBUG: createdBook.id:', createdBook.id);
+
         this.successMessage = 'Book created successfully!';
         this.loading = false;
 
         // Get file directly from DOM before modal is closed
         const fileInput = document.getElementById('createCoverImage') as HTMLInputElement;
         const fileToUpload = fileInput?.files?.[0] || null;
-        console.log('💾 DEBUG: fileToUpload from DOM:', fileToUpload ? fileToUpload.name : 'NULL');
 
         this.closeCreateModal();
 
         // Upload cover image if selected
         if (fileToUpload) {
-          console.log('📤 Proceeding to upload cover image for book ID:', createdBook.id);
           this.uploadCoverImageDirect(createdBook.id, fileToUpload);
         } else {
-          console.log('ℹ️ No file selected, skipping image upload');
           this.loadUserBooks();
         }
       },
       error: (error) => {
-        console.error('❌ Error creating book:', error);
+        console.error('Error creating book:', error);
         this.errorMessage = 'Failed to create book';
         this.loading = false;
       }
@@ -288,21 +280,17 @@ export class UserBooksComponent implements OnInit {
 
   uploadCoverImage(bookId: number): void {
     if (!this.selectedFile) {
-      console.log('⚠️ No file selected for upload, skipping...');
       this.loadUserBooks();
       return;
     }
 
-    console.log('📤 Starting image upload for book ID:', bookId, 'File:', this.selectedFile.name, 'Size:', this.selectedFile.size);
 
     this.bookService.uploadCoverImage(bookId, this.selectedFile).subscribe({
       next: (response) => {
-        console.log('✅ Cover image uploaded successfully:', response);
         this.successMessage = 'Cover image uploaded successfully!';
         this.loadUserBooks();
       },
       error: (error) => {
-        console.error('❌ Error uploading cover image:', error);
         this.errorMessage = 'Failed to upload cover image: ' + (error.error?.message || error.message);
         this.loadUserBooks();
       }
@@ -310,10 +298,8 @@ export class UserBooksComponent implements OnInit {
   }
 
   uploadCoverImageDirect(bookId: number, file: File): void {
-    console.log('Uploading cover image for book ID:', bookId, 'File:', file.name);
     this.bookService.uploadCoverImage(bookId, file).subscribe({
       next: (response) => {
-        console.log('Cover image uploaded successfully:', response);
         this.successMessage = 'Book and cover image created successfully!';
         this.loadUserBooks();
       },
@@ -325,7 +311,6 @@ export class UserBooksComponent implements OnInit {
         const bookToUpdate = { ...this.bookForm, id: bookId, hasCoverImage: false };
         this.bookService.updateBook(bookId, bookToUpdate).subscribe({
           next: () => {
-            console.log('Book updated to reflect failed image upload');
             this.loadUserBooks();
           },
           error: (updateError) => {
@@ -347,12 +332,8 @@ export class UserBooksComponent implements OnInit {
   onFileSelected(event: any): void {
     const file = event.target.files[0];
     if (file) {
-      console.log('📁 DEBUG: File selected:', file.name, file.size, file.type);
-      console.log('📁 DEBUG: Setting this.selectedFile to:', file);
       this.selectedFile = file;
-      console.log('📁 DEBUG: this.selectedFile is now:', this.selectedFile);
     } else {
-      console.log('📁 DEBUG: No file selected, clearing this.selectedFile');
       this.selectedFile = null;
     }
   }

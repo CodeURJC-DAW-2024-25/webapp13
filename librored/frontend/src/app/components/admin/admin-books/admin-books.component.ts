@@ -244,7 +244,6 @@ export class AdminBooksComponent implements OnInit {
 
     this.bookService.uploadCoverImage(bookId, this.selectedFile).subscribe({
       next: () => {
-        console.log('Cover image uploaded successfully');
         this.loadBooks(); // Refresh to show updated cover
       },
       error: (error) => {

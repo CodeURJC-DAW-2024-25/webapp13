@@ -14,7 +14,7 @@
             <input type="text" name="author" class="form-control" required>
         </div>
 
-        <!-- ✅ Genre Dropdown -->
+        <!--  Genre Dropdown -->
         <div class="form-group">
             <label>Genre</label>
             <select name="genre" class="form-control" required>
@@ -30,14 +30,14 @@
             <textarea name="description" class="form-control" rows="3" required></textarea>
         </div>
 
-        <!-- ✅ Cover Picture Upload -->
+        <!--  Cover Picture Upload -->
         <div class="form-group">
             <label>Cover Picture</label>
             <input type="file" id="coverUpload" name="coverImage" class="form-control">
             <button type="button" id="uploadBtn" class="btn btn-secondary mt-2">Upload from Local</button>
         </div>
 
-        <!-- ✅ Owner Selection (Only for Admins) -->
+        <!--  Owner Selection (Only for Admins) -->
         {{#isAdmin}}
         <div class="form-group">
             <label>Owner</label>
@@ -50,7 +50,7 @@
         </div>
         {{/isAdmin}}
 
-        <!-- ✅ Hidden Owner Field (For Users) -->
+        <!--  Hidden Owner Field (For Users) -->
         {{^isAdmin}}
         <input type="hidden" name="ownerId" value="{{userId}}">
         {{/isAdmin}}

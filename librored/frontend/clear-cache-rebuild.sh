@@ -45,14 +45,14 @@ if [ $? -eq 0 ]; then
     # Check build timestamp
     if [ -f "../backend/src/main/resources/static/new/main.js" ]; then
         BUILD_TIME=$(stat -f "%Sm" -t "%H:%M:%S" "../backend/src/main/resources/static/new/main.js")
-        echo "✅ Fresh build completed at $BUILD_TIME"
+        echo " Fresh build completed at $BUILD_TIME"
         ls -la ../backend/src/main/resources/static/new/main.js | awk '{print "   File size:", $5, "bytes, modified:", $6, $7, $8}'
     else
-        echo "❌ Build files not found in expected location"
+        echo "Build files not found in expected location"
         exit 1
     fi
 else
-    echo "❌ Build failed"
+    echo "Build failed"
     exit 1
 fi
 echo ""

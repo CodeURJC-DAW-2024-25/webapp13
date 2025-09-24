@@ -83,11 +83,6 @@ export class LoanService {
       status: loan.status // Should match backend enum
     };
 
-    console.log('=== LOAN SERVICE UPDATE DEBUG ===');
-    console.log('Updating loan ID:', id);
-    console.log('Input LoanRequest:', JSON.stringify(loan, null, 2));
-    console.log('Converted loanDTO for backend:', JSON.stringify(loanDTO, null, 2));
-    console.log('PUT URL:', `${this.ADMIN_API_URL}/${id}`);
 
     return this.http.put<LoanDTO>(`${this.ADMIN_API_URL}/${id}`, loanDTO)
       .pipe(catchError(this.handleError));

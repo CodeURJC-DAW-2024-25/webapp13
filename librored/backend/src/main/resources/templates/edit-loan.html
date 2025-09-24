@@ -83,13 +83,10 @@
 
 <script>
     function showField(fieldId) {
-        console.log("🔍 Trying to show field: " + fieldId);
         var field = document.getElementById(fieldId);
         if (field) {
-            console.log("✅ Field found, displaying it.");
             field.classList.remove('d-none');
         } else {
-            console.error("❌ Field not found in the DOM!");
         }
     }
 
