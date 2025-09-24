@@ -518,6 +518,12 @@ Full reset (removes all containers and data)
 
 ---
 
+### APP VIDEO
+
+Here you can see a short app's video showing its main functionalities:
+
+[App Video](https://www.loom.com/share/9f43fa40cee342b8973283d59640b98f?sid=b90181f4-5018-4364-9037-8edb9a1ad784)
+
 # Members participation
 
 **Ana María Jurado Crespo** [medinaymedia](https://github.com/medinaymedia). All the work was done by Ana María Jurado Crespo.
