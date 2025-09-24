@@ -95,7 +95,7 @@
         let csrfHeader = document.getElementById("csrf_header").value;
         let csrfToken = document.getElementById("csrf_token").value;
 
-        fetch("/api/users/update-username", {
+        fetch("/users/update-username", {
             method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
@@ -130,7 +130,7 @@
         let csrfHeader = document.getElementById("csrf_header_password").value;
         let csrfToken = document.getElementById("csrf_token_password").value;
 
-        fetch("/api/users/verify-password", {
+        fetch("/users/verify-password", {
             method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
@@ -166,7 +166,7 @@
         let csrfHeader = document.getElementById("csrf_header_password").value;
         let csrfToken = document.getElementById("csrf_token_password").value;
 
-        fetch("/api/users/update-password", {
+        fetch("/users/update-password", {
             method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Controller
@@ -146,7 +147,7 @@ public class UserController {
         }
 
         User user = userOptional.get();
-        
+
         // Fetch recommended books for the user
         List<Book> recommendedBooks = bookService.getRecommendationsForUser(user.getId());
 
@@ -156,6 +157,95 @@ public class UserController {
         model.addAttribute("logged", true);
 
         return "myaccount";
+    }
+
+    @PostMapping("/users/update-username")
+    @ResponseBody
+    public Map<String, Object> updateUsername(
+            @RequestParam String newUsername,
+            @AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails) {
+
+        if (userDetails == null) {
+            return Map.of("success", false, "error", "User not authenticated.");
+        }
+
+        String email = userDetails.getUsername();
+        Optional<User> userOptional = userService.getUserByEmail(email);
+
+        if (userOptional.isEmpty()) {
+            return Map.of("success", false, "error", "User not found.");
+        }
+
+        User user = userOptional.get();
+        user.setUsername(newUsername);
+        userService.saveUser(user);
+
+        return Map.of("success", true, "message", "Username updated successfully!");
+    }
+
+    @PostMapping("/users/verify-password")
+    @ResponseBody
+    public Map<String, Object> verifyPassword(
+            @RequestParam String currentPassword,
+            @AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails) {
+
+        if (userDetails == null) {
+            return Map.of("success", false, "error", "User not authenticated.");
+        }
+
+        String email = userDetails.getUsername();
+        Optional<User> userOptional = userService.getUserByEmail(email);
+
+        if (userOptional.isEmpty()) {
+            return Map.of("success", false, "error", "User not found.");
+        }
+
+        User user = userOptional.get();
+        if (!passwordEncoder.matches(currentPassword, user.getEncodedPassword())) {
+            return Map.of("success", false, "error", "Incorrect current password.");
+        }
+
+        return Map.of("success", true, "message", "Password verified! You can now enter a new password.");
+    }
+
+    @PostMapping("/users/update-password")
+    @ResponseBody
+    public Map<String, Object> updatePassword(
+            @RequestParam String currentPassword,
+            @RequestParam String newPassword,
+            @AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails,
+            HttpServletRequest request) {
+
+        if (userDetails == null) {
+            return Map.of("success", false, "error", "User not authenticated.");
+        }
+
+        String email = userDetails.getUsername();
+        Optional<User> userOptional = userService.getUserByEmail(email);
+
+        if (userOptional.isEmpty()) {
+            return Map.of("success", false, "error", "User not found.");
+        }
+
+        User user = userOptional.get();
+        if (!passwordEncoder.matches(currentPassword, user.getEncodedPassword())) {
+            return Map.of("success", false, "error", "Incorrect current password.");
+        }
+
+        // Update password
+        user.setEncodedPassword(passwordEncoder.encode(newPassword));
+        userService.saveUser(user);
+
+        // Clear security context and invalidate session
+        SecurityContextHolder.clearContext();
+        if (request.getSession(false) != null) {
+            request.getSession(false).invalidate();
+        }
+
+        return Map.of(
+            "success", true,
+            "message", "Password updated successfully! Redirecting to login..."
+        );
     }
 
 
