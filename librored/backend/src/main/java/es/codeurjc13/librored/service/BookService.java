@@ -132,26 +132,18 @@ public class BookService {
     }
 
     public BookDTO createBookDTO(BookDTO bookDTO) {
-        System.out.println("🔥 DEBUG: BookService.createBookDTO called with: " + bookDTO);
         try {
             Book book = bookMapper.toDomain(bookDTO);
-            System.out.println("🔥 DEBUG: Book entity created from DTO: " + book);
 
             // Set the owner from the DTO
             if (bookDTO.owner() != null) {
-                System.out.println("🔥 DEBUG: Looking for owner with id: " + bookDTO.owner().id());
                 User owner = userRepository.findById(bookDTO.owner().id())
                         .orElseThrow(() -> new IllegalArgumentException("Owner not found with id: " + bookDTO.owner().id()));
                 book.setOwner(owner);
-                System.out.println("🔥 DEBUG: Owner set successfully: " + owner.getUsername());
             }
-
-            System.out.println("🔥 DEBUG: About to save book to repository...");
             Book savedBook = bookRepository.save(book);
-            System.out.println("🔥 DEBUG: Book saved successfully with id: " + savedBook.getId());
             return bookMapper.toDTO(savedBook);
         } catch (Exception e) {
-            System.out.println("🔥 DEBUG: Exception in createBookDTO: " + e.getClass().getSimpleName() + " - " + e.getMessage());
             e.printStackTrace();
             throw e;
         }

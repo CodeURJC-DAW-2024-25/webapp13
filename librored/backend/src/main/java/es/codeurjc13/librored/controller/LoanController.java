@@ -8,6 +8,7 @@ import es.codeurjc13.librored.service.LoanService;
 import es.codeurjc13.librored.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.web.csrf.CsrfToken;
@@ -383,6 +384,32 @@ public class LoanController {
                 })
                 .collect(Collectors.toList());
         return ResponseEntity.ok(bookData);
+    }
+
+    @GetMapping("/loans/valid-borrowers")
+    @ResponseBody
+    public ResponseEntity<List<Map<String, Object>>> getValidBorrowers(
+            @AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails) {
+
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        User lender = userService.getUserByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        List<User> borrowers = userService.getValidBorrowers(lender);
+
+        List<Map<String, Object>> borrowerData = borrowers.stream()
+                .map(user -> {
+                    Map<String, Object> userMap = new java.util.HashMap<>();
+                    userMap.put("id", user.getId());
+                    userMap.put("username", user.getUsername());
+                    return userMap;
+                })
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(borrowerData);
     }
 
 }

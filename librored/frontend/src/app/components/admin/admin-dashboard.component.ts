@@ -17,7 +17,6 @@ export class AdminDashboardComponent implements OnInit {
 
   ngOnInit(): void {
     // NO AUTH CHECK - Let backend handle it
-    console.log('AdminDashboard loaded without auth check!');
   }
 
   navigateToUserManagement(): void {
@@ -33,13 +32,8 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   downloadReport(): void {
-    console.log('Download report button clicked');
     this.adminService.downloadAdminReport().subscribe({
       next: (blob) => {
-        console.log('Received blob:', blob);
-        console.log('Blob size:', blob.size);
-        console.log('Blob type:', blob.type);
-
         // Check if blob is valid
         if (blob.size === 0) {
           console.error('Received empty blob');
@@ -75,7 +69,6 @@ export class AdminDashboardComponent implements OnInit {
           document.body.removeChild(link);
           window.URL.revokeObjectURL(url);
 
-          console.log('Download initiated successfully');
         } catch (e) {
           console.error('Error creating download:', e);
           alert('Error creating download. Please try again.');

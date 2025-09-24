@@ -106,11 +106,9 @@ export class AdminLoansComponent implements OnInit {
       return;
     }
 
-    console.log('Loading books for lender ID:', lenderId);
     this.loadingBooks = true;
     this.loanService.getAvailableBooksByLender(lenderId).subscribe({
       next: (books) => {
-        console.log('Received books:', books);
         this.availableBooks = books;
         this.loadingBooks = false;
       },
@@ -129,11 +127,9 @@ export class AdminLoansComponent implements OnInit {
       return;
     }
 
-    console.log('Loading books for edit - lender ID:', lenderId, 'current book:', currentBook);
     this.loadingBooks = true;
     this.loanService.getAvailableBooksByLender(lenderId).subscribe({
       next: (books) => {
-        console.log('Received available books:', books);
         // Add the current book to the list if it's not already there
         const currentBookInList = books.find(book => book.id === currentBook.id);
         if (!currentBookInList && currentBook.id) {
@@ -141,7 +137,6 @@ export class AdminLoansComponent implements OnInit {
             id: currentBook.id,
             title: currentBook.title
           });
-          console.log('Added current book to list:', currentBook.title);
         }
         this.availableBooks = books;
         this.loadingBooks = false;
@@ -219,7 +214,6 @@ export class AdminLoansComponent implements OnInit {
 
     this.loading = true;
     const loanRequest = this.convertFormToLoanRequest();
-    console.log('Creating loan with data:', JSON.stringify(loanRequest, null, 2));
     this.loanService.createLoan(loanRequest).subscribe({
       next: () => {
         this.successMessage = 'Loan created successfully!';
@@ -243,23 +237,15 @@ export class AdminLoansComponent implements OnInit {
 
     this.loading = true;
     const loanRequest = this.convertFormToLoanRequest();
-    console.log('=== UPDATE LOAN DEBUG ===');
-    console.log('Selected loan ID:', this.selectedLoanId);
-    console.log('Form data before conversion:', this.loanForm);
-    console.log('Available books:', this.availableBooks);
-    console.log('Users list:', this.users);
-    console.log('Converted loan request:', JSON.stringify(loanRequest, null, 2));
-
     this.loanService.updateLoan(this.selectedLoanId, loanRequest).subscribe({
       next: () => {
-        console.log('✅ Loan updated successfully');
         this.successMessage = 'Loan updated successfully!';
         this.closeEditModal();
         this.loadLoans();
         this.loading = false;
       },
       error: (error) => {
-        console.error('❌ Error updating loan:', error);
+        console.error('Error updating loan:', error);
         console.error('Error status:', error.status);
         console.error('Error message:', error.message);
         console.error('Full error object:', JSON.stringify(error, null, 2));
@@ -309,26 +295,15 @@ export class AdminLoansComponent implements OnInit {
   }
 
   convertFormToLoanRequest(): LoanRequest {
-    console.log('Form data:', this.loanForm);
-    console.log('Form book ID type:', typeof this.loanForm.bookId, 'value:', this.loanForm.bookId);
-    console.log('Form lender ID type:', typeof this.loanForm.lenderId, 'value:', this.loanForm.lenderId);
-    console.log('Form borrower ID type:', typeof this.loanForm.borrowerId, 'value:', this.loanForm.borrowerId);
-    console.log('Available books:', this.availableBooks);
-    console.log('Users:', this.users);
 
     const bookId = Number(this.loanForm.bookId);
     const lenderId = Number(this.loanForm.lenderId);
     const borrowerId = Number(this.loanForm.borrowerId);
 
-    console.log('Converted IDs:', { bookId, lenderId, borrowerId });
-
     const selectedBook = this.availableBooks.find(book => book.id === bookId);
     const selectedLender = this.users.find(user => user.id === lenderId);
     const selectedBorrower = this.users.find(user => user.id === borrowerId);
 
-    console.log('Selected book:', selectedBook);
-    console.log('Selected lender:', selectedLender);
-    console.log('Selected borrower:', selectedBorrower);
 
     return {
       book: {

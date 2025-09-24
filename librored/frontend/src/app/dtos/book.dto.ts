@@ -10,6 +10,12 @@ export interface BookDTO {
     username: string;
   };
   shops?: ShopBasicDTO[];
+  isCurrentlyOnLoan?: boolean;
+  currentLoanInfo?: {
+    borrower: string;
+    startDate: string;
+    endDate?: string;
+  };
 }
 
 export interface ShopBasicDTO {

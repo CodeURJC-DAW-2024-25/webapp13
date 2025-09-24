@@ -41,7 +41,6 @@ export class AuthService {
     private http: HttpClient,
     private router: Router
   ) {
-    console.log('🚀 AuthService constructor - Checking JWT token');
     this.initializeFromStorage();
   }
 
@@ -57,9 +56,7 @@ export class AuthService {
         this.user = JSON.parse(userStr);
         this.logged = true;
         this.authStateSubject.next(true);
-        console.log('🔐 User restored from localStorage:', this.user);
       } catch (error) {
-        console.error('Error parsing user from localStorage:', error);
         this.clearTokens();
       }
     }

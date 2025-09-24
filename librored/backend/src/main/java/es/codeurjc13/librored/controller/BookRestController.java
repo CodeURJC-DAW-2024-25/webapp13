@@ -121,7 +121,6 @@ public class BookRestController {
 
     @PostMapping(value = "/api/v1/books", consumes = "application/json", produces = "application/json")
     public ResponseEntity<BookDTO> createBook(@AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails, @RequestBody BookDTO bookDTO) {
-        System.out.println("🔥 DEBUG: createBook method called with: " + bookDTO);
         try {
             // Get current user
             User currentUser = userService.getUserByEmail(userDetails.getUsername())
@@ -144,10 +143,8 @@ public class BookRestController {
 
             BookDTO createdBook = bookService.createBookDTO(bookDTO);
             URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(createdBook.id()).toUri();
-            System.out.println("🔥 DEBUG: Book created successfully: " + createdBook);
             return ResponseEntity.created(location).body(createdBook);
         } catch (IllegalArgumentException e) {
-            System.out.println("🔥 DEBUG: Error creating book: " + e.getMessage());
             return ResponseEntity.badRequest().build();
         }
     }

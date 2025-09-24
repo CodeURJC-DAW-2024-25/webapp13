@@ -127,7 +127,6 @@ export class AdminService {
    * Download admin report (PDF)
    */
   downloadAdminReport(): Observable<Blob> {
-    console.log('Starting admin report download...');
     const token = localStorage.getItem('access_token');
 
     if (!token) {

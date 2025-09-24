@@ -107,14 +107,42 @@ public class BookController {
 
 
     @PostMapping("/books/create")
-    public String createBook(@RequestParam("title") String title, @RequestParam("author") String author, @RequestParam("genre") String genre, @RequestParam("description") String description, @RequestParam("ownerId") Long ownerId, @RequestParam(value = "coverImage", required = false) MultipartFile coverImage, RedirectAttributes redirectAttributes) {
+    public String createBook(@AuthenticationPrincipal org.springframework.security.core.userdetails.User userDetails,
+                             @RequestParam("title") String title,
+                             @RequestParam("author") String author,
+                             @RequestParam("genre") String genre,
+                             @RequestParam("description") String description,
+                             @RequestParam(value = "ownerId", required = false) Long ownerId,
+                             @RequestParam(value = "coverImage", required = false) MultipartFile coverImage,
+                             RedirectAttributes redirectAttributes) {
+
+        if (userDetails == null) {
+            return "redirect:/login";
+        }
+
+        // Get current user
+        User currentUser = userService.getUserByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isAdmin = currentUser.getRole() == User.Role.ROLE_ADMIN;
 
         Book book = new Book();
         book.setTitle(title);
         book.setAuthor(author);
         book.setGenre(Book.Genre.valueOf(genre));
         book.setDescription(description);
-        book.setOwner(userService.getUserById(ownerId).orElseThrow(() -> new RuntimeException("Owner not found")));
+
+        // For regular users, automatically assign them as owner
+        // For admins, use the provided ownerId
+        if (!isAdmin) {
+            book.setOwner(currentUser);
+        } else {
+            if (ownerId == null) {
+                redirectAttributes.addFlashAttribute("error", "Owner must be selected.");
+                return "redirect:/books/create";
+            }
+            book.setOwner(userService.getUserById(ownerId).orElseThrow(() -> new RuntimeException("Owner not found")));
+        }
 
         try {
             if (coverImage != null && !coverImage.isEmpty()) {

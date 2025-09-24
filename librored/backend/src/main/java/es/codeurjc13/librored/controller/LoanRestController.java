@@ -84,7 +84,7 @@ public class LoanRestController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping("/api/v1/loans")
-    public ResponseEntity<LoanDTO> createLoan(
+    public ResponseEntity<?> createLoan(
             @Parameter(description = "Loan data") @Valid @RequestBody LoanDTO loanDTO) {
         try {
             LoanDTO createdLoan = loanService.createLoanDTO(loanDTO);
@@ -95,7 +95,7 @@ public class LoanRestController {
                     .toUri();
             return ResponseEntity.created(location).body(createdLoan);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 

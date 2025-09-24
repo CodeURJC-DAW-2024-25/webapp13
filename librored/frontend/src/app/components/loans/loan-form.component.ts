@@ -211,7 +211,23 @@ export class LoanFormComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error saving loan:', error);
-        this.errorMessage = error.message || 'Failed to save loan';
+        console.error('Error message property:', error.message);
+        console.error('Full error object:', error);
+
+        // Try multiple ways to extract the error message
+        let errorMessage = 'Failed to save loan';
+
+        if (error.message && error.message !== 'Http failure response for https://localhost:8443/api/v1/loans: 400 OK') {
+          errorMessage = error.message;
+        } else if (typeof error === 'string') {
+          errorMessage = error;
+        } else if (error.error?.error) {
+          errorMessage = error.error.error;
+        } else if (error.error && typeof error.error === 'string') {
+          errorMessage = error.error;
+        }
+
+        this.errorMessage = errorMessage;
         this.submitting = false;
       }
     });

@@ -21,16 +21,13 @@ export class BookService {
 
   private getHeaders(): HttpHeaders {
     const token = this.authService.getAccessToken();
-    console.log('🔐 BookService - JWT token for request:', token ? 'Token present' : 'No token found');
-    console.log('🔐 BookService - Full token value:', token);
     if (!token) {
-      console.warn('⚠️ No JWT token available - request will fail authentication');
+      console.warn('No JWT token available - request will fail authentication');
     }
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
     });
-    console.log('🔐 BookService - Authorization header:', headers.get('Authorization'));
     return headers;
   }
 
@@ -129,7 +126,6 @@ export class BookService {
   uploadCoverImage(id: number, file: File): Observable<any> {
     const formData = new FormData();
     formData.append('file', file);
-    console.log('📤 Uploading cover image for book ID:', id, 'File:', file.name);
 
     // Get JWT token for authorization
     const token = this.authService.getAccessToken();

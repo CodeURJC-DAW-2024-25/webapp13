@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { Observable, throwError } from "rxjs";
-import { catchError } from "rxjs/operators";
+import { catchError, map } from "rxjs/operators";
 import { LoanDTO, LoanRequest } from "../dtos/loan.dto";
 import { PaginatedResponse } from "../interfaces/paginated-response.interface";
 
@@ -83,11 +83,6 @@ export class LoanService {
       status: loan.status // Should match backend enum
     };
 
-    console.log('=== LOAN SERVICE UPDATE DEBUG ===');
-    console.log('Updating loan ID:', id);
-    console.log('Input LoanRequest:', JSON.stringify(loan, null, 2));
-    console.log('Converted loanDTO for backend:', JSON.stringify(loanDTO, null, 2));
-    console.log('PUT URL:', `${this.ADMIN_API_URL}/${id}`);
 
     return this.http.put<LoanDTO>(`${this.ADMIN_API_URL}/${id}`, loanDTO)
       .pipe(catchError(this.handleError));
@@ -192,12 +187,27 @@ export class LoanService {
       .pipe(catchError(this.handleError));
   }
 
+  // Get active loans by book ID
+  getActiveLoansForBook(bookId: number): Observable<LoanDTO[]> {
+    return this.http.get<LoanDTO[]>(`${this.ADMIN_API_URL}/book/${bookId}`, { withCredentials: true })
+      .pipe(
+        map((loans: LoanDTO[]) =>
+          loans.filter(loan => loan.status === 'Active')
+        ),
+        catchError(this.handleError)
+      );
+  }
+
   private handleError(error: any): Observable<never> {
     console.error('LoanService error:', error);
     console.error('Full error object:', JSON.stringify(error, null, 2));
     let errorMessage = 'An error occurred';
 
-    if (error.error?.message) {
+    if (error.error?.error) {
+      // Backend validation errors come in format: {"error": "message"}
+      errorMessage = error.error.error;
+    } else if (error.error?.message) {
+      // Other backend errors
       errorMessage = error.error.message;
     } else if (error.message) {
       errorMessage = error.message;

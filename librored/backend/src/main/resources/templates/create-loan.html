@@ -105,7 +105,7 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        fetch("/api/loans/valid-borrowers")  // Corrected API path
+        fetch("/loans/valid-borrowers")  // MVC endpoint
             .then(response => {
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);

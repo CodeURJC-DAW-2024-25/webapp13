@@ -1,7 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { BookService } from '../../services/book.service';
 import { UserAccountService } from '../../services/user-account.service';
+import { LoanService } from '../../services/loan.service';
 import { BookDTO } from '../../dtos/book.dto';
+import { forkJoin, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 
 interface UserInfo {
   id: number;
@@ -61,7 +64,8 @@ export class UserBooksComponent implements OnInit {
 
   constructor(
     private bookService: BookService,
-    private userAccountService: UserAccountService
+    private userAccountService: UserAccountService,
+    private loanService: LoanService
   ) {}
 
   ngOnInit(): void {
@@ -90,14 +94,68 @@ export class UserBooksComponent implements OnInit {
     this.loading = true;
     this.bookService.getBooksByOwner(this.currentUser.id).subscribe({
       next: (books) => {
-        this.books = books;
-        this.totalItems = books.length;
-        this.totalPages = Math.ceil(this.totalItems / this.pageSize);
-        this.loading = false;
+        // Load loan information for each book
+        this.loadLoanInformationForBooks(books);
       },
       error: (error) => {
         console.error('Error loading user books:', error);
         this.errorMessage = 'Failed to load books';
+        this.loading = false;
+      }
+    });
+  }
+
+  loadLoanInformationForBooks(books: BookDTO[]): void {
+    if (books.length === 0) {
+      this.books = books;
+      this.totalItems = books.length;
+      this.totalPages = Math.ceil(this.totalItems / this.pageSize);
+      this.loading = false;
+      return;
+    }
+
+    // Create observables for each book's loan information
+    const loanRequests = books.map(book => {
+      if (book.id) {
+        return this.loanService.getActiveLoansForBook(book.id).pipe(
+          map(activeLoans => {
+            book.isCurrentlyOnLoan = activeLoans.length > 0;
+            if (activeLoans.length > 0) {
+              const activeLoan = activeLoans[0];
+              book.currentLoanInfo = {
+                borrower: activeLoan.borrower.username,
+                startDate: activeLoan.startDate,
+                endDate: activeLoan.endDate || undefined
+              };
+            }
+            return book;
+          }),
+          catchError(() => {
+            // On error, just mark as not on loan
+            book.isCurrentlyOnLoan = false;
+            return of(book);
+          })
+        );
+      } else {
+        book.isCurrentlyOnLoan = false;
+        return of(book);
+      }
+    });
+
+    // Wait for all loan requests to complete
+    forkJoin(loanRequests).subscribe({
+      next: (booksWithLoanInfo) => {
+        this.books = booksWithLoanInfo;
+        this.totalItems = booksWithLoanInfo.length;
+        this.totalPages = Math.ceil(this.totalItems / this.pageSize);
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error loading loan information:', error);
+        // Even on error, show books without loan info
+        this.books = books;
+        this.totalItems = books.length;
+        this.totalPages = Math.ceil(this.totalItems / this.pageSize);
         this.loading = false;
       }
     });
@@ -150,6 +208,8 @@ export class UserBooksComponent implements OnInit {
     this.showCreateModal = false;
     this.bookForm = this.getEmptyBookForm();
     this.selectedFile = null;
+    // Clear the file input element
+    this.clearFileInput('createCoverImage');
   }
 
   openEditModal(book: BookDTO): void {
@@ -165,6 +225,8 @@ export class UserBooksComponent implements OnInit {
     this.bookForm = this.getEmptyBookForm();
     this.selectedFile = null;
     this.selectedBookId = null;
+    // Clear the file input element
+    this.clearFileInput('editCoverImage');
   }
 
   openDeleteModal(book: BookDTO): void {
@@ -196,41 +258,33 @@ export class UserBooksComponent implements OnInit {
     // Check for file selection BEFORE creating book
     const fileInput = document.getElementById('createCoverImage') as HTMLInputElement;
     const selectedFile = fileInput?.files?.[0] || this.selectedFile || null;
-    console.log('📷 DOM file check:', selectedFile ? selectedFile.name : 'No file found in DOM');
-    console.log('📷 Component selectedFile:', this.selectedFile ? this.selectedFile.name : 'No component file');
 
     // Set hasCoverImage flag to true if a file is selected - the image will be uploaded after book creation
     this.bookForm.hasCoverImage = selectedFile !== null;
 
-    console.log('📚 Creating book with form data:', this.bookForm);
-    console.log('🔍 DEBUG: Final hasCoverImage flag:', this.bookForm.hasCoverImage);
 
     this.loading = true;
     this.bookService.createBook(this.bookForm).subscribe({
       next: (createdBook) => {
-        console.log('✅ Book created successfully:', createdBook);
-        console.log('🆔 DEBUG: createdBook.id:', createdBook.id);
+
         this.successMessage = 'Book created successfully!';
         this.loading = false;
 
         // Get file directly from DOM before modal is closed
         const fileInput = document.getElementById('createCoverImage') as HTMLInputElement;
         const fileToUpload = fileInput?.files?.[0] || null;
-        console.log('💾 DEBUG: fileToUpload from DOM:', fileToUpload ? fileToUpload.name : 'NULL');
 
         this.closeCreateModal();
 
         // Upload cover image if selected
         if (fileToUpload) {
-          console.log('📤 Proceeding to upload cover image for book ID:', createdBook.id);
           this.uploadCoverImageDirect(createdBook.id, fileToUpload);
         } else {
-          console.log('ℹ️ No file selected, skipping image upload');
           this.loadUserBooks();
         }
       },
       error: (error) => {
-        console.error('❌ Error creating book:', error);
+        console.error('Error creating book:', error);
         this.errorMessage = 'Failed to create book';
         this.loading = false;
       }
@@ -288,21 +342,17 @@ export class UserBooksComponent implements OnInit {
 
   uploadCoverImage(bookId: number): void {
     if (!this.selectedFile) {
-      console.log('⚠️ No file selected for upload, skipping...');
       this.loadUserBooks();
       return;
     }
 
-    console.log('📤 Starting image upload for book ID:', bookId, 'File:', this.selectedFile.name, 'Size:', this.selectedFile.size);
 
     this.bookService.uploadCoverImage(bookId, this.selectedFile).subscribe({
       next: (response) => {
-        console.log('✅ Cover image uploaded successfully:', response);
         this.successMessage = 'Cover image uploaded successfully!';
         this.loadUserBooks();
       },
       error: (error) => {
-        console.error('❌ Error uploading cover image:', error);
         this.errorMessage = 'Failed to upload cover image: ' + (error.error?.message || error.message);
         this.loadUserBooks();
       }
@@ -310,10 +360,8 @@ export class UserBooksComponent implements OnInit {
   }
 
   uploadCoverImageDirect(bookId: number, file: File): void {
-    console.log('Uploading cover image for book ID:', bookId, 'File:', file.name);
     this.bookService.uploadCoverImage(bookId, file).subscribe({
       next: (response) => {
-        console.log('Cover image uploaded successfully:', response);
         this.successMessage = 'Book and cover image created successfully!';
         this.loadUserBooks();
       },
@@ -325,7 +373,6 @@ export class UserBooksComponent implements OnInit {
         const bookToUpdate = { ...this.bookForm, id: bookId, hasCoverImage: false };
         this.bookService.updateBook(bookId, bookToUpdate).subscribe({
           next: () => {
-            console.log('Book updated to reflect failed image upload');
             this.loadUserBooks();
           },
           error: (updateError) => {
@@ -347,12 +394,8 @@ export class UserBooksComponent implements OnInit {
   onFileSelected(event: any): void {
     const file = event.target.files[0];
     if (file) {
-      console.log('📁 DEBUG: File selected:', file.name, file.size, file.type);
-      console.log('📁 DEBUG: Setting this.selectedFile to:', file);
       this.selectedFile = file;
-      console.log('📁 DEBUG: this.selectedFile is now:', this.selectedFile);
     } else {
-      console.log('📁 DEBUG: No file selected, clearing this.selectedFile');
       this.selectedFile = null;
     }
   }
@@ -373,5 +416,12 @@ export class UserBooksComponent implements OnInit {
   clearMessages(): void {
     this.errorMessage = '';
     this.successMessage = '';
+  }
+
+  clearFileInput(elementId: string): void {
+    const fileInput = document.getElementById(elementId) as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
   }
 }
