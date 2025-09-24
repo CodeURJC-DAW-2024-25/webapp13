@@ -54,7 +54,7 @@
                          alt="{{ book.title }}"
                          class="book-cover-thumbnail"
                          style="width: 50px; height: 70px; object-fit: cover;"
-                         (error)="$event.target.src='https://localhost:8443/images/default_cover.jpg'">
+                         (error)="$event.target.src='/images/default_cover.jpg'">
                   </td>
                   <td style="max-width: 200px;">
                     <strong>{{ book.title }}</strong>
@@ -292,7 +292,7 @@
                      alt="{{ bookForm.title }}"
                      class="img-fluid"
                      style="max-height: 100px; object-fit: cover;"
-                     (error)="$event.target.src='https://localhost:8443/images/default_cover.jpg'">
+                     (error)="$event.target.src='/images/default_cover.jpg'">
               </div>
               <div class="col-9">
                 <h6>{{ bookForm.title }}</h6>

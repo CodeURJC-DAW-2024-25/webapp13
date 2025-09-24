@@ -388,7 +388,7 @@ export class UserBooksComponent implements OnInit {
     if (book.hasCoverImage && book.id) {
       return this.bookService.getCoverImageUrl(book.id);
     }
-    return 'https://localhost:8443/images/default_cover.jpg';
+    return '/images/default_cover.jpg';
   }
 
   onFileSelected(event: any): void {

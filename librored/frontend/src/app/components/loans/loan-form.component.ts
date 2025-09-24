@@ -217,7 +217,7 @@ export class LoanFormComponent implements OnInit {
         // Try multiple ways to extract the error message
         let errorMessage = 'Failed to save loan';
 
-        if (error.message && error.message !== 'Http failure response for https://localhost:8443/api/v1/loans: 400 OK') {
+        if (error.message && !error.message.includes('Http failure response for') && !error.message.includes('/api/v1/loans: 400 OK')) {
           errorMessage = error.message;
         } else if (typeof error === 'string') {
           errorMessage = error;

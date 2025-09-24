@@ -30,7 +30,7 @@ interface BookRecommendation {
   providedIn: 'root'
 })
 export class UserAccountService {
-  private readonly BASE_URL = 'https://localhost:8443';
+  private readonly BASE_URL = '';
 
   constructor(
     private http: HttpClient,
