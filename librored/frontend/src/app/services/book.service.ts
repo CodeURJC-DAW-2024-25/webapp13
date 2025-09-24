@@ -12,7 +12,7 @@ import { AuthService } from './auth.service';
 export class BookService {
   private readonly API_URL = '/api/books'; // For public books
   private readonly ADMIN_API_URL = '/api/v1/books'; // For admin CRUD operations
-  private readonly BASE_URL = 'https://localhost:8443';
+  private readonly BASE_URL = '';
 
   constructor(
     private http: HttpClient,
